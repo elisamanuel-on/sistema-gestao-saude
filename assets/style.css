@@ -22,6 +22,16 @@
   --risco-moderado-suave: #fbeedd;
   --risco-elevado: #c22b3f;
   --risco-elevado-suave: #fbe4e7;
+  /* Cores categóricas dos 4 tipos de unidade — nunca para risco, só para
+     identificar rapidamente UCC/ERPI/SAD/Clínica-Hospital na tabela. */
+  --tipo-ucc: #0f7a6c;
+  --tipo-ucc-suave: #e1f3ef;
+  --tipo-erpi: #4338b0;
+  --tipo-erpi-suave: #ecebfa;
+  --tipo-sad: #8f3569;
+  --tipo-sad-suave: #f8e9f1;
+  --tipo-clinica-hospital: #155696;
+  --tipo-clinica-hospital-suave: #e5eff8;
 }
 
 body {
@@ -53,7 +63,34 @@ body {
   color: var(--primaria);
   padding: 0 20px 20px;
   border-bottom: 1px solid var(--borda);
-  margin-bottom: 12px;
+  margin-bottom: 8px;
+}
+
+.logotipo-lateral-texto::before {
+  content: "✚ ";
+}
+
+.grupo-nav-lateral {
+  display: flex;
+  flex-direction: column;
+}
+
+.seccao-lateral {
+  margin-top: 14px;
+}
+
+.seccao-lateral:first-child {
+  margin-top: 0;
+}
+
+.legenda-seccao-lateral {
+  padding: 0 20px 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--texto-suave);
+  opacity: 0.75;
 }
 
 .nav-lateral {
@@ -208,8 +245,27 @@ body {
 }
 
 .etiqueta-estado--internado { background: var(--primaria-suave); color: var(--primaria); }
+.etiqueta-estado--em-acompanhamento { background: var(--primaria-suave); color: var(--primaria); }
 .etiqueta-estado--alta { background: var(--risco-baixo-suave); color: var(--risco-baixo); }
 .etiqueta-estado--em-espera { background: var(--risco-moderado-suave); color: var(--risco-moderado); }
+
+/* Etiquetas de tipo de unidade (UCC/ERPI/SAD/Clínica-Hospital) — cor
+   categórica, nunca a escala de risco. */
+.etiqueta-tipo {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.etiqueta-tipo--ucc { background: var(--tipo-ucc-suave); color: var(--tipo-ucc); }
+.etiqueta-tipo--erpi { background: var(--tipo-erpi-suave); color: var(--tipo-erpi); }
+.etiqueta-tipo--sad { background: var(--tipo-sad-suave); color: var(--tipo-sad); }
+.etiqueta-tipo--clinica-hospital { background: var(--tipo-clinica-hospital-suave); color: var(--tipo-clinica-hospital); }
+
+.nota-modulo-cruzado { padding-top: 4px; }
+.nota-modulo-cruzado a { color: var(--primaria); }
 
 /* Ficha do utente */
 
@@ -295,6 +351,44 @@ body {
 .resultado-inline--risco_baixo { background: var(--risco-baixo-suave); color: var(--risco-baixo); }
 .resultado-inline--risco_moderado { background: var(--risco-moderado-suave); color: var(--risco-moderado); }
 .resultado-inline--risco_elevado { background: var(--risco-elevado-suave); color: var(--risco-elevado); }
+.resultado-inline--primaria { background: var(--primaria-suave); color: var(--primaria); }
+
+/* Plano de cuidados multidisciplinar */
+
+.lista-plano-cuidados { display: flex; flex-direction: column; gap: 12px; }
+
+.item-plano-cuidados {
+  background: var(--cartao);
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+
+.cabecalho-item-plano { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; font-size: 0.95rem; }
+
+.etiqueta-area-plano {
+  background: var(--primaria-suave);
+  color: var(--primaria);
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.barra-progresso {
+  background: var(--borda);
+  border-radius: 999px;
+  height: 8px;
+  overflow: hidden;
+  margin: 10px 0 8px;
+}
+
+.barra-progresso-preenchida {
+  background: var(--primaria);
+  height: 100%;
+  border-radius: 999px;
+}
 
 .cartao-resumo-ia {
   margin-top: 12px;

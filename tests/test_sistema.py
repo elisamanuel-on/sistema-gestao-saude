@@ -2,8 +2,10 @@
 
 Cobre: limpeza/estruturação dos dados de diabetes (usada para treinar o
 modelo), a escala clínica de risco de queda (Morse Fall Scale), o resumo
-automático (motor de regras), e o roteamento/callbacks principais da app
-(lista de utentes, ficha, avaliação de risco).
+automático (motor de regras), o roteamento/callbacks principais da app
+(lista de utentes, ficha, avaliação de risco), e os módulos do tipo de
+unidade Clínica/Hospital (exames, plano de cuidados multidisciplinar,
+consultas, faturação com seguros).
 
 Não faz suposições sobre nomes concretos de utentes: usa sempre o primeiro
 utente carregado a partir de dados/utentes.csv (sintético — ver
@@ -13,12 +15,20 @@ geração dos dados.
 import pandas as pd
 
 import app as m
+import constantes
 import riscos
 from limpeza import limpar_registo_bruto, preparar_para_modelo
 
 
 def _primeiro_utente():
     return m.DADOS["utentes"].iloc[0]
+
+
+def _primeiro_utente_com(chave):
+    """Primeiro utente cuja tabela `chave` (em m.DADOS) tem pelo menos uma
+    linha — para testar abas que dependem de haver dados (exames, plano)."""
+    ids_com_dados = set(m.DADOS[chave]["id_utente"])
+    return m.DADOS["utentes"][m.DADOS["utentes"]["id_utente"].isin(ids_com_dados)].iloc[0]
 
 
 class FalsoNClicks:
@@ -228,3 +238,76 @@ def test_modelo_cardio_prevé_probabilidade_valida():
 def test_metricas_dos_modelos_tem_auc_razoavel():
     assert m.METRICAS_DIABETES["auc_conjunto_teste"] > 0.7
     assert m.METRICAS_CARDIO["auc_conjunto_teste"] > 0.7
+
+
+# --- Módulo Clínica/Hospital: tipos, exames, plano de cuidados, consultas ----
+
+
+def test_tipos_cuidado_inclui_clinica_hospital():
+    assert "Clínica/Hospital" in constantes.TIPOS_CUIDADO
+
+
+def test_slug_remove_acentos_espacos_e_barras():
+    assert m._slug("Clínica/Hospital") == "clinica-hospital"
+    assert m._slug("Concluído") == "concluido"
+    assert m._slug("Em espera") == "em-espera"
+
+
+def test_todos_os_utentes_tem_tipo_cuidado_valido():
+    tipos_usados = set(m.DADOS["utentes"]["tipo_cuidado"].unique())
+    assert tipos_usados <= set(constantes.TIPOS_CUIDADO)
+
+
+def test_estado_internado_so_existe_em_ucc_erpi():
+    internados = m.DADOS["utentes"][m.DADOS["utentes"]["estado"] == "Internado"]
+    assert set(internados["tipo_cuidado"].unique()) <= {"UCC", "ERPI"}
+
+
+def test_plano_cuidados_profissional_e_coerente_com_a_area():
+    plano = m.DADOS["plano_cuidados"]
+    for area, profissionais_da_area in plano.groupby("area_profissional")["profissional_responsavel"]:
+        esperado = set(constantes.PROFISSIONAIS_POR_AREA_CUIDADOS[area])
+        assert set(profissionais_da_area.unique()) <= esperado
+
+
+def test_consulta_especialidade_bate_certo_com_o_profissional():
+    consultas = m.DADOS["consultas"]
+    for _idx, c in consultas.iterrows():
+        assert constantes.PROFISSIONAL_ESPECIALIDADE[c["profissional"]] == c["especialidade"]
+
+
+def test_aba_exames_renderiza_para_utente_com_exames():
+    utente = _primeiro_utente_com("exames")
+    assert m._aba_exames(utente["id_utente"]) is not None
+
+
+def test_aba_plano_cuidados_renderiza_para_utente_com_plano():
+    utente = _primeiro_utente_com("plano_cuidados")
+    assert m._aba_plano_cuidados(utente["id_utente"]) is not None
+
+
+def test_pagina_consultas_renderiza():
+    assert m._pagina_consultas() is not None
+
+
+def test_filtrar_consultas_por_especialidade():
+    especialidade = m.DADOS["consultas"]["especialidade"].iloc[0]
+    resultado = m._filtrar_consultas(None, especialidade, None)
+    assert especialidade in str(resultado)
+
+
+def test_filtrar_consultas_sem_resultado():
+    resultado = m._filtrar_consultas("Nome Que Nao Existe De Certeza Absoluta", None, None)
+    assert "Nenhuma consulta encontrada" in str(resultado)
+
+
+def test_faturacao_tem_colunas_de_seguro():
+    fat = m.DADOS["faturacao"]
+    for coluna in ["seguradora", "numero_apolice", "cobertura_percentual_seguro", "valor_seguradora", "copagamento_utente"]:
+        assert coluna in fat.columns
+
+
+def test_faturacao_sem_seguro_aparece_como_travessao():
+    fat = m.DADOS["faturacao"]
+    # depois do fillna em _carregar_todos_os_dados, nunca deve sobrar NaN
+    assert fat["seguradora"].isna().sum() == 0

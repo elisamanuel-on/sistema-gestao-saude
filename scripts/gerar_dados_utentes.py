@@ -1,12 +1,14 @@
 """Gera todo o conjunto de dados sintéticos do sistema de gestão de utentes:
 utentes, sinais vitais, diagnósticos, prescrições, visitas, alergias,
-documentos (metadados), faturação, capacidade e altas.
+documentos (metadados), exames, plano de cuidados, consultas, faturação
+(com seguros privados), capacidade e altas.
 
 Tudo sintético e claramente fictício — nomes gerados por Faker (nunca
-pessoas reais), valores clínicos amostrados a partir dos datasets públicos
-já usados (Pima Diabetes, UCI Heart Disease) para manter distribuições
-realistas, e depois passados pelos modelos já treinados para pré-calcular
-uma primeira avaliação de risco por utente.
+pessoas reais), seguradoras com nomes inventados (nenhuma marca real),
+valores clínicos amostrados a partir dos datasets públicos já usados (Pima
+Diabetes, UCI Heart Disease) para manter distribuições realistas, e depois
+passados pelos modelos já treinados para pré-calcular uma primeira
+avaliação de risco por utente.
 """
 import datetime
 import json
@@ -18,6 +20,18 @@ import numpy as np
 import pandas as pd
 from faker import Faker
 
+from constantes import (
+    AREAS_PLANO_CUIDADOS,
+    CATEGORIAS_EXAME,
+    ESTADOS_AMBULATORIO,
+    ESTADOS_INTERNAMENTO,
+    PROFISSIONAIS,
+    PROFISSIONAIS_POR_AREA_CUIDADOS,
+    PROFISSIONAL_ESPECIALIDADE,
+    SEGURADORAS,
+    TIPOS_CUIDADO,
+    TIPOS_EXAME_POR_CATEGORIA,
+)
 from limpeza import COLUNAS_NUMERICAS_CLINICAS, limpar_registo_bruto
 from riscos import (
     OPCOES_APOIO_MARCHA,
@@ -36,8 +50,10 @@ faker_pt = Faker("pt_PT")
 Faker.seed(11)
 
 N_UTENTES = 45
-TIPOS_CUIDADO = ["UCC", "ERPI", "SAD"]
-CAPACIDADE = {"UCC": 18, "ERPI": 30, "SAD": 25}
+# Pesos: UCC/ERPI/SAD são cuidados continuados (base original); "Clínica/
+# Hospital" é o módulo novo, ambulatório, sem cama/quarto associado.
+PESOS_TIPO_CUIDADO = [0.25, 0.35, 0.20, 0.20]
+CAPACIDADE = {"UCC": 18, "ERPI": 30, "SAD": 25}  # Clínica/Hospital não entra no mapa de ocupação — tem a página Consultas
 
 DIAGNOSTICOS_COMUNS = [
     "Hipertensão arterial", "Diabetes tipo 2", "Insuficiência cardíaca",
@@ -53,9 +69,17 @@ MEDICAMENTOS_COMUNS = [
 ]
 ALERGIAS_POSSIVEIS = ["Penicilina", "Látex", "Aspirina", "Iodo", "Ácaros"]
 TIPOS_VISITA = ["Consulta médica", "Enfermagem", "Fisioterapia", "Visita familiar", "Psicologia"]
-PROFISSIONAIS = ["Dr. Ricardo Rocha", "Dra. Inês Fonseca", "Enf. Marta Sousa", "Enf. Paulo Cardoso", "Fisio. Beatriz Lima"]
 TIPOS_DOCUMENTO = ["Consentimento informado", "Relatório de alta", "Plano individual de cuidados", "Ficha de anamnese"]
 MOTIVOS_ALTA = ["Melhoria clínica", "Transferência para outra unidade", "Alta a pedido da família", "Óbito"]
+
+OBJETIVOS_PLANO_CUIDADOS = {
+    "Enfermagem": ["Prevenção de úlceras de pressão", "Controlo da dor", "Gestão da medicação"],
+    "Medicina": ["Estabilização clínica", "Ajuste terapêutico", "Controlo de comorbilidades"],
+    "Fisioterapia": ["Recuperação da mobilidade", "Prevenção de quedas", "Reeducação da marcha"],
+    "Nutrição": ["Correção de défice nutricional", "Adequação calórica", "Controlo de disfagia"],
+    "Psicologia": ["Apoio à adaptação", "Gestão da ansiedade", "Estimulação cognitiva"],
+    "Serviço Social": ["Apoio na reintegração familiar", "Articulação de apoios sociais", "Planeamento da alta"],
+}
 
 PASTA_DADOS = pathlib.Path("dados")
 PASTA_MODELO = pathlib.Path("modelo")
@@ -69,11 +93,20 @@ def _gerar_utentes():
         nome = faker_pt.name_female() if genero == "Feminino" else faker_pt.name_male()
         idade = ALEATORIO.randint(45, 94)
         data_nascimento = hoje - datetime.timedelta(days=idade * 365 + ALEATORIO.randint(0, 364))
-        tipo_cuidado = ALEATORIO.choices(TIPOS_CUIDADO, weights=[0.3, 0.45, 0.25])[0]
+        tipo_cuidado = ALEATORIO.choices(TIPOS_CUIDADO, weights=PESOS_TIPO_CUIDADO)[0]
         dias_admissao = ALEATORIO.randint(10, 900)
         data_admissao = hoje - datetime.timedelta(days=dias_admissao)
-        estado = ALEATORIO.choices(["Internado", "Alta", "Em espera"], weights=[0.78, 0.14, 0.08])[0]
-        quarto = f"{ALEATORIO.randint(1, 4)}0{ALEATORIO.randint(1, 9)}-{ALEATORIO.choice('ABC')}" if tipo_cuidado != "SAD" and estado == "Internado" else "—"
+        # "Internado" só existe em UCC/ERPI (cama/quarto); SAD e Clínica/
+        # Hospital são ambulatório -> "Em acompanhamento".
+        if tipo_cuidado in ("UCC", "ERPI"):
+            estado = ALEATORIO.choices(ESTADOS_INTERNAMENTO, weights=[0.78, 0.14, 0.08])[0]
+        else:
+            estado = ALEATORIO.choices(ESTADOS_AMBULATORIO, weights=[0.78, 0.14, 0.08])[0]
+        quarto = (
+            f"{ALEATORIO.randint(1, 4)}0{ALEATORIO.randint(1, 9)}-{ALEATORIO.choice('ABC')}"
+            if tipo_cuidado in ("UCC", "ERPI") and estado == "Internado"
+            else "—"
+        )
         linhas.append(
             {
                 "id_utente": f"U{i:04d}",
@@ -254,6 +287,26 @@ def _gerar_faturacao(utentes):
             ars_diarias = 0.0
         else:
             ars_diarias = round(RNG.uniform(600, 1400), 2)
+
+        # Seguro privado: mais comum em Clínica/Hospital (ambulatório, paga-se
+        # por episódio), mais raro nas outras unidades. Nomes de seguradora
+        # claramente fictícios — ver constantes.py e README.
+        prob_seguro = 0.65 if utente["tipo_cuidado"] == "Clínica/Hospital" else 0.20
+        tem_seguro = ALEATORIO.random() < prob_seguro
+        if tem_seguro:
+            seguradora = ALEATORIO.choice(SEGURADORAS)
+            numero_apolice = f"{ALEATORIO.randint(100000, 999999)}-{ALEATORIO.choice('PT')}"
+            cobertura_percentual = ALEATORIO.choice([100, 90, 80, 70])
+            valor_episodio = round(RNG.uniform(60, 450), 2)
+            valor_seguradora = round(valor_episodio * cobertura_percentual / 100, 2)
+            copagamento_utente = round(valor_episodio - valor_seguradora, 2)
+        else:
+            seguradora = ""
+            numero_apolice = ""
+            cobertura_percentual = 0
+            valor_seguradora = 0.0
+            copagamento_utente = 0.0
+
         linhas.append(
             {
                 "id_utente": utente["id_utente"],
@@ -263,12 +316,112 @@ def _gerar_faturacao(utentes):
                 "ars_diarias_internamento": ars_diarias,
                 "ars_pacote_medicamentos": round(RNG.uniform(80, 260), 2),
                 "ars_remuneracao_adicional": round(RNG.uniform(0, 150), 2),
+                "seguradora": seguradora,
+                "numero_apolice": numero_apolice,
+                "cobertura_percentual_seguro": cobertura_percentual,
+                "valor_seguradora": valor_seguradora,
+                "copagamento_utente": copagamento_utente,
                 "erro_fatura": ALEATORIO.random() < 0.08,
             }
         )
     df = pd.DataFrame(linhas)
     df["saldo_cc"] = (df["valor_a_pagar_utente"] + df["comparticipacao_ss"] - df["ars_diarias_internamento"] * 0.1).round(2)
     return df
+
+
+def _gerar_exames(utentes):
+    linhas = []
+    hoje = datetime.date.today()
+    contador = 1
+    for id_utente in utentes["id_utente"]:
+        for _ in range(ALEATORIO.randint(1, 5)):
+            categoria = ALEATORIO.choice(CATEGORIAS_EXAME)
+            tipo_exame = ALEATORIO.choice(TIPOS_EXAME_POR_CATEGORIA[categoria])
+            estado = ALEATORIO.choices(["Normal", "Alterado", "Pendente"], weights=[0.55, 0.25, 0.20])[0]
+            resumo = {
+                "Normal": "Sem alterações relevantes.",
+                "Alterado": "Valores fora do intervalo de referência — a aguardar revisão clínica.",
+                "Pendente": "Resultado ainda não disponível.",
+            }[estado]
+            linhas.append(
+                {
+                    "id_exame": f"EX{contador:05d}",
+                    "id_utente": id_utente,
+                    "data": (hoje - datetime.timedelta(days=ALEATORIO.randint(0, 400))).isoformat(),
+                    "categoria": categoria,
+                    "tipo_exame": tipo_exame,
+                    "estado": estado,
+                    "resumo_resultado": resumo,
+                    "profissional_pedido": ALEATORIO.choice(PROFISSIONAIS),
+                }
+            )
+            contador += 1
+    return pd.DataFrame(linhas).sort_values(["id_utente", "data"], ascending=[True, False]).reset_index(drop=True)
+
+
+def _gerar_plano_cuidados(utentes):
+    linhas = []
+    hoje = datetime.date.today()
+    contador = 1
+    for id_utente in utentes["id_utente"]:
+        n_areas = ALEATORIO.randint(2, 4)
+        for area in ALEATORIO.sample(AREAS_PLANO_CUIDADOS, n_areas):
+            objetivo = ALEATORIO.choice(OBJETIVOS_PLANO_CUIDADOS[area])
+            data_inicio = hoje - datetime.timedelta(days=ALEATORIO.randint(10, 300))
+            estado = ALEATORIO.choices(["Em curso", "Concluído", "Suspenso"], weights=[0.55, 0.30, 0.15])[0]
+            progresso = {"Em curso": ALEATORIO.randint(20, 80), "Concluído": 100, "Suspenso": ALEATORIO.randint(0, 40)}[estado]
+            linhas.append(
+                {
+                    "id_item": f"PC{contador:05d}",
+                    "id_utente": id_utente,
+                    "area_profissional": area,
+                    "objetivo": objetivo,
+                    "profissional_responsavel": ALEATORIO.choice(PROFISSIONAIS_POR_AREA_CUIDADOS[area]),
+                    "data_inicio": data_inicio.isoformat(),
+                    "data_revisao": (data_inicio + datetime.timedelta(days=ALEATORIO.randint(15, 90))).isoformat(),
+                    "estado": estado,
+                    "progresso_percent": progresso,
+                }
+            )
+            contador += 1
+    return pd.DataFrame(linhas)
+
+
+MEDICOS_CONSULTA = list(PROFISSIONAL_ESPECIALIDADE.keys())  # só médicos têm especialidade -> só médicos dão consultas
+
+
+def _gerar_consultas(utentes):
+    linhas = []
+    agora = datetime.datetime.now()
+    contador = 1
+    salas = [f"Sala {n}" for n in range(1, 7)]
+    for _idx, utente in utentes.iterrows():
+        # Utentes de Clínica/Hospital têm bastantes mais consultas (é o
+        # módulo central desse tipo de unidade); os outros têm só
+        # ocasionalmente uma consulta externa.
+        n_consultas = ALEATORIO.randint(3, 8) if utente["tipo_cuidado"] == "Clínica/Hospital" else ALEATORIO.randint(0, 2)
+        for _ in range(n_consultas):
+            profissional = ALEATORIO.choice(MEDICOS_CONSULTA)
+            especialidade = PROFISSIONAL_ESPECIALIDADE[profissional]
+            dias_offset = ALEATORIO.randint(-14, 14)
+            data_hora = agora + datetime.timedelta(days=dias_offset, hours=ALEATORIO.randint(8, 18) - agora.hour)
+            if dias_offset < 0:
+                estado = ALEATORIO.choices(["Realizada", "Cancelada", "Falta"], weights=[0.8, 0.1, 0.1])[0]
+            else:
+                estado = "Agendada"
+            linhas.append(
+                {
+                    "id_consulta": f"C{contador:05d}",
+                    "id_utente": utente["id_utente"],
+                    "data_hora": data_hora.isoformat(timespec="minutes"),
+                    "especialidade": especialidade,
+                    "profissional": profissional,
+                    "sala": ALEATORIO.choice(salas),
+                    "estado": estado,
+                }
+            )
+            contador += 1
+    return pd.DataFrame(linhas).sort_values("data_hora").reset_index(drop=True)
 
 
 def _gerar_altas(utentes):
@@ -303,6 +456,9 @@ def gerar_tudo():
     _gerar_visitas(utentes).to_csv(PASTA_DADOS / "visitas.csv", index=False)
     _gerar_alergias(utentes).to_csv(PASTA_DADOS / "alergias.csv", index=False)
     _gerar_documentos(utentes).to_csv(PASTA_DADOS / "documentos.csv", index=False)
+    _gerar_exames(utentes).to_csv(PASTA_DADOS / "exames.csv", index=False)
+    _gerar_plano_cuidados(utentes).to_csv(PASTA_DADOS / "plano_cuidados.csv", index=False)
+    _gerar_consultas(utentes).to_csv(PASTA_DADOS / "consultas.csv", index=False)
     _gerar_faturacao(utentes).to_csv(PASTA_DADOS / "faturacao.csv", index=False)
     _gerar_altas(utentes).to_csv(PASTA_DADOS / "altas.csv", index=False)
 

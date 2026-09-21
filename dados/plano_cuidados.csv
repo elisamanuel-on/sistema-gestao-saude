@@ -1,0 +1,129 @@
+id_item,id_utente,area_profissional,objetivo,profissional_responsavel,data_inicio,data_revisao,estado,progresso_percent
+PC00001,U0001,Nutrição,Correção de défice nutricional,Nutric. Renata Alves,2026-03-23,2026-04-22,Em curso,57
+PC00002,U0001,Serviço Social,Articulação de apoios sociais,Ass. Social Miguel Nunes,2026-07-10,2026-08-17,Em curso,63
+PC00003,U0002,Nutrição,Controlo de disfagia,Nutric. Renata Alves,2026-02-02,2026-03-20,Em curso,39
+PC00004,U0002,Serviço Social,Apoio na reintegração familiar,Ass. Social Miguel Nunes,2026-01-20,2026-03-13,Suspenso,38
+PC00005,U0002,Psicologia,Gestão da ansiedade,Psic. Vera Matos,2026-09-03,2026-10-18,Em curso,79
+PC00006,U0003,Medicina,Estabilização clínica,Dra. Patrícia Gomes,2026-05-01,2026-06-01,Em curso,48
+PC00007,U0003,Enfermagem,Gestão da medicação,Enf. Paulo Cardoso,2026-03-17,2026-04-18,Concluído,100
+PC00008,U0004,Fisioterapia,Recuperação da mobilidade,Fisio. Beatriz Lima,2026-05-20,2026-07-16,Concluído,100
+PC00009,U0004,Medicina,Controlo de comorbilidades,Dr. Ricardo Rocha,2026-08-05,2026-10-09,Suspenso,3
+PC00010,U0005,Psicologia,Apoio à adaptação,Psic. Vera Matos,2026-01-27,2026-03-30,Suspenso,20
+PC00011,U0005,Nutrição,Correção de défice nutricional,Nutric. Renata Alves,2026-08-09,2026-09-19,Concluído,100
+PC00012,U0006,Nutrição,Controlo de disfagia,Nutric. Renata Alves,2025-12-06,2026-01-21,Concluído,100
+PC00013,U0006,Serviço Social,Apoio na reintegração familiar,Ass. Social Miguel Nunes,2026-07-04,2026-07-21,Em curso,46
+PC00014,U0007,Serviço Social,Articulação de apoios sociais,Ass. Social Miguel Nunes,2026-06-15,2026-08-13,Em curso,41
+PC00015,U0007,Psicologia,Estimulação cognitiva,Psic. Vera Matos,2026-08-16,2026-11-01,Concluído,100
+PC00016,U0007,Medicina,Estabilização clínica,Dr. Hugo Teixeira,2026-01-19,2026-03-21,Em curso,20
+PC00017,U0007,Fisioterapia,Prevenção de quedas,Fisio. Beatriz Lima,2026-08-12,2026-10-28,Em curso,73
+PC00018,U0008,Medicina,Controlo de comorbilidades,Dr. Tiago Matos,2026-02-21,2026-03-15,Concluído,100
+PC00019,U0008,Enfermagem,Gestão da medicação,Enf. Paulo Cardoso,2026-02-22,2026-04-28,Em curso,24
+PC00020,U0008,Serviço Social,Planeamento da alta,Ass. Social Miguel Nunes,2026-07-11,2026-07-31,Em curso,52
+PC00021,U0008,Nutrição,Adequação calórica,Nutric. Renata Alves,2026-06-04,2026-06-20,Concluído,100
+PC00022,U0009,Fisioterapia,Prevenção de quedas,Fisio. Beatriz Lima,2025-12-18,2026-01-10,Concluído,100
+PC00023,U0009,Nutrição,Adequação calórica,Nutric. Renata Alves,2026-03-18,2026-05-11,Suspenso,38
+PC00024,U0009,Serviço Social,Planeamento da alta,Ass. Social Miguel Nunes,2026-03-03,2026-05-25,Em curso,28
+PC00025,U0009,Medicina,Controlo de comorbilidades,Dra. Patrícia Gomes,2026-06-24,2026-09-06,Concluído,100
+PC00026,U0010,Nutrição,Controlo de disfagia,Nutric. Renata Alves,2026-04-28,2026-05-15,Em curso,48
+PC00027,U0010,Fisioterapia,Prevenção de quedas,Fisio. Beatriz Lima,2026-07-26,2026-09-19,Em curso,39
+PC00028,U0011,Psicologia,Apoio à adaptação,Psic. Vera Matos,2026-08-05,2026-10-26,Em curso,52
+PC00029,U0011,Medicina,Controlo de comorbilidades,Dra. Patrícia Gomes,2026-09-12,2026-11-23,Concluído,100
+PC00030,U0011,Fisioterapia,Prevenção de quedas,Fisio. Beatriz Lima,2026-08-29,2026-11-11,Em curso,37
+PC00031,U0011,Serviço Social,Planeamento da alta,Ass. Social Miguel Nunes,2026-07-15,2026-10-12,Em curso,31
+PC00032,U0012,Nutrição,Controlo de disfagia,Nutric. Renata Alves,2026-04-24,2026-05-19,Suspenso,18
+PC00033,U0012,Psicologia,Gestão da ansiedade,Psic. Vera Matos,2026-03-09,2026-04-04,Em curso,78
+PC00034,U0013,Nutrição,Correção de défice nutricional,Nutric. Renata Alves,2026-03-25,2026-04-19,Concluído,100
+PC00035,U0013,Enfermagem,Prevenção de úlceras de pressão,Enf. Paulo Cardoso,2026-09-03,2026-12-01,Em curso,21
+PC00036,U0013,Serviço Social,Articulação de apoios sociais,Ass. Social Miguel Nunes,2026-02-13,2026-03-24,Em curso,80
+PC00037,U0013,Psicologia,Estimulação cognitiva,Psic. Vera Matos,2026-02-04,2026-03-22,Em curso,21
+PC00038,U0014,Medicina,Controlo de comorbilidades,Dra. Patrícia Gomes,2026-06-01,2026-06-29,Em curso,29
+PC00039,U0014,Serviço Social,Apoio na reintegração familiar,Ass. Social Miguel Nunes,2025-12-09,2026-01-01,Em curso,72
+PC00040,U0014,Fisioterapia,Recuperação da mobilidade,Fisio. Beatriz Lima,2026-04-14,2026-06-13,Concluído,100
+PC00041,U0014,Nutrição,Correção de défice nutricional,Nutric. Renata Alves,2026-05-31,2026-06-27,Suspenso,39
+PC00042,U0015,Psicologia,Apoio à adaptação,Psic. Vera Matos,2026-01-29,2026-02-28,Em curso,67
+PC00043,U0015,Fisioterapia,Recuperação da mobilidade,Fisio. Beatriz Lima,2026-02-23,2026-05-17,Concluído,100
+PC00044,U0015,Enfermagem,Prevenção de úlceras de pressão,Enf. Marta Sousa,2026-01-26,2026-03-07,Suspenso,31
+PC00045,U0016,Nutrição,Correção de défice nutricional,Nutric. Renata Alves,2025-12-03,2025-12-24,Suspenso,22
+PC00046,U0016,Fisioterapia,Reeducação da marcha,Fisio. Beatriz Lima,2026-07-13,2026-08-27,Em curso,60
+PC00047,U0017,Enfermagem,Gestão da medicação,Enf. Paulo Cardoso,2026-05-29,2026-06-23,Suspenso,8
+PC00048,U0017,Nutrição,Adequação calórica,Nutric. Renata Alves,2026-01-12,2026-03-04,Em curso,61
+PC00049,U0018,Enfermagem,Controlo da dor,Enf. Paulo Cardoso,2026-07-04,2026-09-19,Concluído,100
+PC00050,U0018,Psicologia,Estimulação cognitiva,Psic. Vera Matos,2026-08-29,2026-11-15,Concluído,100
+PC00051,U0019,Medicina,Estabilização clínica,Dr. Hugo Teixeira,2026-01-28,2026-03-21,Concluído,100
+PC00052,U0019,Fisioterapia,Prevenção de quedas,Fisio. Beatriz Lima,2026-02-04,2026-03-29,Concluído,100
+PC00053,U0019,Psicologia,Estimulação cognitiva,Psic. Vera Matos,2025-12-04,2026-02-28,Em curso,63
+PC00054,U0019,Enfermagem,Gestão da medicação,Enf. Paulo Cardoso,2025-12-13,2026-02-27,Em curso,49
+PC00055,U0020,Serviço Social,Articulação de apoios sociais,Ass. Social Miguel Nunes,2026-01-21,2026-04-18,Em curso,70
+PC00056,U0020,Enfermagem,Gestão da medicação,Enf. Marta Sousa,2026-02-16,2026-03-20,Concluído,100
+PC00057,U0021,Psicologia,Estimulação cognitiva,Psic. Vera Matos,2026-02-07,2026-04-19,Em curso,26
+PC00058,U0021,Enfermagem,Gestão da medicação,Enf. Marta Sousa,2026-06-23,2026-07-10,Concluído,100
+PC00059,U0022,Fisioterapia,Recuperação da mobilidade,Fisio. Beatriz Lima,2026-07-05,2026-08-16,Concluído,100
+PC00060,U0022,Nutrição,Controlo de disfagia,Nutric. Renata Alves,2026-03-20,2026-06-03,Em curso,79
+PC00061,U0023,Medicina,Ajuste terapêutico,Dr. Hugo Teixeira,2026-08-29,2026-09-14,Em curso,72
+PC00062,U0023,Enfermagem,Controlo da dor,Enf. Paulo Cardoso,2026-03-21,2026-06-15,Em curso,59
+PC00063,U0024,Fisioterapia,Reeducação da marcha,Fisio. Beatriz Lima,2026-05-27,2026-07-13,Suspenso,10
+PC00064,U0024,Medicina,Controlo de comorbilidades,Dr. Nuno Barreto,2026-08-24,2026-10-08,Em curso,27
+PC00065,U0024,Serviço Social,Apoio na reintegração familiar,Ass. Social Miguel Nunes,2026-07-23,2026-09-10,Em curso,63
+PC00066,U0025,Fisioterapia,Reeducação da marcha,Fisio. Beatriz Lima,2026-06-16,2026-09-13,Concluído,100
+PC00067,U0025,Enfermagem,Gestão da medicação,Enf. Paulo Cardoso,2026-03-31,2026-05-16,Em curso,58
+PC00068,U0026,Nutrição,Correção de défice nutricional,Nutric. Renata Alves,2026-05-11,2026-07-31,Em curso,47
+PC00069,U0026,Medicina,Controlo de comorbilidades,Dr. Nuno Barreto,2025-12-03,2026-01-24,Em curso,30
+PC00070,U0026,Psicologia,Apoio à adaptação,Psic. Vera Matos,2026-01-30,2026-04-28,Em curso,26
+PC00071,U0026,Fisioterapia,Prevenção de quedas,Fisio. Beatriz Lima,2025-12-21,2026-02-03,Suspenso,11
+PC00072,U0027,Fisioterapia,Reeducação da marcha,Fisio. Beatriz Lima,2026-08-03,2026-10-17,Em curso,65
+PC00073,U0027,Medicina,Controlo de comorbilidades,Dr. Nuno Barreto,2026-07-02,2026-08-21,Em curso,49
+PC00074,U0027,Enfermagem,Gestão da medicação,Enf. Paulo Cardoso,2026-07-23,2026-10-16,Concluído,100
+PC00075,U0027,Nutrição,Correção de défice nutricional,Nutric. Renata Alves,2026-04-18,2026-07-12,Em curso,68
+PC00076,U0028,Fisioterapia,Reeducação da marcha,Fisio. Beatriz Lima,2026-01-02,2026-03-07,Em curso,41
+PC00077,U0028,Medicina,Ajuste terapêutico,Dr. Nuno Barreto,2026-07-30,2026-10-08,Em curso,40
+PC00078,U0029,Nutrição,Controlo de disfagia,Nutric. Renata Alves,2026-04-28,2026-07-06,Em curso,63
+PC00079,U0029,Psicologia,Gestão da ansiedade,Psic. Vera Matos,2026-01-09,2026-03-03,Concluído,100
+PC00080,U0029,Fisioterapia,Recuperação da mobilidade,Fisio. Beatriz Lima,2026-08-30,2026-11-25,Suspenso,11
+PC00081,U0029,Serviço Social,Planeamento da alta,Ass. Social Miguel Nunes,2026-05-22,2026-08-15,Suspenso,28
+PC00082,U0030,Nutrição,Controlo de disfagia,Nutric. Renata Alves,2026-01-20,2026-04-01,Suspenso,22
+PC00083,U0030,Enfermagem,Controlo da dor,Enf. Marta Sousa,2026-07-16,2026-10-11,Concluído,100
+PC00084,U0031,Nutrição,Controlo de disfagia,Nutric. Renata Alves,2026-04-27,2026-06-11,Em curso,52
+PC00085,U0031,Fisioterapia,Prevenção de quedas,Fisio. Beatriz Lima,2026-03-20,2026-04-30,Em curso,30
+PC00086,U0031,Medicina,Ajuste terapêutico,Dra. Patrícia Gomes,2026-05-17,2026-07-31,Em curso,58
+PC00087,U0031,Psicologia,Estimulação cognitiva,Psic. Vera Matos,2026-06-14,2026-08-14,Em curso,63
+PC00088,U0032,Nutrição,Controlo de disfagia,Nutric. Renata Alves,2026-05-04,2026-07-14,Concluído,100
+PC00089,U0032,Serviço Social,Articulação de apoios sociais,Ass. Social Miguel Nunes,2026-02-19,2026-05-16,Em curso,29
+PC00090,U0032,Psicologia,Apoio à adaptação,Psic. Vera Matos,2026-06-27,2026-07-13,Concluído,100
+PC00091,U0033,Enfermagem,Controlo da dor,Enf. Paulo Cardoso,2026-07-21,2026-08-06,Concluído,100
+PC00092,U0033,Fisioterapia,Reeducação da marcha,Fisio. Beatriz Lima,2026-08-16,2026-11-14,Em curso,50
+PC00093,U0033,Serviço Social,Apoio na reintegração familiar,Ass. Social Miguel Nunes,2026-08-26,2026-10-26,Concluído,100
+PC00094,U0033,Nutrição,Adequação calórica,Nutric. Renata Alves,2026-07-18,2026-08-27,Em curso,47
+PC00095,U0034,Nutrição,Adequação calórica,Nutric. Renata Alves,2026-05-17,2026-06-08,Concluído,100
+PC00096,U0034,Serviço Social,Apoio na reintegração familiar,Ass. Social Miguel Nunes,2026-03-27,2026-04-12,Em curso,64
+PC00097,U0035,Psicologia,Apoio à adaptação,Psic. Vera Matos,2026-01-09,2026-02-25,Em curso,52
+PC00098,U0035,Fisioterapia,Recuperação da mobilidade,Fisio. Beatriz Lima,2026-07-22,2026-10-14,Suspenso,5
+PC00099,U0035,Enfermagem,Prevenção de úlceras de pressão,Enf. Paulo Cardoso,2026-06-04,2026-07-30,Suspenso,37
+PC00100,U0035,Medicina,Estabilização clínica,Dr. Nuno Barreto,2026-01-19,2026-03-31,Concluído,100
+PC00101,U0036,Psicologia,Apoio à adaptação,Psic. Vera Matos,2026-09-03,2026-11-21,Concluído,100
+PC00102,U0036,Medicina,Estabilização clínica,Dr. Ricardo Rocha,2026-06-10,2026-08-11,Concluído,100
+PC00103,U0036,Nutrição,Adequação calórica,Nutric. Renata Alves,2026-01-24,2026-03-13,Em curso,20
+PC00104,U0036,Fisioterapia,Recuperação da mobilidade,Fisio. Beatriz Lima,2026-02-17,2026-04-13,Concluído,100
+PC00105,U0037,Psicologia,Gestão da ansiedade,Psic. Vera Matos,2026-05-23,2026-08-11,Concluído,100
+PC00106,U0037,Fisioterapia,Recuperação da mobilidade,Fisio. Beatriz Lima,2026-01-21,2026-03-08,Concluído,100
+PC00107,U0038,Psicologia,Estimulação cognitiva,Psic. Vera Matos,2025-12-09,2026-02-24,Em curso,70
+PC00108,U0038,Serviço Social,Articulação de apoios sociais,Ass. Social Miguel Nunes,2026-05-06,2026-05-31,Concluído,100
+PC00109,U0038,Nutrição,Controlo de disfagia,Nutric. Renata Alves,2026-03-15,2026-04-27,Em curso,60
+PC00110,U0039,Serviço Social,Apoio na reintegração familiar,Ass. Social Miguel Nunes,2025-12-01,2026-01-06,Suspenso,0
+PC00111,U0039,Enfermagem,Prevenção de úlceras de pressão,Enf. Marta Sousa,2025-12-06,2025-12-23,Concluído,100
+PC00112,U0040,Medicina,Controlo de comorbilidades,Dra. Inês Fonseca,2026-06-10,2026-07-19,Em curso,31
+PC00113,U0040,Nutrição,Adequação calórica,Nutric. Renata Alves,2025-12-18,2026-03-15,Concluído,100
+PC00114,U0040,Enfermagem,Gestão da medicação,Enf. Paulo Cardoso,2026-01-10,2026-02-19,Em curso,73
+PC00115,U0040,Fisioterapia,Recuperação da mobilidade,Fisio. Beatriz Lima,2025-12-04,2026-01-24,Em curso,57
+PC00116,U0041,Serviço Social,Apoio na reintegração familiar,Ass. Social Miguel Nunes,2025-12-05,2026-01-11,Em curso,42
+PC00117,U0041,Psicologia,Gestão da ansiedade,Psic. Vera Matos,2026-09-09,2026-11-27,Suspenso,29
+PC00118,U0042,Enfermagem,Gestão da medicação,Enf. Paulo Cardoso,2026-02-16,2026-04-12,Em curso,48
+PC00119,U0042,Nutrição,Correção de défice nutricional,Nutric. Renata Alves,2026-04-28,2026-06-28,Em curso,55
+PC00120,U0042,Serviço Social,Articulação de apoios sociais,Ass. Social Miguel Nunes,2026-09-07,2026-10-01,Concluído,100
+PC00121,U0043,Serviço Social,Apoio na reintegração familiar,Ass. Social Miguel Nunes,2026-06-25,2026-09-12,Em curso,39
+PC00122,U0043,Fisioterapia,Recuperação da mobilidade,Fisio. Beatriz Lima,2026-03-03,2026-05-14,Em curso,41
+PC00123,U0044,Enfermagem,Controlo da dor,Enf. Marta Sousa,2026-03-02,2026-05-22,Concluído,100
+PC00124,U0044,Psicologia,Gestão da ansiedade,Psic. Vera Matos,2025-12-04,2025-12-24,Em curso,75
+PC00125,U0044,Nutrição,Adequação calórica,Nutric. Renata Alves,2026-01-16,2026-04-11,Em curso,75
+PC00126,U0045,Fisioterapia,Recuperação da mobilidade,Fisio. Beatriz Lima,2026-01-17,2026-02-20,Em curso,55
+PC00127,U0045,Psicologia,Estimulação cognitiva,Psic. Vera Matos,2026-05-06,2026-07-11,Em curso,44
+PC00128,U0045,Nutrição,Correção de défice nutricional,Nutric. Renata Alves,2026-03-05,2026-04-14,Concluído,100

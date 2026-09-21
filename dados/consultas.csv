@@ -1,0 +1,90 @@
+id_consulta,id_utente,data_hora,especialidade,profissional,sala,estado
+C00086,U0044,2026-09-09T18:39,Ginecologia,Dra. Patrícia Gomes,Sala 3,Realizada
+C00048,U0024,2026-09-09T18:39,Endocrinologia,Dr. Tiago Matos,Sala 2,Realizada
+C00089,U0045,2026-09-10T12:39,Endocrinologia,Dr. Tiago Matos,Sala 5,Realizada
+C00051,U0025,2026-09-10T12:39,Psiquiatria,Dra. Carla Nogueira,Sala 6,Realizada
+C00060,U0031,2026-09-10T15:39,Ortopedia,Dr. Hugo Teixeira,Sala 3,Cancelada
+C00042,U0020,2026-09-10T18:39,Ginecologia,Dra. Patrícia Gomes,Sala 5,Realizada
+C00052,U0025,2026-09-11T10:39,Clínica Geral,Dr. Ricardo Rocha,Sala 2,Realizada
+C00033,U0018,2026-09-11T18:39,Neurologia,Dra. Sofia Ramalho,Sala 4,Falta
+C00050,U0024,2026-09-12T09:39,Ginecologia,Dra. Patrícia Gomes,Sala 4,Realizada
+C00064,U0035,2026-09-12T12:39,Ginecologia,Dra. Patrícia Gomes,Sala 4,Realizada
+C00001,U0001,2026-09-13T09:39,Neurologia,Dra. Sofia Ramalho,Sala 2,Realizada
+C00003,U0003,2026-09-13T10:39,Pneumologia,Dr. Nuno Barreto,Sala 1,Realizada
+C00046,U0023,2026-09-13T16:39,Cardiologia,Dra. Inês Fonseca,Sala 2,Realizada
+C00066,U0037,2026-09-13T18:39,Pneumologia,Dr. Nuno Barreto,Sala 2,Realizada
+C00023,U0014,2026-09-14T09:39,Neurologia,Dra. Sofia Ramalho,Sala 5,Realizada
+C00076,U0038,2026-09-14T17:39,Psiquiatria,Dra. Carla Nogueira,Sala 3,Realizada
+C00013,U0009,2026-09-15T08:39,Endocrinologia,Dr. Tiago Matos,Sala 6,Realizada
+C00017,U0009,2026-09-15T10:39,Psiquiatria,Dra. Carla Nogueira,Sala 6,Realizada
+C00035,U0019,2026-09-15T16:39,Neurologia,Dra. Sofia Ramalho,Sala 6,Cancelada
+C00056,U0029,2026-09-16T09:39,Pneumologia,Dr. Nuno Barreto,Sala 4,Realizada
+C00075,U0038,2026-09-16T13:39,Ginecologia,Dra. Patrícia Gomes,Sala 6,Realizada
+C00047,U0024,2026-09-16T15:39,Ginecologia,Dra. Patrícia Gomes,Sala 2,Realizada
+C00012,U0008,2026-09-16T16:39,Pneumologia,Dr. Nuno Barreto,Sala 3,Realizada
+C00074,U0038,2026-09-17T10:39,Cardiologia,Dra. Inês Fonseca,Sala 2,Realizada
+C00084,U0044,2026-09-17T14:39,Neurologia,Dra. Sofia Ramalho,Sala 2,Realizada
+C00070,U0037,2026-09-17T15:39,Clínica Geral,Dr. Ricardo Rocha,Sala 2,Cancelada
+C00043,U0020,2026-09-17T16:39,Ginecologia,Dra. Patrícia Gomes,Sala 2,Realizada
+C00028,U0017,2026-09-17T17:39,Clínica Geral,Dr. Ricardo Rocha,Sala 4,Realizada
+C00065,U0036,2026-09-17T17:39,Clínica Geral,Dr. Ricardo Rocha,Sala 6,Realizada
+C00029,U0017,2026-09-18T12:39,Ginecologia,Dra. Patrícia Gomes,Sala 3,Realizada
+C00082,U0043,2026-09-18T13:39,Ginecologia,Dra. Patrícia Gomes,Sala 1,Realizada
+C00030,U0017,2026-09-18T14:39,Psiquiatria,Dra. Carla Nogueira,Sala 3,Realizada
+C00022,U0014,2026-09-19T12:39,Psiquiatria,Dra. Carla Nogueira,Sala 1,Realizada
+C00067,U0037,2026-09-19T12:39,Psiquiatria,Dra. Carla Nogueira,Sala 3,Realizada
+C00002,U0002,2026-09-19T14:39,Neurologia,Dra. Sofia Ramalho,Sala 3,Realizada
+C00071,U0037,2026-09-19T15:39,Clínica Geral,Dr. Ricardo Rocha,Sala 2,Realizada
+C00031,U0018,2026-09-20T12:39,Clínica Geral,Dr. Ricardo Rocha,Sala 1,Realizada
+C00083,U0044,2026-09-20T13:39,Cardiologia,Dra. Inês Fonseca,Sala 1,Realizada
+C00038,U0019,2026-09-20T14:39,Neurologia,Dra. Sofia Ramalho,Sala 4,Realizada
+C00057,U0029,2026-09-20T15:39,Pneumologia,Dr. Nuno Barreto,Sala 2,Realizada
+C00008,U0005,2026-09-20T17:39,Endocrinologia,Dr. Tiago Matos,Sala 4,Realizada
+C00007,U0003,2026-09-21T10:39,Ginecologia,Dra. Patrícia Gomes,Sala 1,Realizada
+C00005,U0003,2026-09-21T11:39,Ortopedia,Dr. Hugo Teixeira,Sala 6,Cancelada
+C00025,U0015,2026-09-21T16:39,Psiquiatria,Dra. Carla Nogueira,Sala 3,Realizada
+C00011,U0008,2026-09-21T17:39,Ortopedia,Dr. Hugo Teixeira,Sala 4,Falta
+C00063,U0034,2026-09-22T10:39,Neurologia,Dra. Sofia Ramalho,Sala 6,Agendada
+C00088,U0045,2026-09-22T10:39,Cardiologia,Dra. Inês Fonseca,Sala 6,Agendada
+C00027,U0016,2026-09-22T18:39,Ginecologia,Dra. Patrícia Gomes,Sala 5,Agendada
+C00009,U0007,2026-09-23T08:39,Clínica Geral,Dr. Ricardo Rocha,Sala 6,Agendada
+C00026,U0016,2026-09-23T09:39,Ortopedia,Dr. Hugo Teixeira,Sala 2,Agendada
+C00073,U0038,2026-09-23T16:39,Cardiologia,Dra. Inês Fonseca,Sala 4,Agendada
+C00062,U0033,2026-09-24T15:39,Ginecologia,Dra. Patrícia Gomes,Sala 1,Agendada
+C00032,U0018,2026-09-26T14:39,Cardiologia,Dra. Inês Fonseca,Sala 5,Agendada
+C00061,U0033,2026-09-26T18:39,Cardiologia,Dra. Inês Fonseca,Sala 5,Agendada
+C00077,U0038,2026-09-27T16:39,Pneumologia,Dr. Nuno Barreto,Sala 6,Agendada
+C00054,U0027,2026-09-28T08:39,Cardiologia,Dra. Inês Fonseca,Sala 4,Agendada
+C00053,U0027,2026-09-28T09:39,Ortopedia,Dr. Hugo Teixeira,Sala 3,Agendada
+C00087,U0045,2026-09-28T09:39,Cardiologia,Dra. Inês Fonseca,Sala 6,Agendada
+C00080,U0040,2026-09-28T10:39,Endocrinologia,Dr. Tiago Matos,Sala 2,Agendada
+C00016,U0009,2026-09-28T10:39,Clínica Geral,Dr. Ricardo Rocha,Sala 4,Agendada
+C00045,U0023,2026-09-28T10:39,Neurologia,Dra. Sofia Ramalho,Sala 4,Agendada
+C00069,U0037,2026-09-28T12:39,Cardiologia,Dra. Inês Fonseca,Sala 4,Agendada
+C00072,U0037,2026-09-28T17:39,Clínica Geral,Dr. Ricardo Rocha,Sala 5,Agendada
+C00010,U0008,2026-09-29T13:39,Ortopedia,Dr. Hugo Teixeira,Sala 2,Agendada
+C00020,U0012,2026-09-29T15:39,Ortopedia,Dr. Hugo Teixeira,Sala 2,Agendada
+C00018,U0011,2026-09-29T16:39,Clínica Geral,Dr. Ricardo Rocha,Sala 2,Agendada
+C00024,U0015,2026-09-30T09:39,Ortopedia,Dr. Hugo Teixeira,Sala 4,Agendada
+C00039,U0019,2026-09-30T15:39,Clínica Geral,Dr. Ricardo Rocha,Sala 2,Agendada
+C00058,U0030,2026-10-01T10:39,Clínica Geral,Dr. Ricardo Rocha,Sala 4,Agendada
+C00019,U0012,2026-10-01T15:39,Cardiologia,Dra. Inês Fonseca,Sala 1,Agendada
+C00036,U0019,2026-10-01T17:39,Pneumologia,Dr. Nuno Barreto,Sala 2,Agendada
+C00049,U0024,2026-10-01T18:39,Psiquiatria,Dra. Carla Nogueira,Sala 4,Agendada
+C00059,U0031,2026-10-02T15:39,Pneumologia,Dr. Nuno Barreto,Sala 3,Agendada
+C00081,U0043,2026-10-02T16:39,Neurologia,Dra. Sofia Ramalho,Sala 5,Agendada
+C00037,U0019,2026-10-02T17:39,Ginecologia,Dra. Patrícia Gomes,Sala 3,Agendada
+C00004,U0003,2026-10-03T13:39,Psiquiatria,Dra. Carla Nogueira,Sala 3,Agendada
+C00079,U0038,2026-10-03T13:39,Psiquiatria,Dra. Carla Nogueira,Sala 3,Agendada
+C00044,U0021,2026-10-03T15:39,Pneumologia,Dr. Nuno Barreto,Sala 5,Agendada
+C00021,U0013,2026-10-03T16:39,Neurologia,Dra. Sofia Ramalho,Sala 5,Agendada
+C00068,U0037,2026-10-03T18:39,Clínica Geral,Dr. Ricardo Rocha,Sala 2,Agendada
+C00078,U0038,2026-10-03T18:39,Neurologia,Dra. Sofia Ramalho,Sala 5,Agendada
+C00006,U0003,2026-10-04T12:39,Ginecologia,Dra. Patrícia Gomes,Sala 4,Agendada
+C00014,U0009,2026-10-04T13:39,Cardiologia,Dra. Inês Fonseca,Sala 6,Agendada
+C00034,U0019,2026-10-04T15:39,Pneumologia,Dr. Nuno Barreto,Sala 4,Agendada
+C00015,U0009,2026-10-04T18:39,Ginecologia,Dra. Patrícia Gomes,Sala 1,Agendada
+C00085,U0044,2026-10-05T09:39,Ginecologia,Dra. Patrícia Gomes,Sala 3,Agendada
+C00041,U0019,2026-10-05T09:39,Ortopedia,Dr. Hugo Teixeira,Sala 5,Agendada
+C00055,U0028,2026-10-05T18:39,Cardiologia,Dra. Inês Fonseca,Sala 6,Agendada
+C00040,U0019,2026-10-06T16:39,Psiquiatria,Dra. Carla Nogueira,Sala 6,Agendada

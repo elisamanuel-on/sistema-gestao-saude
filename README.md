@@ -10,18 +10,27 @@ resumo automático em linguagem natural para o profissional de saúde.
 Antes de construir, pesquisei dois produtos reais do mesmo tipo de mercado:
 **hitCare** (hitEcosystem — software português para UCC/ERPI/SAD, com mapas de
 ocupação/altas e faturação com a Segurança Social) e **LinkHMS** (sistema
-hospitalar com ficha clínica por paciente — EMR). Este projeto cobre o mesmo
-tipo de módulos, mas é uma implementação **original e independente** — nenhum
-código, design, marca ou dado de nenhum dos dois produtos foi copiado. É só
-inspiração na ideia funcional.
+hospitalar com ficha clínica por paciente — EMR, exames, consultas). Este
+projeto cobre os dois tipos de contexto: cuidados continuados (UCC/ERPI/SAD)
+e ambulatório clínico/hospitalar (**Clínica/Hospital**) — mas é uma
+implementação **original e independente** — nenhum código, design, marca ou
+dado de nenhum dos dois produtos foi copiado. É só inspiração na ideia
+funcional, combinada e depois redesenhada.
 
 ## Módulos
 
-- **Utentes** — lista pesquisável/filtrável (nome, tipo de cuidado, estado),
-  com KPIs gerais.
+- **Utentes** — registo único, pesquisável/filtrável, para **todos os tipos
+  de unidade** (UCC, ERPI, SAD e Clínica/Hospital), com KPIs gerais e uma
+  etiqueta de cor por tipo de unidade.
 - **Ficha do utente** — resumo, sinais vitais (gráfico ao longo do tempo),
-  alergias & diagnósticos, prescrições, visitas, documentos, e **avaliação de
-  risco**.
+  alergias & diagnósticos, **exames**, prescrições, **plano de cuidados
+  multidisciplinar**, visitas, documentos, e **avaliação de risco**.
+  - **Exames** — análises, imagiologia, cardiológico e outros, com estado
+    (Normal / Alterado / Pendente) e resumo do resultado.
+  - **Plano de cuidados multidisciplinar** — objetivos e intervenções por
+    área profissional (Enfermagem, Medicina, Fisioterapia, Nutrição,
+    Psicologia, Serviço Social), cada um com profissional responsável,
+    datas de início/revisão, estado e barra de progresso.
 - **Avaliação de risco** — três domínios clínicos, cada um com o seu
   formulário (pré-preenchido com os últimos valores conhecidos do utente):
   - **Risco de diabetes** — modelo de machine learning (random forest)
@@ -39,21 +48,34 @@ inspiração na ideia funcional.
     API, e o resultado é sempre determinístico e auditável. A ideia é o
     profissional ler isto em segundos e decidir — nunca é a decisão final.
 - **Mapa de Ocupação** — capacidade vs. ocupação atual por tipo de cuidado
-  (UCC/ERPI/SAD) e altas registadas por motivo.
+  continuado (UCC/ERPI/SAD) e altas registadas por motivo. O tipo
+  Clínica/Hospital não usa mapa de camas — é ambulatório, por isso tem o
+  módulo Consultas em vez de ocupação.
+- **Consultas** (módulo Clínica/Hospital) — agendamento por especialidade e
+  profissional, com KPIs (consultas hoje, agendadas nos próximos 7 dias,
+  taxa de comparência, faltas), gráfico de consultas por especialidade, e
+  lista filtrável/pesquisável por utente, especialidade e estado (Agendada,
+  Realizada, Cancelada, Falta).
 - **Faturação** — valor a pagar pelos utentes, comparticipação da Segurança
-  Social, verbas ARS (diárias, medicamentos, remuneração adicional), saldos
-  e sinalização de erros de fatura, com exportação para CSV.
+  Social, verbas ARS (diárias, medicamentos, remuneração adicional),
+  **faturação a seguradoras privadas** (cobertura, valor pago pela
+  seguradora, copagamento do utente), saldos e sinalização de erros de
+  fatura, com exportação para CSV.
 
 ## Sobre os dados — nada disto é real
 
 **Nenhuma pessoa real, utente ou paciente está representada em nenhum
 ficheiro deste projeto.** Os 45 utentes (`dados/utentes.csv`), os sinais
-vitais, diagnósticos, prescrições, visitas, alergias, documentos e faturação
-são **todos gerados sinteticamente** (`scripts/gerar_dados_utentes.py`),
-incluindo os nomes (biblioteca `Faker`, nunca uma pessoa real). Os valores
-clínicos usados para pré-preencher os formulários de risco foram amostrados a
-partir de dois datasets públicos e anonimizados amplamente usados em
-investigação/ensino — nunca de pacientes reais:
+vitais, diagnósticos, prescrições, visitas, alergias, documentos, exames,
+plano de cuidados, consultas e faturação são **todos gerados
+sinteticamente** (`scripts/gerar_dados_utentes.py`, com as listas
+partilhadas em `constantes.py`), incluindo os nomes (biblioteca `Faker`,
+nunca uma pessoa real) e os nomes dos profissionais. As **seguradoras** que
+aparecem na faturação (SegurCuidar, ViverSeguro, Confiança Saúde,
+Proteger+) também têm nomes inventados — nenhuma é uma marca real. Os
+valores clínicos usados para pré-preencher os formulários de risco foram
+amostrados a partir de dois datasets públicos e anonimizados amplamente
+usados em investigação/ensino — nunca de pacientes reais:
 
 - **Pima Indians Diabetes Database** (National Institute of Diabetes and
   Digestive and Kidney Diseases) — 768 registos anonimizados.
@@ -98,16 +120,24 @@ sempre emparelhada com um rótulo em texto, nunca só cor: verde `#137a4c`
 (5.4:1), laranja `#9a5700` (5.6:1) e vermelho `#c22b3f` (5.7:1) — todas acima
 do mínimo WCAG de 4.5:1 para texto.
 
+Os 4 tipos de unidade têm uma cor categórica própria (nunca reutilizada para
+risco, para não confundir "tipo" com "gravidade"), todas também acima de
+4.5:1 sobre branco: UCC `#0f7a6c` (5.2:1, a mesma cor de identidade), ERPI
+`#4338b0` (8.6:1), SAD `#8f3569` (7.3:1) e Clínica/Hospital `#155696` (7.5:1).
+
 ## Como correr localmente
 
 ```bash
 pip install -r requirements-dev.txt
 
 # (opcional — os dados e modelos já vêm gerados/treinados neste entregável)
-python scripts/gerar_dados_brutos.py
-python scripts/treinar_modelo.py
-python scripts/treinar_modelo_cardio.py
-python scripts/gerar_dados_utentes.py
+# Nota: corre estes scripts como módulo (-m), não como ficheiro direto —
+# é o que faz "from limpeza import ..." e "from constantes import ..."
+# funcionarem sem teres de mexer em PYTHONPATH.
+python -m scripts.gerar_dados_brutos
+python -m scripts.treinar_modelo
+python -m scripts.treinar_modelo_cardio
+python -m scripts.gerar_dados_utentes
 
 python app.py
 # abrir http://localhost:8051/utentes
@@ -141,16 +171,19 @@ pytest -v
 ruff check --select=F,E9,B .
 ```
 
-26 testes cobrem: limpeza/estruturação de dados, a escala de risco de queda
+39 testes cobrem: limpeza/estruturação de dados, a escala de risco de queda
 (incluindo as fronteiras exatas entre baixo/moderado/elevado), o resumo
-automático, o roteamento e os callbacks principais, e a validade das
-previsões dos dois modelos de ML.
+automático, o roteamento e os callbacks principais, a validade das
+previsões dos dois modelos de ML, e o módulo Clínica/Hospital (coerência
+profissional/especialidade nas consultas, coerência profissional/área no
+plano de cuidados, exames, e as colunas de seguro na faturação).
 
 ## O que ficaria para uma próxima iteração
 
 Sendo um projeto de portfólio, há decisões de âmbito deliberadas: sem
 autenticação/permissões por utilizador, sem persistência em base de dados
 (os dados vivem em CSV, carregados uma vez no arranque), sem exportação em
-Excel para os utentes (só CSV na faturação), e sem conformidade RGPD/RNCCI
-formal — tudo isto seria o próximo passo natural para uma versão de
+Excel para os utentes (só CSV na faturação), sem conformidade RGPD/RNCCI
+formal, e a página de Consultas é uma lista filtrável em vez de uma vista de
+calendário — tudo isto seria o próximo passo natural para uma versão de
 produção.

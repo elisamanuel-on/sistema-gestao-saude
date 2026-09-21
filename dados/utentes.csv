@@ -1,46 +1,46 @@
 id_utente,nome,genero,data_nascimento,processo,tipo_cuidado,data_admissao,quarto,estado
-U0001,Nelson da Melo,Masculino,1946-02-15,760479,ERPI,2024-04-19,209-B,Internado
-U0002,Mélanie Correia-Coelho,Feminino,1975-02-18,785687,ERPI,2026-06-11,107-B,Internado
-U0003,Luciana Ribeiro-Ramos,Feminino,1942-10-05,299447,SAD,2026-07-09,—,Internado
-U0004,Bianca Melo,Feminino,1943-09-27,983348,SAD,2025-10-12,—,Internado
-U0005,Carminho Baptista,Feminino,1948-06-13,391674,ERPI,2025-04-18,108-C,Internado
-U0006,Simão Rocha-Andrade,Masculino,1946-08-30,690497,ERPI,2025-10-24,301-A,Internado
-U0007,Kelly-Lia Santos,Feminino,1956-08-14,117710,SAD,2025-08-12,—,Internado
-U0008,Pilar-Catarina Reis,Feminino,1968-06-20,843334,SAD,2026-07-20,—,Internado
-U0009,Micael Araújo,Masculino,1955-09-02,426326,ERPI,2026-02-20,306-A,Internado
-U0010,Ângelo Correia,Masculino,1981-03-07,841360,SAD,2026-05-14,—,Internado
-U0011,Naiara Amaral,Feminino,1981-09-02,299947,ERPI,2025-05-01,208-C,Internado
-U0012,Inês da Pinho,Feminino,1954-11-14,942438,ERPI,2025-08-03,201-B,Internado
-U0013,Mauro Esteves,Masculino,1980-06-17,323601,UCC,2024-04-20,101-A,Internado
-U0014,Martim Abreu,Masculino,1965-10-02,504928,SAD,2025-10-10,—,Alta
-U0015,Lorena Santos,Feminino,1977-08-18,575223,UCC,2024-11-29,306-C,Internado
-U0016,Lara Oliveira,Feminino,1944-02-07,291708,SAD,2026-04-26,—,Alta
-U0017,Sofia Ferreira,Feminino,1962-06-13,266173,SAD,2025-12-30,—,Internado
-U0018,Violeta Esteves,Feminino,1938-03-29,149704,SAD,2025-01-01,—,Internado
-U0019,Flor Amaral-Araújo,Feminino,1975-09-15,963730,ERPI,2025-12-24,405-B,Internado
-U0020,Kevin Barros,Masculino,1963-01-14,232540,UCC,2024-09-04,—,Em espera
-U0021,Júlia Araújo,Feminino,1950-12-28,885367,ERPI,2024-12-20,304-A,Internado
-U0022,Rita Abreu,Feminino,1977-05-19,656797,ERPI,2025-12-30,205-B,Internado
-U0023,Eduarda Anjos,Feminino,1976-04-01,788843,UCC,2025-06-07,—,Em espera
-U0024,Jéssica do Machado,Feminino,1944-09-24,835020,SAD,2025-05-13,—,Alta
-U0025,Brian Paiva,Masculino,1979-09-23,175950,ERPI,2026-06-27,306-A,Internado
-U0026,Yara Soares,Feminino,1953-01-03,872892,ERPI,2026-07-28,—,Alta
-U0027,Íris Baptista,Feminino,1960-04-10,998939,UCC,2025-05-15,—,Alta
-U0028,Ismael Almeida,Masculino,1980-01-21,175758,ERPI,2024-12-11,401-C,Internado
-U0029,Violeta Borges,Feminino,1975-11-11,863580,UCC,2025-12-22,—,Alta
-U0030,Fábio Teixeira,Masculino,1956-10-18,131236,ERPI,2025-06-17,109-C,Internado
-U0031,Alexandre Antunes,Masculino,1943-08-29,218368,ERPI,2026-01-19,—,Em espera
-U0032,Marcos de Sousa,Masculino,1931-12-05,250177,ERPI,2025-05-02,106-B,Internado
-U0033,Diana Melo-Nascimento,Feminino,1948-07-16,563399,SAD,2025-09-26,—,Internado
-U0034,Valentim Branco,Masculino,1966-04-22,503092,ERPI,2025-12-29,404-A,Internado
-U0035,Petra Macedo,Feminino,1944-05-02,961780,UCC,2026-04-27,102-B,Internado
-U0036,Kelly Marques,Feminino,1974-02-16,501130,ERPI,2026-02-04,—,Alta
-U0037,Afonso Fonseca,Masculino,1938-05-05,574456,ERPI,2024-05-02,—,Em espera
-U0038,Álvaro Cruz,Masculino,1977-09-17,780826,UCC,2024-12-28,306-B,Internado
-U0039,Kelly Pires,Feminino,1940-08-04,935554,ERPI,2026-03-01,304-A,Internado
-U0040,Bianca-Ana Campos,Feminino,1941-08-14,307670,ERPI,2024-12-05,302-C,Internado
-U0041,Letícia Figueiredo,Feminino,1951-06-01,385584,UCC,2026-08-31,103-A,Internado
-U0042,Wilson Ramos,Masculino,1946-10-19,892940,SAD,2025-04-17,—,Internado
-U0043,Francisca Macedo,Feminino,1955-10-16,857467,SAD,2026-06-14,—,Internado
-U0044,Brian Baptista,Masculino,1973-02-16,107053,ERPI,2024-12-10,—,Alta
-U0045,Nuno Rocha,Masculino,1945-12-24,459763,ERPI,2025-04-15,—,Alta
+U0001,Nelson da Melo,Masculino,1946-02-16,760479,ERPI,2024-04-20,209-B,Internado
+U0002,Mélanie Correia-Coelho,Feminino,1975-02-19,785687,ERPI,2026-06-12,107-B,Internado
+U0003,Luciana Ribeiro-Ramos,Feminino,1942-10-06,299447,Clínica/Hospital,2026-07-10,—,Em acompanhamento
+U0004,Bianca Melo,Feminino,1943-09-28,983348,SAD,2025-10-13,—,Em acompanhamento
+U0005,Carminho Baptista,Feminino,1948-06-14,189117,SAD,2025-04-19,—,Em acompanhamento
+U0006,Simão Rocha-Andrade,Masculino,1940-05-24,981029,ERPI,2025-02-25,—,Em espera
+U0007,Kelly-Lia Santos,Feminino,1936-06-06,903511,ERPI,2026-01-20,102-C,Internado
+U0008,Pilar-Catarina Reis,Feminino,1956-08-15,117710,Clínica/Hospital,2025-08-13,—,Em acompanhamento
+U0009,Margarida Araújo,Feminino,1968-06-21,843334,Clínica/Hospital,2026-07-21,—,Em acompanhamento
+U0010,Ângelo Correia,Masculino,1955-09-03,426326,ERPI,2026-02-21,306-A,Internado
+U0011,Pedro Amaral,Masculino,1981-03-08,841360,SAD,2026-05-15,—,Em acompanhamento
+U0012,Inês da Pinho,Feminino,1981-09-03,299947,ERPI,2025-05-02,208-C,Internado
+U0013,Mara Esteves,Feminino,1954-11-15,942438,ERPI,2025-08-04,201-B,Internado
+U0014,Martim Abreu,Masculino,1980-06-18,323601,UCC,2024-04-21,101-A,Internado
+U0015,Lucas Santos,Masculino,1965-10-03,504928,SAD,2025-10-11,—,Alta
+U0016,Lara Oliveira,Feminino,1977-08-19,575223,UCC,2024-11-30,306-C,Internado
+U0017,Sofia Ferreira,Feminino,1944-02-08,291708,Clínica/Hospital,2026-04-27,—,Alta
+U0018,Violeta Esteves,Feminino,1962-06-14,266173,Clínica/Hospital,2025-12-31,—,Em acompanhamento
+U0019,Flor Amaral-Araújo,Feminino,1938-03-30,149704,Clínica/Hospital,2025-01-02,—,Em acompanhamento
+U0020,Vitória-Bruna Magalhães,Feminino,1975-09-16,963730,ERPI,2025-12-25,405-B,Internado
+U0021,Gustavo Macedo,Masculino,1963-01-15,232540,UCC,2024-09-05,—,Em espera
+U0022,Alice Sousa,Feminino,1950-12-29,393831,SAD,2024-12-21,—,Em acompanhamento
+U0023,Ema Cruz,Feminino,1968-09-28,395658,UCC,2025-07-18,101-A,Internado
+U0024,Manuel Lourenço,Masculino,1947-12-24,572221,Clínica/Hospital,2026-06-10,—,Em acompanhamento
+U0025,Leandro Assunção,Masculino,1938-10-26,835020,ERPI,2026-04-22,108-B,Internado
+U0026,Xavier Soares,Masculino,1979-09-24,175950,ERPI,2026-06-28,306-A,Internado
+U0027,Íris Baptista,Feminino,1953-01-04,872892,ERPI,2026-07-29,—,Alta
+U0028,Irina Almeida,Feminino,1960-04-11,998939,UCC,2025-05-16,—,Alta
+U0029,William Borges,Masculino,1980-01-22,175758,ERPI,2024-12-12,401-C,Internado
+U0030,Érica Teixeira,Feminino,1975-11-12,863580,UCC,2025-12-23,—,Alta
+U0031,Alexandre Antunes,Masculino,1956-10-19,131236,ERPI,2025-06-18,109-C,Internado
+U0032,Marcos de Sousa,Masculino,1943-08-30,218368,ERPI,2026-01-20,—,Em espera
+U0033,Eduardo Melo-Nascimento,Masculino,1931-12-06,111856,SAD,2025-05-03,—,Em acompanhamento
+U0034,Valentim Branco,Masculino,1962-07-27,890386,SAD,2026-02-17,—,Em acompanhamento
+U0035,Rúben Macedo,Masculino,1939-03-02,551826,ERPI,2026-01-08,304-C,Internado
+U0036,Kelly Marques,Feminino,1968-03-24,977758,UCC,2025-10-23,208-B,Internado
+U0037,Adriana Fonseca,Feminino,1936-09-12,218310,Clínica/Hospital,2025-12-03,—,Alta
+U0038,Álvaro Cruz,Masculino,1951-05-24,756129,Clínica/Hospital,2024-05-15,—,Em acompanhamento
+U0039,João Pires,Masculino,1938-05-06,574456,SAD,2024-05-03,—,Em espera
+U0040,António Campos,Masculino,1977-09-18,780826,ERPI,2024-12-29,306-B,Internado
+U0041,Letícia Figueiredo,Feminino,1940-08-05,935554,ERPI,2026-03-02,304-A,Internado
+U0042,Vitória Ramos,Feminino,1941-08-15,307670,ERPI,2024-12-06,302-C,Internado
+U0043,Francisca Macedo,Feminino,1951-06-02,385584,UCC,2026-09-01,103-A,Internado
+U0044,Brian Baptista,Masculino,1946-10-20,892940,Clínica/Hospital,2025-04-18,—,Em acompanhamento
+U0045,Miriam Rocha,Feminino,1955-10-17,857467,Clínica/Hospital,2026-06-15,—,Em acompanhamento

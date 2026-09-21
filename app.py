@@ -4,32 +4,38 @@ Inspirado (só na ideia funcional, nunca na marca/design) em dois produtos
 reais pesquisados antes de construir isto: hitCare (hitEcosystem), software
 português para UCC/ERPI/SAD com mapas de ocupação/altas e faturação com a
 Segurança Social, e LinkHMS, um sistema hospitalar com ficha clínica por
-paciente (EMR). Nada aqui reproduz o logótipo, as cores de marca ou o
-layout exato de nenhum dos dois — é uma implementação original, com os
-mesmos tipos de módulo.
+paciente (EMR, exames, consultas). Nada aqui reproduz o logótipo, as cores
+de marca ou o layout exato de nenhum dos dois — é uma implementação
+original, que cobre os dois tipos de contexto: cuidados continuados
+(UCC/ERPI/SAD) e ambulatório clínico/hospitalar.
 
-Quatro módulos, navegação lateral:
-  /utentes           — lista de utentes (pesquisa/filtro)
+Módulos, navegação lateral agrupada por contexto:
+  /utentes           — lista de utentes de todas as unidades (pesquisa/filtro)
   /utentes/<id>       — ficha do utente: resumo, sinais vitais, alergias &
-                         diagnósticos, prescrições, visitas, documentos, e
-                         avaliação de risco (diabetes + cardiovascular, por
-                         machine learning, + risco de queda pela Morse Fall
-                         Scale — instrumento clínico publicado), com um
-                         resumo automático em linguagem natural (motor de
-                         regras local, sem API externa) para o profissional
-                         ler em segundos antes de decidir.
-  /ocupacao           — capacidade, ocupação e altas por tipo de cuidado
-  /faturacao          — valores a pagar, comparticipação, ARS, saldos
+                         diagnósticos, exames, prescrições, plano de cuidados
+                         multidisciplinar, visitas, documentos, e avaliação
+                         de risco (diabetes + cardiovascular, por machine
+                         learning, + risco de queda pela Morse Fall Scale —
+                         instrumento clínico publicado), com um resumo
+                         automático em linguagem natural (motor de regras
+                         local, sem API externa) para o profissional ler em
+                         segundos antes de decidir.
+  /ocupacao           — capacidade, ocupação e altas (cuidados continuados)
+  /consultas          — agendamento/consultas (módulo Clínica/Hospital)
+  /faturacao          — valores a pagar, comparticipação, ARS, seguros, saldos
 
-Dados: tudo sintético (ver scripts/gerar_dados_utentes.py). Os modelos de
-risco são treinados em datasets públicos e anonimizados (Pima Diabetes, UCI
-Heart Disease) — nenhuma pessoa real, utente ou paciente está representada
-em nenhum ficheiro deste projeto. Esta ferramenta é uma demonstração
-técnica de portfólio, não um sistema clínico certificado.
+Dados: tudo sintético (ver scripts/gerar_dados_utentes.py e constantes.py).
+Os modelos de risco são treinados em datasets públicos e anonimizados (Pima
+Diabetes, UCI Heart Disease) — nenhuma pessoa real, utente ou paciente está
+representada em nenhum ficheiro deste projeto, e as seguradoras que
+aparecem na faturação têm nomes inventados (nenhuma marca real). Esta
+ferramenta é uma demonstração técnica de portfólio, não um sistema clínico
+certificado.
 """
 import datetime
 import json
 import pathlib
+import unicodedata
 
 import dash
 import joblib
@@ -37,6 +43,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from dash import Input, Output, State, dash_table, dcc, html
 
+from constantes import ESPECIALIDADES, TIPOS_CUIDADO
 from limpeza import LIMITES_PLAUSIVEIS
 from riscos import (
     OPCOES_APOIO_MARCHA,
@@ -54,6 +61,18 @@ from scripts.treinar_modelo_cardio import COLUNAS_CARDIO
 
 PASTA_DADOS = pathlib.Path("dados")
 PASTA_MODELO = pathlib.Path("modelo")
+
+ESTADOS_UTENTE = ["Internado", "Em acompanhamento", "Alta", "Em espera"]
+
+TOM_PLANO = {"Em curso": "primaria", "Concluído": "risco_baixo", "Suspenso": "risco_moderado"}
+
+
+def _slug(texto):
+    """Normaliza texto em português para um sufixo de classe CSS seguro
+    (sem acentos, sem espaços, sem barras) — ex.: 'Clínica/Hospital' ->
+    'clinica-hospital', 'Concluído' -> 'concluido'."""
+    sem_acentos = unicodedata.normalize("NFKD", texto).encode("ascii", "ignore").decode("ascii")
+    return sem_acentos.lower().replace(" ", "-").replace("/", "-")
 
 RES_DIABETES = {
     "gravidezes": "Nº de gravidezes",
@@ -87,6 +106,13 @@ CORES = {
     "risco_moderado_suave": "#fbeedd",
     "risco_elevado": "#c22b3f",
     "risco_elevado_suave": "#fbe4e7",
+    # Cores categóricas dos 4 tipos de unidade (nunca usadas para risco —
+    # risco usa sempre a escala baixo/moderado/elevado acima). Todas
+    # validadas a 4.5:1+ de contraste sobre branco (ver README).
+    "tipo_ucc": "#0f7a6c",
+    "tipo_erpi": "#4338b0",
+    "tipo_sad": "#8f3569",
+    "tipo_clinica_hospital": "#155696",
 }
 
 
@@ -105,7 +131,12 @@ def _carregar_todos_os_dados():
     dados["visitas"] = pd.read_csv(PASTA_DADOS / "visitas.csv")
     dados["alergias"] = pd.read_csv(PASTA_DADOS / "alergias.csv")
     dados["documentos"] = pd.read_csv(PASTA_DADOS / "documentos.csv")
+    dados["exames"] = pd.read_csv(PASTA_DADOS / "exames.csv")
+    dados["plano_cuidados"] = pd.read_csv(PASTA_DADOS / "plano_cuidados.csv")
+    dados["consultas"] = pd.read_csv(PASTA_DADOS / "consultas.csv", parse_dates=["data_hora"])
     dados["faturacao"] = pd.read_csv(PASTA_DADOS / "faturacao.csv")
+    dados["faturacao"]["seguradora"] = dados["faturacao"]["seguradora"].fillna("—")
+    dados["faturacao"]["numero_apolice"] = dados["faturacao"]["numero_apolice"].fillna("—")
     dados["altas"] = pd.read_csv(PASTA_DADOS / "altas.csv")
     return dados
 
@@ -170,20 +201,43 @@ def _aviso_medico():
     )
 
 
+SECCOES_NAVEGACAO = [
+    ("Geral", [("/utentes", "Utentes")]),
+    ("Cuidados continuados", [("/ocupacao", "Mapa de Ocupação")]),
+    ("Clínica & Hospital", [("/consultas", "Consultas")]),
+    ("Gestão", [("/faturacao", "Faturação")]),
+]
+
+
 def _barra_lateral(caminho_atual):
-    itens = [("/utentes", "Utentes"), ("/ocupacao", "Mapa de Ocupação"), ("/faturacao", "Faturação")]
-    ligacoes = []
-    for destino, rotulo in itens:
-        ativa = caminho_atual == destino or (destino == "/utentes" and caminho_atual.startswith("/utentes"))
-        classe = "ligacao-lateral" + (" ligacao-lateral--ativa" if ativa else "")
-        ligacoes.append(dcc.Link(rotulo, href=destino, className=classe))
+    seccoes = []
+    for titulo_seccao, itens in SECCOES_NAVEGACAO:
+        ligacoes = []
+        for destino, rotulo in itens:
+            ativa = caminho_atual == destino or (destino == "/utentes" and caminho_atual.startswith("/utentes"))
+            classe = "ligacao-lateral" + (" ligacao-lateral--ativa" if ativa else "")
+            ligacoes.append(dcc.Link(rotulo, href=destino, className=classe))
+        seccoes.append(
+            html.Div(
+                [html.Div(titulo_seccao, className="legenda-seccao-lateral"), html.Nav(ligacoes, className="nav-lateral")],
+                className="seccao-lateral",
+            )
+        )
     return html.Div(
         [
-            html.Div("Gestão de Saúde", className="logotipo-lateral"),
-            html.Nav(ligacoes, className="nav-lateral"),
+            html.Div([html.Span("Gestão de Saúde", className="logotipo-lateral-texto")], className="logotipo-lateral"),
+            html.Div(seccoes, className="grupo-nav-lateral"),
         ],
         className="barra-lateral",
     )
+
+
+def _etiqueta_tipo_cuidado(tipo):
+    return html.Span(tipo, className=f"etiqueta-tipo etiqueta-tipo--{_slug(tipo)}")
+
+
+def _etiqueta_tom(texto, tom, sufixo_classe="resultado-inline"):
+    return html.Span(texto, className=f"{sufixo_classe} {sufixo_classe}--{tom}")
 
 
 # --- Página: Lista de utentes -----------------------------------------------
@@ -200,7 +254,7 @@ def _tabela_utentes(df):
                     html.Td(dcc.Link(u["nome"], href=f"/utentes/{u['id_utente']}", className="ligacao-tabela")),
                     html.Td(u["genero"]),
                     html.Td(str(_idade_utente(u["data_nascimento"]))),
-                    html.Td(u["tipo_cuidado"]),
+                    html.Td(_etiqueta_tipo_cuidado(u["tipo_cuidado"])),
                     html.Td(u["quarto"]),
                     html.Td(html.Span(u["estado"], className=f"etiqueta-estado etiqueta-estado--{u['estado'].lower().replace(' ', '-')}")),
                 ]
@@ -218,17 +272,22 @@ def _tabela_utentes(df):
 def _pagina_utentes():
     df = DADOS["utentes"]
     total = len(df)
-    internados = int((df["estado"] == "Internado").sum())
+    ativos = int(df["estado"].isin(["Internado", "Em acompanhamento"]).sum())
     em_espera = int((df["estado"] == "Em espera").sum())
     altas_mes = len(DADOS["altas"])
 
     return html.Div(
         [
             html.H1("Utentes"),
+            html.P(
+                "Registo único para todos os tipos de unidade — cuidados continuados (UCC/ERPI/SAD) e "
+                "ambulatório clínico/hospitalar.",
+                className="texto-explicativo",
+            ),
             html.Div(
                 [
                     _cartao_kpi("Total de utentes", total),
-                    _cartao_kpi("Internados", internados, tom="primaria"),
+                    _cartao_kpi("Internados / em acompanhamento", ativos, tom="primaria"),
                     _cartao_kpi("Em espera", em_espera, tom="risco_moderado" if em_espera else ""),
                     _cartao_kpi("Altas registadas", altas_mes),
                 ],
@@ -239,13 +298,13 @@ def _pagina_utentes():
                     dcc.Input(id="pesquisa-utente", type="text", placeholder="Pesquisar por nome...", className="campo-pesquisa"),
                     dcc.Dropdown(
                         id="filtro-tipo-cuidado",
-                        options=[{"label": t, "value": t} for t in ["UCC", "ERPI", "SAD"]],
+                        options=[{"label": t, "value": t} for t in TIPOS_CUIDADO],
                         placeholder="Tipo de cuidado",
                         className="filtro-dropdown",
                     ),
                     dcc.Dropdown(
                         id="filtro-estado",
-                        options=[{"label": e, "value": e} for e in ["Internado", "Alta", "Em espera"]],
+                        options=[{"label": e, "value": e} for e in ESTADOS_UTENTE],
                         placeholder="Estado",
                         className="filtro-dropdown",
                     ),
@@ -359,6 +418,59 @@ def _aba_documentos(id_utente):
             for _idx, d in documentos.iterrows()
         ]
     )
+
+
+def _aba_exames(id_utente):
+    exames = DADOS["exames"][DADOS["exames"]["id_utente"] == id_utente].sort_values("data", ascending=False)
+    if exames.empty:
+        return html.P("Sem exames registados.", className="texto-explicativo")
+    return dash_table.DataTable(
+        columns=[
+            {"name": "Data", "id": "data"},
+            {"name": "Categoria", "id": "categoria"},
+            {"name": "Exame", "id": "tipo_exame"},
+            {"name": "Estado", "id": "estado"},
+            {"name": "Resumo", "id": "resumo_resultado"},
+            {"name": "Pedido por", "id": "profissional_pedido"},
+        ],
+        data=exames.to_dict("records"),
+        style_table={"overflowX": "auto"},
+        style_cell={"padding": "8px", "fontFamily": "inherit", "fontSize": "0.85rem"},
+        style_header={"fontWeight": "600", "backgroundColor": CORES["primaria_suave"]},
+        style_data_conditional=[
+            {"if": {"filter_query": '{estado} = "Alterado"'}, "backgroundColor": CORES["risco_elevado_suave"]},
+            {"if": {"filter_query": '{estado} = "Pendente"'}, "backgroundColor": CORES["risco_moderado_suave"]},
+        ],
+        page_size=10,
+    )
+
+
+def _aba_plano_cuidados(id_utente):
+    plano = DADOS["plano_cuidados"][DADOS["plano_cuidados"]["id_utente"] == id_utente].sort_values("area_profissional")
+    if plano.empty:
+        return html.P("Sem plano de cuidados registado.", className="texto-explicativo")
+    itens = []
+    for _idx, item in plano.iterrows():
+        tom = TOM_PLANO.get(item["estado"], "primaria")
+        itens.append(
+            html.Div(
+                [
+                    html.Div(
+                        [html.Span(item["area_profissional"], className="etiqueta-area-plano"), html.Strong(item["objetivo"])],
+                        className="cabecalho-item-plano",
+                    ),
+                    html.P(
+                        f"Responsável: {item['profissional_responsavel']} · Início: {item['data_inicio']} · "
+                        f"Próxima revisão: {item['data_revisao']}",
+                        className="texto-explicativo",
+                    ),
+                    html.Div(html.Div(className="barra-progresso-preenchida", style={"width": f"{item['progresso_percent']}%"}), className="barra-progresso"),
+                    _etiqueta_tom(f"{item['estado']} — {item['progresso_percent']}%", tom),
+                ],
+                className="item-plano-cuidados",
+            )
+        )
+    return html.Div(itens, className="lista-plano-cuidados")
 
 
 def _campo_numerico(id_campo, rotulo, minimo, maximo, valor, passo=1):
@@ -500,7 +612,9 @@ def _pagina_ficha_utente(id_utente):
                     dcc.Tab(label="Resumo", value="resumo", children=[_aba_resumo(id_utente, utente)]),
                     dcc.Tab(label="Sinais vitais", value="vitais", children=[_aba_vitais(id_utente)]),
                     dcc.Tab(label="Alergias & Diagnósticos", value="alergias", children=[_aba_alergias_diagnosticos(id_utente)]),
+                    dcc.Tab(label="Exames", value="exames", children=[_aba_exames(id_utente)]),
                     dcc.Tab(label="Prescrições", value="prescricoes", children=[_aba_prescricoes(id_utente)]),
+                    dcc.Tab(label="Plano de Cuidados", value="plano_cuidados", children=[_aba_plano_cuidados(id_utente)]),
                     dcc.Tab(label="Visitas", value="visitas", children=[_aba_visitas(id_utente)]),
                     dcc.Tab(label="Documentos", value="documentos", children=[_aba_documentos(id_utente)]),
                     dcc.Tab(label="Avaliação de risco", value="risco", children=[_aba_avaliacao_risco(id_utente)]),
@@ -565,6 +679,108 @@ def _pagina_ocupacao():
                 [html.H3("Altas registadas"), dcc.Graph(figure=fig_altas, config={"displayModeBar": False})],
                 className="cartao-secao",
             ),
+            html.Div(
+                [
+                    "O módulo ",
+                    html.Strong("Clínica/Hospital"),
+                    " não usa mapa de camas — é ambulatório, organizado por marcação. Ver ",
+                    dcc.Link("Consultas", href="/consultas"),
+                    ".",
+                ],
+                className="texto-explicativo nota-modulo-cruzado",
+            ),
+        ]
+    )
+
+
+# --- Página: Consultas (módulo Clínica/Hospital) ------------------------------
+
+
+def _tabela_consultas(df):
+    if df.empty:
+        return html.P("Nenhuma consulta encontrada com estes filtros.", className="texto-explicativo")
+    tabela = df.merge(DADOS["utentes"][["id_utente", "nome"]], on="id_utente").sort_values("data_hora")
+    tabela["data_hora"] = tabela["data_hora"].dt.strftime("%Y-%m-%d %H:%M")
+    return dash_table.DataTable(
+        columns=[
+            {"name": "Data/Hora", "id": "data_hora"},
+            {"name": "Utente", "id": "nome"},
+            {"name": "Especialidade", "id": "especialidade"},
+            {"name": "Profissional", "id": "profissional"},
+            {"name": "Sala", "id": "sala"},
+            {"name": "Estado", "id": "estado"},
+        ],
+        data=tabela.to_dict("records"),
+        style_table={"overflowX": "auto"},
+        style_cell={"padding": "8px", "fontFamily": "inherit", "fontSize": "0.85rem"},
+        style_header={"fontWeight": "600", "backgroundColor": CORES["primaria_suave"]},
+        style_data_conditional=[
+            {"if": {"filter_query": '{estado} = "Agendada"'}, "backgroundColor": CORES["primaria_suave"]},
+            {"if": {"filter_query": '{estado} = "Falta"'}, "backgroundColor": CORES["risco_elevado_suave"]},
+            {"if": {"filter_query": '{estado} = "Cancelada"'}, "backgroundColor": CORES["borda"]},
+        ],
+        sort_action="native",
+        page_size=14,
+    )
+
+
+def _pagina_consultas():
+    consultas = DADOS["consultas"]
+    hoje = pd.Timestamp.now().normalize()
+    daqui_7_dias = hoje + pd.Timedelta(days=7)
+
+    consultas_hoje = int((consultas["data_hora"].dt.normalize() == hoje).sum())
+    agendadas_semana = int(
+        ((consultas["estado"] == "Agendada") & (consultas["data_hora"] >= hoje) & (consultas["data_hora"] < daqui_7_dias)).sum()
+    )
+    passadas = consultas[consultas["estado"].isin(["Realizada", "Falta"])]
+    taxa_comparencia = (passadas["estado"] == "Realizada").mean() * 100 if len(passadas) else 100.0
+    faltas = int((consultas["estado"] == "Falta").sum())
+
+    kpis = html.Div(
+        [
+            _cartao_kpi("Consultas hoje", consultas_hoje, tom="primaria"),
+            _cartao_kpi("Agendadas (próximos 7 dias)", agendadas_semana),
+            _cartao_kpi("Taxa de comparência", f"{taxa_comparencia:.0f}%", tom="risco_baixo" if taxa_comparencia >= 85 else "risco_moderado"),
+            _cartao_kpi("Faltas registadas", faltas, tom="risco_elevado" if faltas else "risco_baixo"),
+        ],
+        className="kpis-linha",
+    )
+
+    contagem_especialidade = consultas["especialidade"].value_counts()
+    fig_especialidade = go.Figure(
+        go.Bar(x=contagem_especialidade.values, y=contagem_especialidade.index, orientation="h", marker_color=CORES["primaria"])
+    )
+    fig_especialidade.update_layout(
+        title="Consultas por especialidade", template="plotly_white", height=300, margin=dict(t=40, l=140, r=20, b=30),
+        paper_bgcolor=CORES["cartao"], plot_bgcolor=CORES["cartao"], font_color=CORES["texto"],
+    )
+
+    return html.Div(
+        [
+            html.H1("Consultas"),
+            html.P("Agendamento do módulo Clínica/Hospital — ambulatório, organizado por especialidade e profissional.", className="texto-explicativo"),
+            kpis,
+            html.Div([html.H3("Consultas por especialidade"), dcc.Graph(figure=fig_especialidade, config={"displayModeBar": False})], className="cartao-secao"),
+            html.Div(
+                [
+                    dcc.Input(id="pesquisa-consulta", type="text", placeholder="Pesquisar por nome do utente...", className="campo-pesquisa"),
+                    dcc.Dropdown(
+                        id="filtro-especialidade",
+                        options=[{"label": e, "value": e} for e in ESPECIALIDADES],
+                        placeholder="Especialidade",
+                        className="filtro-dropdown",
+                    ),
+                    dcc.Dropdown(
+                        id="filtro-estado-consulta",
+                        options=[{"label": e, "value": e} for e in ["Agendada", "Realizada", "Cancelada", "Falta"]],
+                        placeholder="Estado",
+                        className="filtro-dropdown",
+                    ),
+                ],
+                className="filtros-utentes",
+            ),
+            html.Div(id="corpo-tabela-consultas"),
         ]
     )
 
@@ -584,6 +800,8 @@ def _pagina_faturacao():
     total_a_pagar = fat["valor_a_pagar_utente"].sum()
     total_comparticipacao = fat["comparticipacao_ss"].sum()
     total_ars = (fat["ars_diarias_internamento"] + fat["ars_pacote_medicamentos"] + fat["ars_remuneracao_adicional"]).sum()
+    total_seguradoras = fat["valor_seguradora"].sum()
+    utentes_com_seguro = int((fat["seguradora"] != "—").sum())
     erros = int(fat["erro_fatura"].sum())
 
     kpis = html.Div(
@@ -591,6 +809,7 @@ def _pagina_faturacao():
             _cartao_kpi("Valor a pagar pelos utentes", _formatar_euros(total_a_pagar, 2)),
             _cartao_kpi("Comparticipação Segurança Social", _formatar_euros(total_comparticipacao)),
             _cartao_kpi("Total ARS (diárias + medicamentos + remuneração)", _formatar_euros(total_ars), tom="primaria"),
+            _cartao_kpi("Faturado a seguradoras privadas", _formatar_euros(total_seguradoras, 2), nota=f"{utentes_com_seguro} utentes com seguro"),
             _cartao_kpi("Erros de fatura", erros, tom="risco_elevado" if erros else "risco_baixo"),
         ],
         className="kpis-linha",
@@ -612,6 +831,10 @@ def _pagina_faturacao():
             {"name": "Comparticipação SS (€)", "id": "comparticipacao_ss"},
             {"name": "ARS diárias (€)", "id": "ars_diarias_internamento"},
             {"name": "ARS medicamentos (€)", "id": "ars_pacote_medicamentos"},
+            {"name": "Seguradora", "id": "seguradora"},
+            {"name": "Cobertura (%)", "id": "cobertura_percentual_seguro"},
+            {"name": "Valor seguradora (€)", "id": "valor_seguradora"},
+            {"name": "Copagamento (€)", "id": "copagamento_utente"},
             {"name": "Saldo CC (€)", "id": "saldo_cc"},
             {"name": "Erro?", "id": "erro_fatura"},
         ],
@@ -673,6 +896,8 @@ def _rotear_pagina(caminho):
         return _pagina_ficha_utente(id_utente)
     if caminho == "/ocupacao":
         return _pagina_ocupacao()
+    if caminho == "/consultas":
+        return _pagina_consultas()
     if caminho == "/faturacao":
         return _pagina_faturacao()
     return html.Div([html.H2("Página não encontrada"), dcc.Link("Voltar ao início", href="/utentes")])
@@ -693,6 +918,24 @@ def _filtrar_utentes(texto_pesquisa, tipo_cuidado, estado):
     if estado:
         df = df[df["estado"] == estado]
     return _tabela_utentes(df)
+
+
+@app.callback(
+    Output("corpo-tabela-consultas", "children"),
+    Input("pesquisa-consulta", "value"),
+    Input("filtro-especialidade", "value"),
+    Input("filtro-estado-consulta", "value"),
+)
+def _filtrar_consultas(texto_pesquisa, especialidade, estado):
+    df = DADOS["consultas"]
+    if texto_pesquisa:
+        ids_correspondentes = DADOS["utentes"][DADOS["utentes"]["nome"].str.contains(texto_pesquisa, case=False, na=False)]["id_utente"]
+        df = df[df["id_utente"].isin(ids_correspondentes)]
+    if especialidade:
+        df = df[df["especialidade"] == especialidade]
+    if estado:
+        df = df[df["estado"] == estado]
+    return _tabela_consultas(df)
 
 
 # --- Callbacks: ficha do utente — sinais vitais -------------------------------
@@ -797,6 +1040,11 @@ def _descarregar_csv_faturacao(n_clicks):
             "ars_diarias_internamento": "ARS diárias (€)",
             "ars_pacote_medicamentos": "ARS medicamentos (€)",
             "ars_remuneracao_adicional": "ARS remuneração adicional (€)",
+            "seguradora": "Seguradora",
+            "numero_apolice": "Nº apólice",
+            "cobertura_percentual_seguro": "Cobertura seguro (%)",
+            "valor_seguradora": "Valor seguradora (€)",
+            "copagamento_utente": "Copagamento utente (€)",
             "saldo_cc": "Saldo CC (€)",
             "erro_fatura": "Erro de fatura",
         }

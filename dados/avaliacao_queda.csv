@@ -1,46 +1,46 @@
 id_utente,historico_quedas,diagnostico_secundario,apoio_marcha,soro_iv,marcha,estado_mental,pontuacao,classificacao
-U0001,Não,Sim (mais de um diagnóstico ativo),Nenhum / repouso / acompanhado por profissional,Não,Comprometida,"Orientado(a), consciente das suas limitações",35,Risco moderado
-U0002,Não,Não,Apoia-se em mobiliário,Sim,Comprometida,"Orientado(a), consciente das suas limitações",70,Risco elevado
-U0003,"Sim, nos últimos 3 meses",Não,Apoia-se em mobiliário,Sim,Normal / acamado / cadeira de rodas,"Orientado(a), consciente das suas limitações",75,Risco elevado
-U0004,Não,Sim (mais de um diagnóstico ativo),"Canadianas, bengala ou andarilho",Não,Normal / acamado / cadeira de rodas,Sobrestima capacidades ou esquece limitações,45,Risco moderado
-U0005,Não,Sim (mais de um diagnóstico ativo),Nenhum / repouso / acompanhado por profissional,Não,Comprometida,"Orientado(a), consciente das suas limitações",35,Risco moderado
-U0006,Não,Sim (mais de um diagnóstico ativo),"Canadianas, bengala ou andarilho",Não,Fraca,Sobrestima capacidades ou esquece limitações,55,Risco elevado
-U0007,Não,Sim (mais de um diagnóstico ativo),Nenhum / repouso / acompanhado por profissional,Não,Fraca,"Orientado(a), consciente das suas limitações",25,Risco moderado
-U0008,Não,Sim (mais de um diagnóstico ativo),"Canadianas, bengala ou andarilho",Não,Fraca,"Orientado(a), consciente das suas limitações",40,Risco moderado
-U0009,Não,Sim (mais de um diagnóstico ativo),Apoia-se em mobiliário,Não,Comprometida,Sobrestima capacidades ou esquece limitações,80,Risco elevado
-U0010,Não,Sim (mais de um diagnóstico ativo),Nenhum / repouso / acompanhado por profissional,Não,Fraca,"Orientado(a), consciente das suas limitações",25,Risco moderado
-U0011,Não,Sim (mais de um diagnóstico ativo),"Canadianas, bengala ou andarilho",Não,Comprometida,"Orientado(a), consciente das suas limitações",50,Risco moderado
-U0012,Não,Sim (mais de um diagnóstico ativo),Nenhum / repouso / acompanhado por profissional,Não,Fraca,Sobrestima capacidades ou esquece limitações,40,Risco moderado
-U0013,"Sim, nos últimos 3 meses",Não,"Canadianas, bengala ou andarilho",Não,Fraca,Sobrestima capacidades ou esquece limitações,65,Risco elevado
-U0014,"Sim, nos últimos 3 meses",Sim (mais de um diagnóstico ativo),Nenhum / repouso / acompanhado por profissional,Não,Fraca,Sobrestima capacidades ou esquece limitações,65,Risco elevado
-U0015,Não,Sim (mais de um diagnóstico ativo),Nenhum / repouso / acompanhado por profissional,Não,Normal / acamado / cadeira de rodas,"Orientado(a), consciente das suas limitações",15,Risco baixo
-U0016,Não,Não,"Canadianas, bengala ou andarilho",Não,Fraca,"Orientado(a), consciente das suas limitações",25,Risco moderado
+U0001,Não,Sim (mais de um diagnóstico ativo),Nenhum / repouso / acompanhado por profissional,Sim,Normal / acamado / cadeira de rodas,"Orientado(a), consciente das suas limitações",35,Risco moderado
+U0002,Não,Sim (mais de um diagnóstico ativo),Apoia-se em mobiliário,Não,Normal / acamado / cadeira de rodas,Sobrestima capacidades ou esquece limitações,60,Risco elevado
+U0003,Não,Sim (mais de um diagnóstico ativo),"Canadianas, bengala ou andarilho",Sim,Normal / acamado / cadeira de rodas,"Orientado(a), consciente das suas limitações",50,Risco moderado
+U0004,Não,Não,Nenhum / repouso / acompanhado por profissional,Sim,Comprometida,"Orientado(a), consciente das suas limitações",40,Risco moderado
+U0005,Não,Não,"Canadianas, bengala ou andarilho",Não,Normal / acamado / cadeira de rodas,"Orientado(a), consciente das suas limitações",15,Risco baixo
+U0006,Não,Sim (mais de um diagnóstico ativo),Nenhum / repouso / acompanhado por profissional,Sim,Fraca,"Orientado(a), consciente das suas limitações",45,Risco moderado
+U0007,Não,Sim (mais de um diagnóstico ativo),Apoia-se em mobiliário,Não,Comprometida,Sobrestima capacidades ou esquece limitações,80,Risco elevado
+U0008,Não,Sim (mais de um diagnóstico ativo),"Canadianas, bengala ou andarilho",Sim,Fraca,"Orientado(a), consciente das suas limitações",60,Risco elevado
+U0009,"Sim, nos últimos 3 meses",Sim (mais de um diagnóstico ativo),"Canadianas, bengala ou andarilho",Não,Fraca,"Orientado(a), consciente das suas limitações",65,Risco elevado
+U0010,Não,Sim (mais de um diagnóstico ativo),Nenhum / repouso / acompanhado por profissional,Não,Comprometida,Sobrestima capacidades ou esquece limitações,50,Risco moderado
+U0011,Não,Não,Nenhum / repouso / acompanhado por profissional,Não,Normal / acamado / cadeira de rodas,"Orientado(a), consciente das suas limitações",0,Risco baixo
+U0012,Não,Não,Nenhum / repouso / acompanhado por profissional,Não,Fraca,"Orientado(a), consciente das suas limitações",10,Risco baixo
+U0013,"Sim, nos últimos 3 meses",Sim (mais de um diagnóstico ativo),Apoia-se em mobiliário,Não,Normal / acamado / cadeira de rodas,"Orientado(a), consciente das suas limitações",70,Risco elevado
+U0014,"Sim, nos últimos 3 meses",Sim (mais de um diagnóstico ativo),Apoia-se em mobiliário,Não,Fraca,"Orientado(a), consciente das suas limitações",80,Risco elevado
+U0015,Não,Não,Apoia-se em mobiliário,Sim,Comprometida,"Orientado(a), consciente das suas limitações",70,Risco elevado
+U0016,Não,Sim (mais de um diagnóstico ativo),Nenhum / repouso / acompanhado por profissional,Não,Fraca,Sobrestima capacidades ou esquece limitações,40,Risco moderado
 U0017,Não,Não,Nenhum / repouso / acompanhado por profissional,Não,Fraca,"Orientado(a), consciente das suas limitações",10,Risco baixo
-U0018,Não,Sim (mais de um diagnóstico ativo),Nenhum / repouso / acompanhado por profissional,Não,Fraca,"Orientado(a), consciente das suas limitações",25,Risco moderado
-U0019,Não,Sim (mais de um diagnóstico ativo),"Canadianas, bengala ou andarilho",Sim,Normal / acamado / cadeira de rodas,Sobrestima capacidades ou esquece limitações,65,Risco elevado
-U0020,"Sim, nos últimos 3 meses",Sim (mais de um diagnóstico ativo),Nenhum / repouso / acompanhado por profissional,Não,Comprometida,"Orientado(a), consciente das suas limitações",60,Risco elevado
-U0021,"Sim, nos últimos 3 meses",Sim (mais de um diagnóstico ativo),Nenhum / repouso / acompanhado por profissional,Não,Fraca,"Orientado(a), consciente das suas limitações",50,Risco moderado
-U0022,Não,Sim (mais de um diagnóstico ativo),"Canadianas, bengala ou andarilho",Não,Normal / acamado / cadeira de rodas,"Orientado(a), consciente das suas limitações",30,Risco moderado
-U0023,Não,Não,Nenhum / repouso / acompanhado por profissional,Não,Comprometida,Sobrestima capacidades ou esquece limitações,35,Risco moderado
-U0024,Não,Sim (mais de um diagnóstico ativo),"Canadianas, bengala ou andarilho",Não,Fraca,"Orientado(a), consciente das suas limitações",40,Risco moderado
-U0025,Não,Não,Nenhum / repouso / acompanhado por profissional,Não,Fraca,"Orientado(a), consciente das suas limitações",10,Risco baixo
-U0026,Não,Não,Nenhum / repouso / acompanhado por profissional,Não,Comprometida,Sobrestima capacidades ou esquece limitações,35,Risco moderado
-U0027,Não,Não,Apoia-se em mobiliário,Não,Comprometida,"Orientado(a), consciente das suas limitações",50,Risco moderado
-U0028,Não,Sim (mais de um diagnóstico ativo),"Canadianas, bengala ou andarilho",Não,Normal / acamado / cadeira de rodas,Sobrestima capacidades ou esquece limitações,45,Risco moderado
-U0029,"Sim, nos últimos 3 meses",Não,"Canadianas, bengala ou andarilho",Não,Fraca,"Orientado(a), consciente das suas limitações",50,Risco moderado
-U0030,Não,Sim (mais de um diagnóstico ativo),Nenhum / repouso / acompanhado por profissional,Sim,Comprometida,Sobrestima capacidades ou esquece limitações,70,Risco elevado
-U0031,"Sim, nos últimos 3 meses",Sim (mais de um diagnóstico ativo),"Canadianas, bengala ou andarilho",Não,Fraca,Sobrestima capacidades ou esquece limitações,80,Risco elevado
-U0032,"Sim, nos últimos 3 meses",Não,Apoia-se em mobiliário,Não,Comprometida,Sobrestima capacidades ou esquece limitações,90,Risco elevado
-U0033,Não,Sim (mais de um diagnóstico ativo),Apoia-se em mobiliário,Não,Comprometida,Sobrestima capacidades ou esquece limitações,80,Risco elevado
-U0034,Não,Sim (mais de um diagnóstico ativo),Nenhum / repouso / acompanhado por profissional,Não,Fraca,"Orientado(a), consciente das suas limitações",25,Risco moderado
-U0035,Não,Sim (mais de um diagnóstico ativo),"Canadianas, bengala ou andarilho",Não,Comprometida,"Orientado(a), consciente das suas limitações",50,Risco moderado
-U0036,Não,Sim (mais de um diagnóstico ativo),"Canadianas, bengala ou andarilho",Não,Normal / acamado / cadeira de rodas,Sobrestima capacidades ou esquece limitações,45,Risco moderado
-U0037,Não,Sim (mais de um diagnóstico ativo),"Canadianas, bengala ou andarilho",Sim,Normal / acamado / cadeira de rodas,"Orientado(a), consciente das suas limitações",50,Risco moderado
+U0018,Não,Sim (mais de um diagnóstico ativo),"Canadianas, bengala ou andarilho",Sim,Fraca,Sobrestima capacidades ou esquece limitações,75,Risco elevado
+U0019,Não,Sim (mais de um diagnóstico ativo),Nenhum / repouso / acompanhado por profissional,Não,Comprometida,"Orientado(a), consciente das suas limitações",35,Risco moderado
+U0020,Não,Sim (mais de um diagnóstico ativo),"Canadianas, bengala ou andarilho",Não,Normal / acamado / cadeira de rodas,"Orientado(a), consciente das suas limitações",30,Risco moderado
+U0021,Não,Não,Apoia-se em mobiliário,Não,Normal / acamado / cadeira de rodas,"Orientado(a), consciente das suas limitações",30,Risco moderado
+U0022,Não,Sim (mais de um diagnóstico ativo),Nenhum / repouso / acompanhado por profissional,Não,Normal / acamado / cadeira de rodas,"Orientado(a), consciente das suas limitações",15,Risco baixo
+U0023,"Sim, nos últimos 3 meses",Não,Nenhum / repouso / acompanhado por profissional,Não,Fraca,Sobrestima capacidades ou esquece limitações,50,Risco moderado
+U0024,Não,Sim (mais de um diagnóstico ativo),Nenhum / repouso / acompanhado por profissional,Não,Comprometida,"Orientado(a), consciente das suas limitações",35,Risco moderado
+U0025,Não,Não,Apoia-se em mobiliário,Não,Fraca,"Orientado(a), consciente das suas limitações",40,Risco moderado
+U0026,Não,Sim (mais de um diagnóstico ativo),Apoia-se em mobiliário,Não,Fraca,"Orientado(a), consciente das suas limitações",55,Risco elevado
+U0027,"Sim, nos últimos 3 meses",Sim (mais de um diagnóstico ativo),Apoia-se em mobiliário,Não,Normal / acamado / cadeira de rodas,"Orientado(a), consciente das suas limitações",70,Risco elevado
+U0028,Não,Não,Nenhum / repouso / acompanhado por profissional,Não,Fraca,"Orientado(a), consciente das suas limitações",10,Risco baixo
+U0029,Não,Não,Nenhum / repouso / acompanhado por profissional,Não,Fraca,"Orientado(a), consciente das suas limitações",10,Risco baixo
+U0030,Não,Não,"Canadianas, bengala ou andarilho",Não,Normal / acamado / cadeira de rodas,"Orientado(a), consciente das suas limitações",15,Risco baixo
+U0031,Não,Não,Apoia-se em mobiliário,Não,Normal / acamado / cadeira de rodas,Sobrestima capacidades ou esquece limitações,45,Risco moderado
+U0032,Não,Não,Apoia-se em mobiliário,Sim,Comprometida,Sobrestima capacidades ou esquece limitações,85,Risco elevado
+U0033,Não,Não,"Canadianas, bengala ou andarilho",Não,Comprometida,"Orientado(a), consciente das suas limitações",35,Risco moderado
+U0034,Não,Sim (mais de um diagnóstico ativo),Nenhum / repouso / acompanhado por profissional,Sim,Normal / acamado / cadeira de rodas,"Orientado(a), consciente das suas limitações",35,Risco moderado
+U0035,Não,Não,"Canadianas, bengala ou andarilho",Não,Normal / acamado / cadeira de rodas,"Orientado(a), consciente das suas limitações",15,Risco baixo
+U0036,"Sim, nos últimos 3 meses",Não,Nenhum / repouso / acompanhado por profissional,Sim,Comprometida,Sobrestima capacidades ou esquece limitações,80,Risco elevado
+U0037,Não,Não,Apoia-se em mobiliário,Não,Normal / acamado / cadeira de rodas,"Orientado(a), consciente das suas limitações",30,Risco moderado
 U0038,Não,Não,"Canadianas, bengala ou andarilho",Não,Normal / acamado / cadeira de rodas,"Orientado(a), consciente das suas limitações",15,Risco baixo
-U0039,Não,Não,Apoia-se em mobiliário,Não,Fraca,Sobrestima capacidades ou esquece limitações,55,Risco elevado
+U0039,Não,Sim (mais de um diagnóstico ativo),Nenhum / repouso / acompanhado por profissional,Não,Normal / acamado / cadeira de rodas,"Orientado(a), consciente das suas limitações",15,Risco baixo
 U0040,Não,Sim (mais de um diagnóstico ativo),"Canadianas, bengala ou andarilho",Não,Normal / acamado / cadeira de rodas,"Orientado(a), consciente das suas limitações",30,Risco moderado
-U0041,"Sim, nos últimos 3 meses",Não,Apoia-se em mobiliário,Não,Fraca,"Orientado(a), consciente das suas limitações",65,Risco elevado
-U0042,Não,Sim (mais de um diagnóstico ativo),Nenhum / repouso / acompanhado por profissional,Sim,Fraca,"Orientado(a), consciente das suas limitações",45,Risco moderado
-U0043,Não,Não,Nenhum / repouso / acompanhado por profissional,Não,Fraca,"Orientado(a), consciente das suas limitações",10,Risco baixo
-U0044,Não,Não,Nenhum / repouso / acompanhado por profissional,Não,Normal / acamado / cadeira de rodas,"Orientado(a), consciente das suas limitações",0,Risco baixo
-U0045,"Sim, nos últimos 3 meses",Não,Apoia-se em mobiliário,Não,Normal / acamado / cadeira de rodas,Sobrestima capacidades ou esquece limitações,70,Risco elevado
+U0041,Não,Sim (mais de um diagnóstico ativo),"Canadianas, bengala ou andarilho",Não,Comprometida,"Orientado(a), consciente das suas limitações",50,Risco moderado
+U0042,Não,Sim (mais de um diagnóstico ativo),"Canadianas, bengala ou andarilho",Não,Comprometida,"Orientado(a), consciente das suas limitações",50,Risco moderado
+U0043,"Sim, nos últimos 3 meses",Não,Apoia-se em mobiliário,Sim,Fraca,"Orientado(a), consciente das suas limitações",85,Risco elevado
+U0044,Não,Sim (mais de um diagnóstico ativo),Nenhum / repouso / acompanhado por profissional,Não,Normal / acamado / cadeira de rodas,"Orientado(a), consciente das suas limitações",15,Risco baixo
+U0045,Não,Não,Apoia-se em mobiliário,Não,Fraca,"Orientado(a), consciente das suas limitações",40,Risco moderado

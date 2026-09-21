@@ -1,48 +1,56 @@
 id_utente,alergia
-U0001,Aspirina
-U0002,Aspirina
-U0003,Penicilina
-U0004,Nenhuma conhecida
+U0001,Nenhuma conhecida
+U0002,Nenhuma conhecida
+U0003,Ácaros
+U0003,Látex
+U0004,Penicilina
 U0005,Nenhuma conhecida
-U0006,Ácaros
-U0006,Látex
-U0007,Nenhuma conhecida
-U0008,Nenhuma conhecida
-U0009,Nenhuma conhecida
+U0006,Nenhuma conhecida
+U0007,Aspirina
+U0008,Ácaros
+U0009,Aspirina
+U0009,Látex
 U0010,Nenhuma conhecida
 U0011,Nenhuma conhecida
-U0012,Nenhuma conhecida
+U0012,Iodo
 U0013,Nenhuma conhecida
-U0014,Nenhuma conhecida
-U0015,Aspirina
-U0016,Penicilina
-U0017,Nenhuma conhecida
-U0018,Aspirina
+U0014,Ácaros
+U0014,Aspirina
+U0015,Ácaros
+U0016,Nenhuma conhecida
+U0017,Iodo
+U0017,Ácaros
+U0018,Ácaros
 U0019,Nenhuma conhecida
-U0020,Nenhuma conhecida
-U0021,Nenhuma conhecida
+U0020,Ácaros
+U0020,Aspirina
+U0021,Látex
+U0021,Iodo
 U0022,Nenhuma conhecida
-U0023,Nenhuma conhecida
+U0023,Penicilina
 U0024,Nenhuma conhecida
 U0025,Nenhuma conhecida
 U0026,Nenhuma conhecida
-U0027,Nenhuma conhecida
+U0027,Penicilina
+U0027,Aspirina
 U0028,Nenhuma conhecida
 U0029,Nenhuma conhecida
 U0030,Nenhuma conhecida
-U0031,Ácaros
+U0031,Nenhuma conhecida
 U0032,Nenhuma conhecida
 U0033,Nenhuma conhecida
 U0034,Nenhuma conhecida
-U0035,Ácaros
-U0035,Aspirina
+U0035,Nenhuma conhecida
 U0036,Nenhuma conhecida
-U0037,Penicilina
-U0038,Nenhuma conhecida
+U0037,Aspirina
+U0038,Látex
+U0038,Penicilina
 U0039,Nenhuma conhecida
 U0040,Nenhuma conhecida
-U0041,Nenhuma conhecida
-U0042,Nenhuma conhecida
+U0041,Aspirina
+U0041,Ácaros
+U0042,Aspirina
+U0042,Iodo
 U0043,Nenhuma conhecida
-U0044,Nenhuma conhecida
+U0044,Látex
 U0045,Nenhuma conhecida
