@@ -3,3 +3,4 @@ pandas==3.0.2
 plotly==7.1.0
 scikit-learn==1.8.0
 joblib==1.5.3
+gunicorn==26.2.0

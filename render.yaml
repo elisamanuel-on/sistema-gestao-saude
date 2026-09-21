@@ -1,0 +1,13 @@
+# Blueprint de deploy para o Render (render.com).
+# Se preferires configurar manualmente no dashboard do Render em vez de usar
+# este ficheiro, os mesmos valores estão explicados no README.
+services:
+  - type: web
+    name: sistema-gestao-saude
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:server --bind 0.0.0.0:$PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.15

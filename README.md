@@ -113,6 +113,27 @@ python app.py
 # abrir http://localhost:8051/utentes
 ```
 
+## Deploy no Render
+
+O projeto já vem preparado para o [Render](https://render.com): `gunicorn`
+está no `requirements.txt` e `app.py` expõe `server = app.server` (o Flask
+por trás do Dash), que é o que o `gunicorn` corre.
+
+**Opção A — Blueprint automático (`render.yaml`):** no dashboard do Render,
+"New +" → "Blueprint" → liga o repositório GitHub → o Render lê o
+`render.yaml` da raiz do projeto e configura tudo sozinho.
+
+**Opção B — Manual:** "New +" → "Web Service" → liga o repositório → nos
+campos:
+- **Build Command**: `pip install -r requirements.txt`
+- **Start Command**: `gunicorn app:server --bind 0.0.0.0:$PORT`
+- **Plan**: Free chega perfeitamente para uma demonstração de portfólio.
+
+Nota sobre o plano gratuito: a instância "adormece" ao fim de uns minutos
+sem tráfego, e o primeiro pedido a seguir demora ~30-50 segundos a acordar.
+Não é um bug — é assim que o plano gratuito funciona. Se fores mostrar isto
+a um cliente ao vivo, vale a pena abrir o link uns minutos antes.
+
 ## Testes
 
 ```bash
