@@ -1,0 +1,227 @@
+id_utente,data_hora,tipo,registado_por
+U0001,2026-09-16T21:52,Visita familiar,Fisio. Beatriz Lima
+U0001,2026-09-13T21:52,Consulta médica,Enf. Paulo Cardoso
+U0001,2026-09-10T21:52,Consulta médica,Fisio. Beatriz Lima
+U0001,2026-09-04T21:52,Fisioterapia,Enf. Marta Sousa
+U0001,2026-08-21T21:52,Visita familiar,Dra. Inês Fonseca
+U0001,2026-06-21T21:52,Enfermagem,Dr. Ricardo Rocha
+U0001,2026-06-12T21:52,Enfermagem,Fisio. Beatriz Lima
+U0002,2026-07-30T21:52,Enfermagem,Enf. Marta Sousa
+U0002,2026-06-12T21:52,Enfermagem,Enf. Paulo Cardoso
+U0002,2026-05-28T21:52,Fisioterapia,Fisio. Beatriz Lima
+U0003,2026-09-13T21:52,Visita familiar,Dra. Inês Fonseca
+U0003,2026-09-03T21:52,Consulta médica,Dra. Inês Fonseca
+U0003,2026-09-01T21:52,Visita familiar,Dra. Inês Fonseca
+U0003,2026-07-20T21:52,Consulta médica,Enf. Paulo Cardoso
+U0003,2026-06-09T21:52,Consulta médica,Dr. Ricardo Rocha
+U0003,2026-05-24T21:52,Consulta médica,Enf. Paulo Cardoso
+U0004,2026-09-03T21:52,Fisioterapia,Dr. Ricardo Rocha
+U0004,2026-08-28T21:52,Enfermagem,Dra. Inês Fonseca
+U0004,2026-08-09T21:52,Enfermagem,Dra. Inês Fonseca
+U0004,2026-06-24T21:52,Enfermagem,Enf. Paulo Cardoso
+U0005,2026-09-06T21:52,Fisioterapia,Enf. Marta Sousa
+U0005,2026-09-03T21:52,Consulta médica,Dra. Inês Fonseca
+U0005,2026-08-05T21:52,Consulta médica,Enf. Marta Sousa
+U0005,2026-06-21T21:52,Fisioterapia,Dr. Ricardo Rocha
+U0006,2026-07-16T21:52,Psicologia,Fisio. Beatriz Lima
+U0006,2026-07-09T21:52,Consulta médica,Enf. Marta Sousa
+U0006,2026-06-09T21:52,Psicologia,Enf. Paulo Cardoso
+U0007,2026-09-19T21:52,Consulta médica,Enf. Marta Sousa
+U0007,2026-09-10T21:52,Consulta médica,Dra. Inês Fonseca
+U0007,2026-09-08T21:52,Fisioterapia,Enf. Paulo Cardoso
+U0007,2026-09-01T21:52,Fisioterapia,Fisio. Beatriz Lima
+U0007,2026-08-08T21:52,Psicologia,Enf. Paulo Cardoso
+U0007,2026-06-16T21:52,Psicologia,Dra. Inês Fonseca
+U0007,2026-06-12T21:52,Psicologia,Enf. Paulo Cardoso
+U0007,2026-06-11T21:52,Psicologia,Enf. Marta Sousa
+U0008,2026-09-17T21:52,Enfermagem,Dra. Inês Fonseca
+U0008,2026-09-01T21:52,Consulta médica,Dra. Inês Fonseca
+U0008,2026-07-27T21:52,Psicologia,Enf. Paulo Cardoso
+U0008,2026-07-14T21:52,Consulta médica,Enf. Marta Sousa
+U0008,2026-05-24T21:52,Visita familiar,Dr. Ricardo Rocha
+U0009,2026-09-18T21:52,Enfermagem,Enf. Paulo Cardoso
+U0009,2026-09-18T21:52,Enfermagem,Enf. Marta Sousa
+U0009,2026-06-30T21:52,Consulta médica,Enf. Paulo Cardoso
+U0009,2026-06-19T21:52,Enfermagem,Dr. Ricardo Rocha
+U0009,2026-06-11T21:52,Visita familiar,Fisio. Beatriz Lima
+U0010,2026-08-31T21:52,Fisioterapia,Dr. Ricardo Rocha
+U0010,2026-08-09T21:52,Fisioterapia,Fisio. Beatriz Lima
+U0011,2026-08-07T21:52,Enfermagem,Fisio. Beatriz Lima
+U0011,2026-08-05T21:52,Visita familiar,Enf. Marta Sousa
+U0011,2026-07-29T21:52,Psicologia,Fisio. Beatriz Lima
+U0011,2026-07-25T21:52,Fisioterapia,Enf. Marta Sousa
+U0011,2026-07-09T21:52,Psicologia,Enf. Paulo Cardoso
+U0011,2026-07-04T21:52,Fisioterapia,Dra. Inês Fonseca
+U0012,2026-08-23T21:52,Psicologia,Dra. Inês Fonseca
+U0012,2026-07-24T21:52,Psicologia,Fisio. Beatriz Lima
+U0012,2026-07-12T21:52,Psicologia,Enf. Paulo Cardoso
+U0012,2026-05-27T21:52,Fisioterapia,Dra. Inês Fonseca
+U0012,2026-05-25T21:52,Fisioterapia,Dra. Inês Fonseca
+U0013,2026-08-08T21:52,Visita familiar,Fisio. Beatriz Lima
+U0013,2026-07-02T21:52,Consulta médica,Dr. Ricardo Rocha
+U0013,2026-06-24T21:52,Fisioterapia,Enf. Marta Sousa
+U0014,2026-07-20T21:52,Psicologia,Enf. Paulo Cardoso
+U0014,2026-06-26T21:52,Consulta médica,Enf. Paulo Cardoso
+U0015,2026-09-14T21:52,Consulta médica,Enf. Marta Sousa
+U0015,2026-08-18T21:52,Visita familiar,Fisio. Beatriz Lima
+U0015,2026-07-20T21:52,Visita familiar,Dr. Ricardo Rocha
+U0015,2026-07-01T21:52,Enfermagem,Dr. Ricardo Rocha
+U0015,2026-06-05T21:52,Psicologia,Enf. Paulo Cardoso
+U0016,2026-09-11T21:52,Fisioterapia,Dr. Ricardo Rocha
+U0016,2026-08-22T21:52,Psicologia,Enf. Paulo Cardoso
+U0016,2026-07-15T21:52,Visita familiar,Dr. Ricardo Rocha
+U0016,2026-06-11T21:52,Consulta médica,Enf. Marta Sousa
+U0017,2026-09-14T21:52,Consulta médica,Enf. Paulo Cardoso
+U0017,2026-07-29T21:52,Fisioterapia,Fisio. Beatriz Lima
+U0017,2026-05-29T21:52,Psicologia,Dr. Ricardo Rocha
+U0018,2026-08-12T21:52,Psicologia,Fisio. Beatriz Lima
+U0018,2026-08-09T21:52,Enfermagem,Dra. Inês Fonseca
+U0018,2026-07-22T21:52,Enfermagem,Enf. Marta Sousa
+U0018,2026-06-28T21:52,Enfermagem,Dra. Inês Fonseca
+U0018,2026-06-25T21:52,Visita familiar,Enf. Marta Sousa
+U0018,2026-06-11T21:52,Fisioterapia,Enf. Marta Sousa
+U0018,2026-06-11T21:52,Enfermagem,Dr. Ricardo Rocha
+U0018,2026-06-09T21:52,Visita familiar,Enf. Marta Sousa
+U0019,2026-09-07T21:52,Fisioterapia,Enf. Marta Sousa
+U0019,2026-08-21T21:52,Consulta médica,Dr. Ricardo Rocha
+U0019,2026-08-20T21:52,Enfermagem,Fisio. Beatriz Lima
+U0019,2026-07-18T21:52,Fisioterapia,Enf. Paulo Cardoso
+U0019,2026-06-12T21:52,Psicologia,Enf. Paulo Cardoso
+U0019,2026-06-02T21:52,Visita familiar,Enf. Marta Sousa
+U0019,2026-05-25T21:52,Consulta médica,Dra. Inês Fonseca
+U0020,2026-09-16T21:52,Consulta médica,Dra. Inês Fonseca
+U0020,2026-08-24T21:52,Visita familiar,Enf. Marta Sousa
+U0020,2026-08-19T21:52,Visita familiar,Enf. Paulo Cardoso
+U0020,2026-07-28T21:52,Visita familiar,Enf. Paulo Cardoso
+U0020,2026-06-30T21:52,Enfermagem,Dr. Ricardo Rocha
+U0020,2026-06-14T21:52,Fisioterapia,Fisio. Beatriz Lima
+U0020,2026-06-13T21:52,Consulta médica,Fisio. Beatriz Lima
+U0021,2026-08-18T21:52,Enfermagem,Dr. Ricardo Rocha
+U0021,2026-07-28T21:52,Fisioterapia,Enf. Paulo Cardoso
+U0021,2026-06-30T21:52,Psicologia,Dr. Ricardo Rocha
+U0021,2026-06-25T21:52,Enfermagem,Fisio. Beatriz Lima
+U0021,2026-06-12T21:52,Enfermagem,Dra. Inês Fonseca
+U0022,2026-09-08T21:52,Fisioterapia,Dra. Inês Fonseca
+U0022,2026-08-18T21:52,Consulta médica,Enf. Marta Sousa
+U0022,2026-08-15T21:52,Psicologia,Fisio. Beatriz Lima
+U0022,2026-08-10T21:52,Consulta médica,Dr. Ricardo Rocha
+U0022,2026-07-17T21:52,Visita familiar,Dr. Ricardo Rocha
+U0022,2026-07-04T21:52,Fisioterapia,Enf. Paulo Cardoso
+U0022,2026-06-14T21:52,Consulta médica,Enf. Marta Sousa
+U0023,2026-09-09T21:52,Psicologia,Dr. Ricardo Rocha
+U0023,2026-07-23T21:52,Psicologia,Dra. Inês Fonseca
+U0024,2026-09-15T21:52,Fisioterapia,Enf. Marta Sousa
+U0024,2026-08-27T21:52,Psicologia,Enf. Marta Sousa
+U0024,2026-08-22T21:52,Visita familiar,Enf. Marta Sousa
+U0024,2026-08-02T21:52,Consulta médica,Enf. Marta Sousa
+U0025,2026-09-06T21:52,Visita familiar,Enf. Paulo Cardoso
+U0025,2026-08-25T21:52,Visita familiar,Dra. Inês Fonseca
+U0025,2026-07-23T21:52,Visita familiar,Fisio. Beatriz Lima
+U0025,2026-06-12T21:52,Visita familiar,Dr. Ricardo Rocha
+U0025,2026-06-10T21:52,Psicologia,Enf. Marta Sousa
+U0025,2026-06-03T21:52,Psicologia,Enf. Paulo Cardoso
+U0026,2026-09-02T21:52,Enfermagem,Fisio. Beatriz Lima
+U0026,2026-08-29T21:52,Consulta médica,Fisio. Beatriz Lima
+U0026,2026-08-18T21:52,Psicologia,Enf. Marta Sousa
+U0026,2026-08-18T21:52,Consulta médica,Dr. Ricardo Rocha
+U0026,2026-07-16T21:52,Consulta médica,Dra. Inês Fonseca
+U0026,2026-07-14T21:52,Visita familiar,Dr. Ricardo Rocha
+U0027,2026-09-14T21:52,Visita familiar,Dr. Ricardo Rocha
+U0027,2026-09-12T21:52,Consulta médica,Enf. Marta Sousa
+U0027,2026-07-24T21:52,Psicologia,Enf. Paulo Cardoso
+U0027,2026-07-23T21:52,Enfermagem,Enf. Marta Sousa
+U0027,2026-05-31T21:52,Consulta médica,Fisio. Beatriz Lima
+U0028,2026-09-05T21:52,Visita familiar,Enf. Paulo Cardoso
+U0028,2026-08-21T21:52,Consulta médica,Fisio. Beatriz Lima
+U0028,2026-08-03T21:52,Consulta médica,Enf. Paulo Cardoso
+U0028,2026-07-31T21:52,Consulta médica,Dr. Ricardo Rocha
+U0028,2026-07-23T21:52,Visita familiar,Dr. Ricardo Rocha
+U0028,2026-07-10T21:52,Enfermagem,Enf. Paulo Cardoso
+U0028,2026-06-23T21:52,Psicologia,Dra. Inês Fonseca
+U0028,2026-06-09T21:52,Enfermagem,Fisio. Beatriz Lima
+U0029,2026-08-26T21:52,Enfermagem,Enf. Paulo Cardoso
+U0029,2026-08-24T21:52,Psicologia,Fisio. Beatriz Lima
+U0029,2026-08-20T21:52,Consulta médica,Dr. Ricardo Rocha
+U0029,2026-08-10T21:52,Fisioterapia,Dr. Ricardo Rocha
+U0029,2026-07-31T21:52,Visita familiar,Dra. Inês Fonseca
+U0029,2026-07-24T21:52,Psicologia,Dr. Ricardo Rocha
+U0029,2026-07-08T21:52,Fisioterapia,Dr. Ricardo Rocha
+U0030,2026-08-25T21:52,Psicologia,Dr. Ricardo Rocha
+U0030,2026-08-18T21:52,Visita familiar,Dra. Inês Fonseca
+U0030,2026-08-06T21:52,Visita familiar,Dra. Inês Fonseca
+U0030,2026-07-31T21:52,Fisioterapia,Fisio. Beatriz Lima
+U0030,2026-07-26T21:52,Visita familiar,Enf. Marta Sousa
+U0030,2026-06-19T21:52,Visita familiar,Fisio. Beatriz Lima
+U0030,2026-06-15T21:52,Consulta médica,Enf. Paulo Cardoso
+U0031,2026-08-23T21:52,Psicologia,Fisio. Beatriz Lima
+U0031,2026-06-30T21:52,Visita familiar,Enf. Paulo Cardoso
+U0031,2026-06-29T21:52,Visita familiar,Fisio. Beatriz Lima
+U0031,2026-06-19T21:52,Enfermagem,Enf. Marta Sousa
+U0031,2026-06-11T21:52,Visita familiar,Dr. Ricardo Rocha
+U0032,2026-07-08T21:52,Fisioterapia,Fisio. Beatriz Lima
+U0032,2026-07-07T21:52,Consulta médica,Fisio. Beatriz Lima
+U0032,2026-06-30T21:52,Fisioterapia,Dra. Inês Fonseca
+U0033,2026-09-10T21:52,Psicologia,Enf. Paulo Cardoso
+U0033,2026-08-27T21:52,Visita familiar,Dr. Ricardo Rocha
+U0033,2026-08-24T21:52,Visita familiar,Enf. Marta Sousa
+U0033,2026-08-08T21:52,Visita familiar,Enf. Marta Sousa
+U0033,2026-08-02T21:52,Consulta médica,Enf. Paulo Cardoso
+U0033,2026-07-20T21:52,Psicologia,Dr. Ricardo Rocha
+U0033,2026-06-08T21:52,Enfermagem,Enf. Paulo Cardoso
+U0034,2026-07-09T21:52,Visita familiar,Enf. Marta Sousa
+U0034,2026-07-08T21:52,Fisioterapia,Enf. Marta Sousa
+U0035,2026-09-04T21:52,Psicologia,Enf. Marta Sousa
+U0035,2026-07-14T21:52,Enfermagem,Dr. Ricardo Rocha
+U0035,2026-06-23T21:52,Psicologia,Enf. Paulo Cardoso
+U0035,2026-06-10T21:52,Psicologia,Dr. Ricardo Rocha
+U0036,2026-08-31T21:52,Visita familiar,Enf. Paulo Cardoso
+U0036,2026-08-15T21:52,Visita familiar,Dra. Inês Fonseca
+U0036,2026-07-16T21:52,Visita familiar,Enf. Marta Sousa
+U0036,2026-06-17T21:52,Psicologia,Enf. Marta Sousa
+U0037,2026-07-24T21:52,Psicologia,Fisio. Beatriz Lima
+U0037,2026-07-06T21:52,Consulta médica,Enf. Paulo Cardoso
+U0038,2026-09-12T21:52,Consulta médica,Enf. Marta Sousa
+U0038,2026-08-07T21:52,Visita familiar,Dr. Ricardo Rocha
+U0038,2026-07-14T21:52,Enfermagem,Enf. Marta Sousa
+U0038,2026-07-11T21:52,Consulta médica,Enf. Marta Sousa
+U0038,2026-06-07T21:52,Enfermagem,Enf. Paulo Cardoso
+U0039,2026-09-18T21:52,Psicologia,Enf. Marta Sousa
+U0039,2026-09-18T21:52,Consulta médica,Dr. Ricardo Rocha
+U0039,2026-08-21T21:52,Enfermagem,Dra. Inês Fonseca
+U0039,2026-08-17T21:52,Enfermagem,Enf. Marta Sousa
+U0039,2026-08-02T21:52,Visita familiar,Dra. Inês Fonseca
+U0039,2026-07-09T21:52,Psicologia,Fisio. Beatriz Lima
+U0039,2026-06-13T21:52,Fisioterapia,Fisio. Beatriz Lima
+U0040,2026-09-14T21:52,Psicologia,Dr. Ricardo Rocha
+U0040,2026-08-25T21:52,Psicologia,Enf. Marta Sousa
+U0040,2026-08-19T21:52,Consulta médica,Enf. Paulo Cardoso
+U0040,2026-06-28T21:52,Fisioterapia,Enf. Marta Sousa
+U0040,2026-06-24T21:52,Fisioterapia,Enf. Marta Sousa
+U0040,2026-06-12T21:52,Consulta médica,Dra. Inês Fonseca
+U0040,2026-06-10T21:52,Enfermagem,Enf. Paulo Cardoso
+U0041,2026-09-02T21:52,Fisioterapia,Enf. Paulo Cardoso
+U0041,2026-08-24T21:52,Psicologia,Dra. Inês Fonseca
+U0041,2026-08-12T21:52,Consulta médica,Enf. Paulo Cardoso
+U0041,2026-07-06T21:52,Psicologia,Enf. Marta Sousa
+U0041,2026-07-06T21:52,Psicologia,Enf. Marta Sousa
+U0041,2026-05-31T21:52,Visita familiar,Dra. Inês Fonseca
+U0041,2026-05-27T21:52,Psicologia,Enf. Marta Sousa
+U0042,2026-08-29T21:52,Psicologia,Dra. Inês Fonseca
+U0042,2026-08-23T21:52,Visita familiar,Dr. Ricardo Rocha
+U0042,2026-07-23T21:52,Fisioterapia,Fisio. Beatriz Lima
+U0042,2026-07-22T21:52,Fisioterapia,Dr. Ricardo Rocha
+U0042,2026-06-23T21:52,Fisioterapia,Dra. Inês Fonseca
+U0042,2026-06-15T21:52,Fisioterapia,Dra. Inês Fonseca
+U0042,2026-06-05T21:52,Consulta médica,Fisio. Beatriz Lima
+U0042,2026-05-24T21:52,Psicologia,Dr. Ricardo Rocha
+U0043,2026-08-11T21:52,Consulta médica,Fisio. Beatriz Lima
+U0043,2026-08-07T21:52,Visita familiar,Fisio. Beatriz Lima
+U0044,2026-09-19T21:52,Psicologia,Dra. Inês Fonseca
+U0044,2026-09-15T21:52,Visita familiar,Enf. Marta Sousa
+U0044,2026-07-13T21:52,Fisioterapia,Dr. Ricardo Rocha
+U0044,2026-06-28T21:52,Enfermagem,Enf. Marta Sousa
+U0044,2026-06-12T21:52,Consulta médica,Enf. Paulo Cardoso
+U0044,2026-06-03T21:52,Visita familiar,Dr. Ricardo Rocha
+U0045,2026-08-21T21:52,Fisioterapia,Dr. Ricardo Rocha
+U0045,2026-08-21T21:52,Fisioterapia,Enf. Marta Sousa
+U0045,2026-07-12T21:52,Consulta médica,Enf. Marta Sousa

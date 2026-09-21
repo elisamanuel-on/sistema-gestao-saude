@@ -1,0 +1,10 @@
+id_utente,tipo_cuidado,data_alta,motivo
+U0014,SAD,2026-08-14,Óbito
+U0016,SAD,2026-04-07,Óbito
+U0024,SAD,2026-08-01,Melhoria clínica
+U0026,ERPI,2026-04-21,Melhoria clínica
+U0027,UCC,2026-09-12,Melhoria clínica
+U0029,UCC,2026-08-06,Transferência para outra unidade
+U0036,ERPI,2026-08-03,Transferência para outra unidade
+U0044,ERPI,2026-04-02,Melhoria clínica
+U0045,ERPI,2026-04-09,Melhoria clínica

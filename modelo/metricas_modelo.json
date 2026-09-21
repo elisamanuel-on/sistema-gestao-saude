@@ -1,0 +1,37 @@
+{
+  "modelo_escolhido": "random_forest",
+  "auc_validacao_cruzada": {
+    "regressao_logistica": 0.8238219822812847,
+    "random_forest": 0.8303945182724253
+  },
+  "auc_conjunto_teste": 0.8998148148148148,
+  "acuracia_conjunto_teste": 0.7727272727272727,
+  "matriz_confusao": {
+    "rotulos": [
+      "sem_diabetes",
+      "com_diabetes"
+    ],
+    "valores": [
+      [
+        91,
+        9
+      ],
+      [
+        26,
+        28
+      ]
+    ]
+  },
+  "n_treino": 614,
+  "n_teste": 154,
+  "importancia_features": {
+    "gravidezes": 0.0683455976929328,
+    "glicose": 0.3257589512614777,
+    "pressao_arterial": 0.0537315705542319,
+    "espessura_pele": 0.062241530871357906,
+    "insulina": 0.09164403496867525,
+    "imc": 0.16445397657312028,
+    "pedigree_diabetes": 0.0918023105540436,
+    "idade": 0.14202202752416032
+  }
+}

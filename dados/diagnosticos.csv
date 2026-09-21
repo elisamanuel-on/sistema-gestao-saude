@@ -1,0 +1,110 @@
+id_utente,data,profissional,diagnostico
+U0001,2024-10-25,Dra. Inês Fonseca,Obesidade
+U0001,2026-03-24,Enf. Marta Sousa,Osteoporose
+U0002,2026-04-28,Enf. Marta Sousa,Insuficiência cardíaca
+U0003,2026-09-12,Enf. Paulo Cardoso,Insuficiência cardíaca
+U0003,2025-04-25,Dr. Ricardo Rocha,Artrose
+U0003,2025-08-04,Dr. Ricardo Rocha,Hipertensão arterial
+U0004,2026-03-27,Enf. Marta Sousa,Obesidade
+U0004,2026-07-15,Fisio. Beatriz Lima,Demência leve
+U0004,2026-06-03,Fisio. Beatriz Lima,Hipertensão arterial
+U0005,2025-04-28,Enf. Paulo Cardoso,Artrose
+U0005,2026-03-23,Enf. Marta Sousa,Depressão
+U0005,2026-07-12,Enf. Paulo Cardoso,Demência leve
+U0006,2026-09-11,Dra. Inês Fonseca,Insuficiência cardíaca
+U0006,2024-12-11,Enf. Paulo Cardoso,DPOC
+U0006,2024-12-01,Dr. Ricardo Rocha,Obesidade
+U0007,2025-10-04,Enf. Paulo Cardoso,Dislipidemia
+U0007,2024-12-17,Enf. Paulo Cardoso,Doença renal crónica
+U0008,2025-06-14,Enf. Paulo Cardoso,Diabetes tipo 2
+U0009,2025-09-02,Fisio. Beatriz Lima,Artrose
+U0009,2025-03-16,Fisio. Beatriz Lima,Doença renal crónica
+U0009,2026-08-09,Fisio. Beatriz Lima,Obesidade
+U0009,2026-08-20,Fisio. Beatriz Lima,Demência leve
+U0010,2025-01-21,Dr. Ricardo Rocha,Depressão
+U0010,2025-10-24,Dra. Inês Fonseca,Osteoporose
+U0010,2025-03-21,Enf. Paulo Cardoso,Dislipidemia
+U0010,2025-10-20,Enf. Marta Sousa,Hipertensão arterial
+U0011,2025-08-06,Dr. Ricardo Rocha,Demência leve
+U0011,2026-05-15,Enf. Paulo Cardoso,Depressão
+U0011,2026-05-31,Dra. Inês Fonseca,Obesidade
+U0012,2026-05-27,Dr. Ricardo Rocha,Fibrilhação auricular
+U0012,2025-04-16,Enf. Marta Sousa,Insuficiência cardíaca
+U0013,2025-10-06,Enf. Marta Sousa,Diabetes tipo 2
+U0013,2025-04-09,Enf. Marta Sousa,Insuficiência cardíaca
+U0013,2025-06-14,Dra. Inês Fonseca,Hipertensão arterial
+U0014,2026-03-05,Enf. Paulo Cardoso,Artrose
+U0015,2026-06-04,Fisio. Beatriz Lima,Fibrilhação auricular
+U0015,2025-06-27,Enf. Paulo Cardoso,Demência leve
+U0015,2026-01-17,Dr. Ricardo Rocha,Diabetes tipo 2
+U0016,2025-09-12,Dra. Inês Fonseca,Hipertensão arterial
+U0016,2026-06-11,Enf. Marta Sousa,Obesidade
+U0016,2026-08-15,Enf. Marta Sousa,Diabetes tipo 2
+U0016,2026-02-09,Enf. Marta Sousa,Insuficiência cardíaca
+U0017,2026-03-19,Fisio. Beatriz Lima,Artrose
+U0018,2025-05-09,Dr. Ricardo Rocha,Hipertensão arterial
+U0018,2026-06-23,Dra. Inês Fonseca,Fibrilhação auricular
+U0018,2025-03-25,Enf. Marta Sousa,Dislipidemia
+U0018,2026-03-04,Fisio. Beatriz Lima,Depressão
+U0019,2024-12-16,Enf. Marta Sousa,Artrose
+U0019,2024-11-16,Fisio. Beatriz Lima,Hipertensão arterial
+U0019,2026-02-20,Dra. Inês Fonseca,DPOC
+U0019,2026-03-20,Dra. Inês Fonseca,Dislipidemia
+U0020,2025-06-01,Dr. Ricardo Rocha,Doença renal crónica
+U0020,2026-05-12,Enf. Marta Sousa,Dislipidemia
+U0021,2025-10-04,Fisio. Beatriz Lima,Osteoporose
+U0022,2026-07-13,Dra. Inês Fonseca,Osteoporose
+U0022,2025-09-18,Enf. Marta Sousa,Demência leve
+U0022,2025-07-30,Dra. Inês Fonseca,Hipertensão arterial
+U0023,2025-12-23,Enf. Paulo Cardoso,Diabetes tipo 2
+U0023,2025-09-03,Fisio. Beatriz Lima,Fibrilhação auricular
+U0024,2026-05-18,Dr. Ricardo Rocha,Osteoporose
+U0024,2025-10-02,Fisio. Beatriz Lima,Depressão
+U0024,2025-07-21,Dra. Inês Fonseca,Insuficiência cardíaca
+U0024,2025-05-05,Fisio. Beatriz Lima,Obesidade
+U0025,2026-05-18,Enf. Marta Sousa,Osteoporose
+U0026,2024-11-27,Enf. Paulo Cardoso,Fibrilhação auricular
+U0027,2026-03-02,Enf. Paulo Cardoso,Depressão
+U0027,2025-01-14,Dra. Inês Fonseca,Artrose
+U0028,2025-10-15,Enf. Marta Sousa,Fibrilhação auricular
+U0028,2025-01-31,Enf. Paulo Cardoso,Diabetes tipo 2
+U0028,2024-11-16,Enf. Marta Sousa,DPOC
+U0028,2025-11-26,Dr. Ricardo Rocha,Artrose
+U0029,2025-09-03,Dra. Inês Fonseca,Hipertensão arterial
+U0029,2025-01-22,Enf. Marta Sousa,Artrose
+U0030,2025-01-25,Dr. Ricardo Rocha,Artrose
+U0030,2025-03-11,Dr. Ricardo Rocha,Osteoporose
+U0030,2025-06-14,Dra. Inês Fonseca,DPOC
+U0030,2026-06-23,Enf. Marta Sousa,Diabetes tipo 2
+U0031,2026-08-22,Fisio. Beatriz Lima,DPOC
+U0032,2025-05-29,Dr. Ricardo Rocha,Hipertensão arterial
+U0032,2025-09-16,Dra. Inês Fonseca,Fibrilhação auricular
+U0032,2025-06-03,Fisio. Beatriz Lima,Insuficiência cardíaca
+U0033,2026-07-21,Dra. Inês Fonseca,Depressão
+U0033,2026-08-31,Enf. Paulo Cardoso,Fibrilhação auricular
+U0033,2025-07-05,Dra. Inês Fonseca,Dislipidemia
+U0034,2026-07-15,Enf. Paulo Cardoso,Hipertensão arterial
+U0035,2025-04-30,Enf. Marta Sousa,Fibrilhação auricular
+U0035,2026-04-28,Fisio. Beatriz Lima,Demência leve
+U0035,2025-08-13,Dr. Ricardo Rocha,Obesidade
+U0035,2026-06-28,Dr. Ricardo Rocha,Doença renal crónica
+U0036,2026-01-05,Enf. Paulo Cardoso,Fibrilhação auricular
+U0036,2026-05-22,Enf. Paulo Cardoso,Dislipidemia
+U0037,2026-08-28,Dr. Ricardo Rocha,Insuficiência cardíaca
+U0037,2025-09-27,Enf. Paulo Cardoso,Hipertensão arterial
+U0037,2025-03-22,Fisio. Beatriz Lima,DPOC
+U0037,2025-03-24,Dr. Ricardo Rocha,Dislipidemia
+U0038,2025-04-20,Fisio. Beatriz Lima,Osteoporose
+U0039,2025-02-17,Dra. Inês Fonseca,Diabetes tipo 2
+U0040,2025-04-18,Fisio. Beatriz Lima,Fibrilhação auricular
+U0040,2025-11-10,Enf. Marta Sousa,Diabetes tipo 2
+U0041,2025-07-25,Enf. Paulo Cardoso,Demência leve
+U0041,2026-07-28,Dra. Inês Fonseca,Doença renal crónica
+U0041,2025-01-26,Enf. Paulo Cardoso,Dislipidemia
+U0042,2025-06-08,Dra. Inês Fonseca,Obesidade
+U0042,2026-06-07,Fisio. Beatriz Lima,Diabetes tipo 2
+U0043,2025-04-02,Dra. Inês Fonseca,Insuficiência cardíaca
+U0043,2025-08-01,Fisio. Beatriz Lima,Dislipidemia
+U0044,2026-09-11,Dra. Inês Fonseca,Artrose
+U0045,2026-04-14,Enf. Marta Sousa,Diabetes tipo 2
+U0045,2025-03-27,Fisio. Beatriz Lima,Artrose

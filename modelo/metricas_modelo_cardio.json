@@ -1,0 +1,42 @@
+{
+  "modelo_escolhido": "random_forest",
+  "auc_validacao_cruzada": {
+    "regressao_logistica": 0.904040404040404,
+    "random_forest": 0.9103988603988604
+  },
+  "auc_conjunto_teste": 0.9123376623376622,
+  "acuracia_conjunto_teste": 0.8360655737704918,
+  "matriz_confusao": {
+    "rotulos": [
+      "sem_doenca_cardiaca",
+      "com_doenca_cardiaca"
+    ],
+    "valores": [
+      [
+        19,
+        9
+      ],
+      [
+        1,
+        32
+      ]
+    ]
+  },
+  "n_treino": 242,
+  "n_teste": 61,
+  "importancia_features": {
+    "idade": 0.07105526927712685,
+    "sexo": 0.027989390453803383,
+    "tipo_dor_peito": 0.1630077141314697,
+    "pressao_repouso": 0.06358957570979945,
+    "colesterol": 0.07374174883815546,
+    "glicemia_jejum_elevada": 0.006992115905915916,
+    "ecg_repouso": 0.01831833661664073,
+    "freq_cardiaca_maxima": 0.11002605408610215,
+    "angina_exercicio": 0.07826635586866237,
+    "depressao_st": 0.10754892808191958,
+    "inclinacao_st": 0.06102143123122617,
+    "n_vasos_principais": 0.09378826059687143,
+    "talassemia": 0.12465481920230684
+  }
+}
