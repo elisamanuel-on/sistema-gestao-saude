@@ -110,6 +110,9 @@ SECCOES_POR_PERFIL = {
     "Administrativo": ["Início", "Geral", "Cuidados continuados", "Clínica & Hospital", "Gestão"],
 }
 
+# "Profissionais" é gerido junto de "Gestão" (Faturação) — cadastro de
+# pessoal é tipicamente uma função administrativa, tal como a Faturação.
+
 # Ações fictícias para o histórico/auditoria de cada utente (quem alterou o
 # quê e quando) — dado sintético, tal como todo o resto (ver README).
 ACOES_HISTORICO = [
@@ -118,3 +121,26 @@ ACOES_HISTORICO = [
     "Agendou consulta", "Alterou estado da consulta", "Consultou avaliação de risco",
     "Atualizou dados de faturação",
 ]
+
+# --- Cadastro de profissionais -----------------------------------------------
+# Categoria da pessoa (o "cargo"), distinta de área do plano de cuidados
+# (AREAS_PLANO_CUIDADOS acima) e de especialidade médica (ESPECIALIDADES).
+# Só "Médico" tem especialidade médica de consulta — as outras categorias
+# entram no plano de cuidados multidisciplinar através de
+# CATEGORIA_PARA_AREA_CUIDADOS.
+CATEGORIAS_PROFISSIONAL = ["Médico", "Enfermeiro", "Fisioterapeuta", "Nutricionista", "Psicólogo", "Assistente Social"]
+
+CATEGORIA_PARA_AREA_CUIDADOS = {
+    "Médico": "Medicina",
+    "Enfermeiro": "Enfermagem",
+    "Fisioterapeuta": "Fisioterapia",
+    "Nutricionista": "Nutrição",
+    "Psicólogo": "Psicologia",
+    "Assistente Social": "Serviço Social",
+}
+
+ESTADOS_PROFISSIONAL = ["Ativo", "Inativo"]
+
+# Salas e horários usados no agendamento de consultas (criar/reagendar).
+SALAS_CONSULTA = [f"Sala {n}" for n in range(1, 7)]
+HORARIOS_CONSULTA = [f"{h:02d}:{m:02d}" for h in range(8, 19) for m in (0, 30) if not (h == 18 and m == 30)]

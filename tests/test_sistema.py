@@ -12,6 +12,9 @@ utente carregado a partir de dados/utentes.csv (sintético — ver
 scripts/gerar_dados_utentes.py), para não ficar frágil a alterações na
 geração dos dados.
 """
+from io import BytesIO
+
+import dash
 import pandas as pd
 
 import app as m
@@ -385,10 +388,147 @@ def test_vista_calendario_de_consultas_nao_rebenta():
     assert resultado is not None
 
 
-def test_exportar_csv_faturacao_usa_ponto_virgula_como_separador():
-    # Excel em português usa "," como separador decimal, por isso o CSV
-    # exportado tem de usar ";" a separar colunas (ver app.py).
+def test_exportar_csv_faturacao_usa_ponto_virgula_e_virgula_decimal():
+    # Excel em português usa ";" para separar colunas e "," como separador
+    # decimal (ver app.py) — sem isto, ou o ficheiro abre tudo numa coluna
+    # só, ou os números com casas decimais aparecem como texto.
     resultado = m._descarregar_csv_faturacao(1)
-    primeira_linha = resultado["content"].splitlines()[0]
-    assert ";" in primeira_linha
-    assert "," not in primeira_linha
+    linhas = resultado["content"].splitlines()
+    cabecalho = linhas[0]
+    primeira_linha_dados = linhas[1]
+    assert ";" in cabecalho
+    assert "," not in cabecalho  # nenhum título de coluna tem vírgula
+    assert ";" in primeira_linha_dados
+    assert "," in primeira_linha_dados  # algum valor com casas decimais usa vírgula
+    assert "." not in primeira_linha_dados.replace("—", "")  # não deve sobrar nenhum ponto decimal
+
+
+# --- Faturação: exportação em Excel -------------------------------------------
+
+
+def test_exportar_excel_faturacao_produz_ficheiro_xlsx_valido():
+    conteudo = m._gerar_excel_faturacao()
+    # .xlsx é um zip — todo ficheiro zip começa por esta assinatura "PK".
+    assert conteudo[:2] == b"PK"
+    from openpyxl import load_workbook
+
+    livro = load_workbook(BytesIO(conteudo))
+    folha = livro.active
+    cabecalho = [c.value for c in folha[1]]
+    assert "Utente" in cabecalho
+    assert folha.max_row == len(m.DADOS["faturacao"]) + 1  # +1 do cabeçalho
+
+
+# --- Agendamento: criar, cancelar e reagendar consulta ------------------------
+
+
+def _medico_ativo_para_teste():
+    prof = m.DADOS["profissionais"]
+    return prof[(prof["categoria"] == "Médico") & (prof["estado"] == "Ativo")].iloc[0]
+
+
+def test_criar_consulta_sem_conflito_e_bem_sucedida():
+    medico = _medico_ativo_para_teste()
+    utente = _primeiro_utente()
+    antes = len(m.DADOS["consultas"])
+    mensagem, versao = m._criar_consulta(1, utente["id_utente"], medico["especialidade"], medico["nome"], "2027-01-10", "09:00", "Sala 1", 0)
+    assert "risco_baixo" in mensagem.className
+    assert len(m.DADOS["consultas"]) == antes + 1
+    assert versao == 1
+
+
+def test_criar_consulta_com_conflito_de_profissional_e_bloqueada():
+    medico = _medico_ativo_para_teste()
+    utente = _primeiro_utente()
+    m._criar_consulta(1, utente["id_utente"], medico["especialidade"], medico["nome"], "2027-01-11", "09:00", "Sala 2", 0)
+    antes = len(m.DADOS["consultas"])
+    mensagem, versao = m._criar_consulta(1, utente["id_utente"], medico["especialidade"], medico["nome"], "2027-01-11", "09:00", "Sala 3", 0)
+    assert "risco_elevado" in mensagem.className
+    assert versao is dash.no_update
+    assert len(m.DADOS["consultas"]) == antes  # não criou a segunda
+
+
+def test_criar_consulta_com_campos_em_falta_pede_para_preencher():
+    mensagem, versao = m._criar_consulta(1, None, None, None, None, None, None, 0)
+    assert "risco_moderado" in mensagem.className
+    assert versao is dash.no_update
+
+
+def test_cancelar_consulta_muda_estado_para_cancelada():
+    medico = _medico_ativo_para_teste()
+    utente = _primeiro_utente()
+    m._criar_consulta(1, utente["id_utente"], medico["especialidade"], medico["nome"], "2027-01-12", "10:00", "Sala 1", 0)
+    id_consulta = m.DADOS["consultas"].iloc[-1]["id_consulta"]
+    mensagem, _versao = m._cancelar_consulta(1, id_consulta, 0)
+    assert "cancelada" in mensagem.children.lower()
+    assert m.DADOS["consultas"].loc[m.DADOS["consultas"]["id_consulta"] == id_consulta, "estado"].iloc[0] == "Cancelada"
+
+
+def test_reagendar_consulta_atualiza_data_hora_e_sala():
+    medico = _medico_ativo_para_teste()
+    utente = _primeiro_utente()
+    m._criar_consulta(1, utente["id_utente"], medico["especialidade"], medico["nome"], "2027-01-13", "11:00", "Sala 1", 0)
+    id_consulta = m.DADOS["consultas"].iloc[-1]["id_consulta"]
+    mensagem, _versao = m._reagendar_consulta(1, id_consulta, "2027-01-14", "15:00", "Sala 4", 0)
+    assert "risco_baixo" in mensagem.className
+    linha = m.DADOS["consultas"].loc[m.DADOS["consultas"]["id_consulta"] == id_consulta].iloc[0]
+    assert linha["sala"] == "Sala 4"
+    assert pd.Timestamp(linha["data_hora"]) == pd.Timestamp("2027-01-14 15:00")
+
+
+# --- Profissionais: CRUD -------------------------------------------------------
+
+
+def test_profissionais_carregados_tem_pelo_menos_um_medico_ativo():
+    prof = m.DADOS["profissionais"]
+    assert ((prof["categoria"] == "Médico") & (prof["estado"] == "Ativo")).any()
+
+
+def test_criar_profissional_medico_sem_especialidade_e_recusado():
+    mensagem, _versao = m._criar_profissional(1, "Dr. Teste Sem Especialidade", "Médico", None, "x@x.com", "CP-1", "2020-01-01", 0)
+    assert "risco_moderado" in mensagem.className
+
+
+def test_criar_profissional_com_nome_duplicado_e_recusado():
+    nome_existente = m.DADOS["profissionais"].iloc[0]["nome"]
+    mensagem, _versao = m._criar_profissional(1, nome_existente, "Enfermeiro", None, "x@x.com", "CP-2", "2020-01-01", 0)
+    assert "risco_elevado" in mensagem.className
+
+
+def test_criar_e_remover_profissional_sem_historico():
+    mensagem, versao = m._criar_profissional(1, "Enf. Teste Removível", "Enfermeiro", None, "teste@x.com", "CP-9", "2021-01-01", 0)
+    assert "risco_baixo" in mensagem.className
+    assert "Enf. Teste Removível" in m.DADOS["profissionais"]["nome"].values
+    assert not m._profissional_tem_historico("Enf. Teste Removível")
+    mensagem2, _versao2 = m._remover_profissional(1, "Enf. Teste Removível", versao)
+    assert "risco_baixo" in mensagem2.className
+    assert "Enf. Teste Removível" not in m.DADOS["profissionais"]["nome"].values
+
+
+def test_remover_profissional_com_historico_e_bloqueado():
+    nome_com_consultas = m.DADOS["consultas"].iloc[0]["profissional"]
+    assert m._profissional_tem_historico(nome_com_consultas)
+    mensagem, versao = m._remover_profissional(1, nome_com_consultas, 0)
+    assert "Inativo" in mensagem.children
+    assert versao is dash.no_update
+    # continua no cadastro — não foi removido
+    assert nome_com_consultas in m.DADOS["profissionais"]["nome"].values
+
+
+def test_alternar_estado_profissional_liga_desliga():
+    m._criar_profissional(1, "Fisio. Teste Estado", "Fisioterapeuta", None, "x@x.com", "CP-3", "2020-01-01", 0)
+    estado_antes = m.DADOS["profissionais"].loc[m.DADOS["profissionais"]["nome"] == "Fisio. Teste Estado", "estado"].iloc[0]
+    m._alternar_estado_profissional(1, "Fisio. Teste Estado", 0)
+    estado_depois = m.DADOS["profissionais"].loc[m.DADOS["profissionais"]["nome"] == "Fisio. Teste Estado", "estado"].iloc[0]
+    assert estado_antes != estado_depois
+
+
+def test_editar_profissional_atualiza_contacto():
+    m._criar_profissional(1, "Psic. Teste Editar", "Psicólogo", None, "antigo@x.com", "CP-4", "2020-01-01", 0)
+    m._editar_profissional(1, "Psic. Teste Editar", "novo@x.com", None, None, 0)
+    contacto = m.DADOS["profissionais"].loc[m.DADOS["profissionais"]["nome"] == "Psic. Teste Editar", "contacto"].iloc[0]
+    assert contacto == "novo@x.com"
+
+
+def test_pagina_profissionais_renderiza():
+    assert m._pagina_profissionais() is not None

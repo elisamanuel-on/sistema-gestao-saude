@@ -30,8 +30,20 @@ Administrativo, uma simulação sem autenticação real):
   /ocupacao           — capacidade, ocupação e altas (cuidados continuados)
   /consultas          — agendamento/consultas (módulo Clínica/Hospital),
                          em vista de lista ou de calendário semanal
-  /faturacao          — valores a pagar, comparticipação, ARS, seguros, saldos
+  /faturacao          — valores a pagar, comparticipação, ARS, seguros,
+                         saldos, exportação em Excel (.xlsx) ou CSV
+  /profissionais      — cadastro de profissionais (médicos + equipa de
+                         apoio): adicionar, editar, marcar inativo/ativo,
+                         remover (bloqueado se houver histórico associado)
   /sobre              — sobre este projeto (para quem abre o link direto)
+
+Nota sobre persistência: não há base de dados — os dados vivem em memória,
+carregados uma vez a partir dos CSV no arranque do servidor. Consultas
+criadas/canceladas/reagendadas e profissionais adicionados/editados/
+removidos pela própria aplicação ficam só nessa memória: refletem-se
+imediatamente para quem estiver a usar o sistema, mas perdem-se se o
+servidor reiniciar. Decisão de âmbito consciente para um projeto de
+portfólio — ver README.
 
 Dados: tudo sintético (ver scripts/gerar_dados_utentes.py e constantes.py).
 Os modelos de risco são treinados em datasets públicos e anonimizados (Pima
@@ -52,11 +64,22 @@ import joblib
 import pandas as pd
 import plotly.graph_objects as go
 from dash import ALL, Input, Output, State, ctx, dash_table, dcc, html
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill
+from openpyxl.utils import get_column_letter
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas as pdf_canvas
 
-from constantes import ESPECIALIDADES, PERFIS_ACESSO, SECCOES_POR_PERFIL, TIPOS_CUIDADO
+from constantes import (
+    CATEGORIAS_PROFISSIONAL,
+    ESPECIALIDADES,
+    HORARIOS_CONSULTA,
+    PERFIS_ACESSO,
+    SALAS_CONSULTA,
+    SECCOES_POR_PERFIL,
+    TIPOS_CUIDADO,
+)
 from limpeza import LIMITES_PLAUSIVEIS
 from riscos import (
     OPCOES_APOIO_MARCHA,
@@ -151,6 +174,10 @@ def _carregar_todos_os_dados():
     dados["faturacao"]["seguradora"] = dados["faturacao"]["seguradora"].fillna("—")
     dados["faturacao"]["numero_apolice"] = dados["faturacao"]["numero_apolice"].fillna("—")
     dados["historico"] = pd.read_csv(PASTA_DADOS / "historico.csv", parse_dates=["data_hora"])
+    dados["profissionais"] = pd.read_csv(PASTA_DADOS / "profissionais.csv")
+    dados["profissionais"]["especialidade"] = dados["profissionais"]["especialidade"].fillna("")
+    dados["profissionais"]["contacto"] = dados["profissionais"]["contacto"].fillna("—")
+    dados["profissionais"]["numero_cedula"] = dados["profissionais"]["numero_cedula"].fillna("—")
     dados["altas"] = pd.read_csv(PASTA_DADOS / "altas.csv")
     return dados
 
@@ -216,6 +243,19 @@ def _ids_utentes_risco_elevado():
     return elevado[elevado].index.tolist()
 
 
+def _registar_historico(id_utente, profissional, acao):
+    """Acrescenta uma linha ao histórico/auditoria do utente — chamado
+    sempre que uma ação do módulo de agendamento (marcar/cancelar/reagendar
+    consulta) altera algo. Só em memória, tal como o resto dos dados
+    criados pela própria aplicação (ver nota de persistência no topo do
+    ficheiro)."""
+    novo_id = f"H{len(DADOS['historico']) + 1:05d}"
+    nova_linha = pd.DataFrame(
+        [{"id_evento": novo_id, "id_utente": id_utente, "data_hora": pd.Timestamp.now(), "profissional": profissional, "acao": acao}]
+    )
+    DADOS["historico"] = pd.concat([DADOS["historico"], nova_linha], ignore_index=True)
+
+
 # --- Componentes reutilizáveis ----------------------------------------------
 
 
@@ -244,7 +284,7 @@ SECCOES_NAVEGACAO = [
     ("Geral", [("/utentes", "Utentes")]),
     ("Cuidados continuados", [("/ocupacao", "Mapa de Ocupação")]),
     ("Clínica & Hospital", [("/consultas", "Consultas")]),
-    ("Gestão", [("/faturacao", "Faturação")]),
+    ("Gestão", [("/faturacao", "Faturação"), ("/profissionais", "Profissionais")]),
 ]
 
 
@@ -999,6 +1039,96 @@ def _tabela_consultas(df):
     )
 
 
+def _proximo_id_consulta():
+    if DADOS["consultas"].empty:
+        return "C00001"
+    maior = DADOS["consultas"]["id_consulta"].str.lstrip("C").astype(int).max()
+    return f"C{maior + 1:05d}"
+
+
+def _conflito_consulta(profissional, sala, data_hora, excluir_id=None):
+    """True se já existir uma consulta ativa (Agendada/Realizada) para o
+    mesmo profissional ou a mesma sala, à mesma data/hora — usado ao criar
+    ou reagendar, para não deixar marcar duas consultas em cima uma da
+    outra."""
+    ativas = DADOS["consultas"][DADOS["consultas"]["estado"].isin(["Agendada", "Realizada"])]
+    if excluir_id:
+        ativas = ativas[ativas["id_consulta"] != excluir_id]
+    mesma_hora = ativas[ativas["data_hora"] == data_hora]
+    return bool(((mesma_hora["profissional"] == profissional) | (mesma_hora["sala"] == sala)).any())
+
+
+def _formulario_nova_consulta():
+    opcoes_utente = [{"label": f"{u['nome']} ({u['id_utente']})", "value": u["id_utente"]} for _idx, u in DADOS["utentes"].iterrows()]
+    return html.Details(
+        [
+            html.Summary("+ Nova Consulta", className="resumo-details"),
+            html.Div(
+                [
+                    dcc.Dropdown(id="form-consulta-utente", options=opcoes_utente, placeholder="Utente", className="filtro-dropdown"),
+                    dcc.Dropdown(
+                        id="form-consulta-especialidade",
+                        options=[{"label": e, "value": e} for e in ESPECIALIDADES],
+                        placeholder="Especialidade",
+                        className="filtro-dropdown",
+                    ),
+                    dcc.Dropdown(id="form-consulta-profissional", placeholder="Profissional (escolhe a especialidade primeiro)", className="filtro-dropdown"),
+                    dcc.DatePickerSingle(id="form-consulta-data", placeholder="Data", display_format="DD/MM/YYYY", min_date_allowed=datetime.date.today()),
+                    dcc.Dropdown(
+                        id="form-consulta-hora",
+                        options=[{"label": h, "value": h} for h in HORARIOS_CONSULTA],
+                        placeholder="Hora",
+                        className="filtro-dropdown",
+                    ),
+                    dcc.Dropdown(id="form-consulta-sala", options=[{"label": s, "value": s} for s in SALAS_CONSULTA], placeholder="Sala", className="filtro-dropdown"),
+                ],
+                className="grelha-formulario",
+            ),
+            html.Button("Marcar consulta", id="botao-criar-consulta", className="botao-primario", n_clicks=0),
+            html.Div(id="mensagem-criar-consulta", className="resultado-mini"),
+        ],
+        className="painel-details",
+    )
+
+
+def _painel_gerir_consulta():
+    return html.Div(
+        [
+            html.H3("Gerir consulta existente"),
+            html.P("Só é possível gerir consultas com estado Agendada.", className="texto-explicativo"),
+            dcc.Dropdown(id="select-consulta-gerir", placeholder="Escolhe uma consulta agendada...", className="filtro-dropdown"),
+            html.Div(
+                [html.Button("Cancelar consulta", id="botao-cancelar-consulta", className="botao-secundario", n_clicks=0)],
+                className="botoes-exportar",
+            ),
+            html.Details(
+                [
+                    html.Summary("Reagendar (nova data/hora/sala)", className="resumo-details"),
+                    html.Div(
+                        [
+                            dcc.DatePickerSingle(
+                                id="form-reagendar-data", placeholder="Nova data", display_format="DD/MM/YYYY", min_date_allowed=datetime.date.today()
+                            ),
+                            dcc.Dropdown(
+                                id="form-reagendar-hora",
+                                options=[{"label": h, "value": h} for h in HORARIOS_CONSULTA],
+                                placeholder="Nova hora",
+                                className="filtro-dropdown",
+                            ),
+                            dcc.Dropdown(id="form-reagendar-sala", options=[{"label": s, "value": s} for s in SALAS_CONSULTA], placeholder="Nova sala", className="filtro-dropdown"),
+                        ],
+                        className="grelha-formulario",
+                    ),
+                    html.Button("Confirmar novo horário", id="botao-reagendar-consulta", className="botao-primario", n_clicks=0),
+                ],
+                className="painel-details",
+            ),
+            html.Div(id="mensagem-gerir-consulta", className="resultado-mini"),
+        ],
+        className="cartao-secao",
+    )
+
+
 def _inicio_semana_atual():
     hoje = pd.Timestamp.now().normalize()
     return hoje - pd.Timedelta(days=hoje.dayofweek)
@@ -1098,6 +1228,7 @@ def _pagina_consultas():
             html.P("Agendamento do módulo Clínica/Hospital — ambulatório, organizado por especialidade e profissional.", className="texto-explicativo"),
             kpis,
             html.Div([html.H3("Consultas por especialidade"), dcc.Graph(figure=fig_especialidade, config={"displayModeBar": False})], className="cartao-secao"),
+            _formulario_nova_consulta(),
             html.Div(
                 [
                     dcc.Input(id="pesquisa-consulta", type="text", placeholder="Pesquisar por nome do utente...", className="campo-pesquisa"),
@@ -1124,7 +1255,9 @@ def _pagina_consultas():
                 className="filtros-utentes",
             ),
             dcc.Store(id="semana-consultas-inicio"),
+            dcc.Store(id="consultas-atualizacao", data=0),
             html.Div(id="corpo-tabela-consultas"),
+            _painel_gerir_consulta(),
         ]
     )
 
@@ -1136,6 +1269,58 @@ def _formatar_euros(valor, casas_decimais=0):
     texto = f"{valor:,.{casas_decimais}f}"
     texto = texto.replace(",", "§").replace(".", ",").replace("§", ".")
     return f"{texto} €"
+
+
+COLUNAS_EXPORTACAO_FATURACAO = {
+    "nome": "Utente",
+    "tipo_cuidado": "Tipo",
+    "valor_a_pagar_utente": "Valor a pagar (€)",
+    "comparticipacao_ss": "Comparticipação SS (€)",
+    "ars_diarias_internamento": "ARS diárias (€)",
+    "ars_pacote_medicamentos": "ARS medicamentos (€)",
+    "ars_remuneracao_adicional": "ARS remuneração adicional (€)",
+    "seguradora": "Seguradora",
+    "numero_apolice": "Nº apólice",
+    "cobertura_percentual_seguro": "Cobertura seguro (%)",
+    "valor_seguradora": "Valor seguradora (€)",
+    "copagamento_utente": "Copagamento utente (€)",
+    "saldo_cc": "Saldo CC (€)",
+    "erro_fatura": "Erro de fatura",
+}
+
+
+def _gerar_excel_faturacao():
+    """Excel (.xlsx) a sério, não um CSV disfarçado — resolve de vez a
+    ambiguidade da vírgula/ponto e vírgula (essa depende só da configuração
+    regional do computador de quem abre o CSV, não do ficheiro em si), e de
+    caminho já formata cabeçalhos e moeda."""
+    fat = DADOS["faturacao"].merge(DADOS["utentes"][["id_utente", "nome", "tipo_cuidado"]], on="id_utente")
+    fat = fat[list(COLUNAS_EXPORTACAO_FATURACAO.keys())].rename(columns=COLUNAS_EXPORTACAO_FATURACAO)
+    colunas_euro = {c for c in fat.columns if "€" in c}
+
+    livro = Workbook()
+    folha = livro.active
+    folha.title = "Faturação"
+    folha.append(list(fat.columns))
+    for celula in folha[1]:
+        celula.font = Font(bold=True, color="FFFFFF")
+        celula.fill = PatternFill("solid", fgColor="0F7A6C")
+    for _idx, linha in fat.iterrows():
+        folha.append(list(linha))
+
+    for i, coluna in enumerate(fat.columns, start=1):
+        letra = get_column_letter(i)
+        largura = max(len(coluna), int(fat[coluna].astype(str).map(len).max())) + 3
+        folha.column_dimensions[letra].width = min(34, max(11, largura))
+        if coluna in colunas_euro:
+            for linha_celulas in folha.iter_rows(min_row=2, min_col=i, max_col=i):
+                linha_celulas[0].number_format = "#,##0.00 €"
+    folha.freeze_panes = "A2"
+
+    buffer = io.BytesIO()
+    livro.save(buffer)
+    buffer.seek(0)
+    return buffer.getvalue()
 
 
 def _pagina_faturacao():
@@ -1161,7 +1346,9 @@ def _pagina_faturacao():
 
     botao_exportar = html.Div(
         [
-            html.Button("Descarregar CSV", id="botao-csv-faturacao", className="botao-secundario"),
+            html.Button("Descarregar Excel", id="botao-excel-faturacao", className="botao-primario"),
+            dcc.Download(id="descarregar-excel-faturacao"),
+            html.Button("CSV", id="botao-csv-faturacao", className="botao-secundario"),
             dcc.Download(id="descarregar-csv-faturacao"),
         ],
         className="botoes-exportar",
@@ -1197,6 +1384,153 @@ def _pagina_faturacao():
             html.H1("Faturação"),
             kpis,
             html.Div([html.Div([html.H3("Detalhe por utente"), botao_exportar], className="cabecalho-secao"), tabela], className="cartao-secao"),
+        ]
+    )
+
+
+# --- Página: Profissionais (cadastro, CRUD) -----------------------------------
+
+COLUNAS_COM_PROFISSIONAL = [
+    ("consultas", "profissional"),
+    ("diagnosticos", "profissional"),
+    ("prescricoes", "profissional"),
+    ("visitas", "registado_por"),
+    ("exames", "profissional_pedido"),
+    ("plano_cuidados", "profissional_responsavel"),
+    ("historico", "profissional"),
+]
+
+
+def _stats_profissional(nome):
+    n_consultas = int((DADOS["consultas"]["profissional"] == nome).sum())
+    n_plano = int((DADOS["plano_cuidados"]["profissional_responsavel"] == nome).sum())
+    return n_consultas, n_plano
+
+
+def _profissional_tem_historico(nome):
+    return any((DADOS[tabela][coluna] == nome).any() for tabela, coluna in COLUNAS_COM_PROFISSIONAL)
+
+
+def _tabela_profissionais():
+    prof = DADOS["profissionais"].sort_values("nome")
+    if prof.empty:
+        return html.P("Sem profissionais cadastrados.", className="texto-explicativo")
+    linhas = []
+    for _idx, p in prof.iterrows():
+        n_consultas, n_plano = _stats_profissional(p["nome"])
+        linhas.append(
+            html.Tr(
+                [
+                    html.Td(p["nome"]),
+                    html.Td(p["categoria"]),
+                    html.Td(p["especialidade"] or "—"),
+                    html.Td(p["contacto"]),
+                    html.Td(p["numero_cedula"]),
+                    html.Td(p["data_admissao"]),
+                    html.Td(html.Span(p["estado"], className=f"etiqueta-estado etiqueta-estado--{_slug(p['estado'])}")),
+                    html.Td(str(n_consultas)),
+                    html.Td(str(n_plano)),
+                ]
+            )
+        )
+    cabecalhos = ["Nome", "Categoria", "Especialidade", "Contacto", "Nº cédula", "Admissão", "Estado", "Consultas", "Plano de cuidados"]
+    return html.Table(
+        [html.Thead(html.Tr([html.Th(c) for c in cabecalhos])), html.Tbody(linhas)],
+        className="tabela-utentes",
+    )
+
+
+def _formulario_novo_profissional():
+    return html.Details(
+        [
+            html.Summary("+ Novo Profissional", className="resumo-details"),
+            html.Div(
+                [
+                    dcc.Input(id="form-prof-nome", type="text", placeholder="Nome (ex.: Dr. João Silva)", className="campo-pesquisa"),
+                    dcc.Dropdown(
+                        id="form-prof-categoria",
+                        options=[{"label": c, "value": c} for c in CATEGORIAS_PROFISSIONAL],
+                        placeholder="Categoria",
+                        className="filtro-dropdown",
+                    ),
+                    dcc.Dropdown(
+                        id="form-prof-especialidade",
+                        options=[{"label": e, "value": e} for e in ESPECIALIDADES],
+                        placeholder="Especialidade (só Médico)",
+                        className="filtro-dropdown",
+                    ),
+                    dcc.Input(id="form-prof-contacto", type="text", placeholder="Contacto (email ou telefone)", className="campo-pesquisa"),
+                    dcc.Input(id="form-prof-cedula", type="text", placeholder="Nº de cédula profissional", className="campo-pesquisa"),
+                    dcc.DatePickerSingle(
+                        id="form-prof-admissao", placeholder="Data de admissão", display_format="DD/MM/YYYY", max_date_allowed=datetime.date.today()
+                    ),
+                ],
+                className="grelha-formulario",
+            ),
+            html.Button("Adicionar profissional", id="botao-criar-profissional", className="botao-primario", n_clicks=0),
+            html.Div(id="mensagem-criar-profissional", className="resultado-mini"),
+        ],
+        className="painel-details",
+    )
+
+
+def _painel_gerir_profissional():
+    return html.Div(
+        [
+            html.H3("Gerir profissional"),
+            dcc.Dropdown(id="select-profissional-gerir", placeholder="Escolhe um profissional...", className="filtro-dropdown"),
+            html.Div(
+                [
+                    dcc.Input(id="form-prof-editar-contacto", type="text", placeholder="Novo contacto (deixa em branco para não alterar)", className="campo-pesquisa"),
+                    dcc.Input(id="form-prof-editar-cedula", type="text", placeholder="Novo nº de cédula (deixa em branco para não alterar)", className="campo-pesquisa"),
+                    dcc.Dropdown(
+                        id="form-prof-editar-especialidade",
+                        options=[{"label": e, "value": e} for e in ESPECIALIDADES],
+                        placeholder="Nova especialidade (só Médico)",
+                        className="filtro-dropdown",
+                    ),
+                ],
+                className="grelha-formulario",
+            ),
+            html.Div(
+                [
+                    html.Button("Guardar alterações", id="botao-editar-profissional", className="botao-secundario", n_clicks=0),
+                    html.Button("Alternar Ativo/Inativo", id="botao-alternar-estado-profissional", className="botao-secundario", n_clicks=0),
+                    html.Button("Remover", id="botao-remover-profissional", className="botao-secundario", n_clicks=0),
+                ],
+                className="botoes-exportar",
+            ),
+            html.Div(id="mensagem-gerir-profissional", className="resultado-mini"),
+        ],
+        className="cartao-secao",
+    )
+
+
+def _pagina_profissionais():
+    prof = DADOS["profissionais"]
+    ativos = int((prof["estado"] == "Ativo").sum())
+    inativos = int((prof["estado"] == "Inativo").sum())
+
+    return html.Div(
+        [
+            html.H1("Profissionais"),
+            html.P(
+                "Cadastro da equipa — médicos (com especialidade, para as consultas) e a equipa de apoio "
+                "(enfermagem, fisioterapia, nutrição, psicologia, serviço social, para o plano de cuidados).",
+                className="texto-explicativo",
+            ),
+            html.Div(
+                [
+                    _cartao_kpi("Total", len(prof)),
+                    _cartao_kpi("Ativos", ativos, tom="risco_baixo"),
+                    _cartao_kpi("Inativos", inativos, tom="risco_moderado" if inativos else ""),
+                ],
+                className="kpis-linha",
+            ),
+            _formulario_novo_profissional(),
+            dcc.Store(id="profissionais-atualizacao", data=0),
+            html.Div(id="corpo-tabela-profissionais"),
+            _painel_gerir_profissional(),
         ]
     )
 
@@ -1280,6 +1614,8 @@ def _rotear_pagina(caminho, perfil):
         return _pagina_consultas()
     if caminho == "/faturacao":
         return _pagina_faturacao()
+    if caminho == "/profissionais":
+        return _pagina_profissionais()
     if caminho == "/sobre":
         return _pagina_sobre()
     return html.Div([html.H2("Página não encontrada"), dcc.Link("Voltar ao início", href="/")])
@@ -1309,8 +1645,9 @@ def _filtrar_utentes(texto_pesquisa, tipo_cuidado, estado):
     Input("filtro-estado-consulta", "value"),
     Input("modo-vista-consultas", "value"),
     Input("semana-consultas-inicio", "data"),
+    Input("consultas-atualizacao", "data"),
 )
-def _filtrar_consultas(texto_pesquisa, especialidade, estado, modo="lista", semana_inicio_iso=None):
+def _filtrar_consultas(texto_pesquisa, especialidade, estado, modo="lista", semana_inicio_iso=None, _versao=None):
     df = DADOS["consultas"]
     if texto_pesquisa:
         ids_correspondentes = DADOS["utentes"][DADOS["utentes"]["nome"].str.contains(texto_pesquisa, case=False, na=False)]["id_utente"]
@@ -1339,6 +1676,276 @@ def _navegar_semana_consultas(n_anterior, n_seguinte, semana_atual_iso):
     elif ctx.triggered_id == "botao-semana-seguinte":
         inicio += pd.Timedelta(days=7)
     return inicio.date().isoformat()
+
+
+# --- Callbacks: agendamento — criar, cancelar, reagendar consulta ------------
+
+
+@app.callback(Output("form-consulta-profissional", "options"), Input("form-consulta-especialidade", "value"))
+def _profissionais_disponiveis_para_especialidade(especialidade):
+    if not especialidade:
+        return []
+    prof = DADOS["profissionais"]
+    disponiveis = prof[(prof["categoria"] == "Médico") & (prof["especialidade"] == especialidade) & (prof["estado"] == "Ativo")]
+    return [{"label": n, "value": n} for n in disponiveis["nome"]]
+
+
+@app.callback(
+    Output("mensagem-criar-consulta", "children"),
+    Output("consultas-atualizacao", "data", allow_duplicate=True),
+    Input("botao-criar-consulta", "n_clicks"),
+    State("form-consulta-utente", "value"),
+    State("form-consulta-especialidade", "value"),
+    State("form-consulta-profissional", "value"),
+    State("form-consulta-data", "date"),
+    State("form-consulta-hora", "value"),
+    State("form-consulta-sala", "value"),
+    State("consultas-atualizacao", "data"),
+    prevent_initial_call=True,
+)
+def _criar_consulta(n_clicks, id_utente, especialidade, profissional, data, hora, sala, versao):
+    if not n_clicks:
+        return dash.no_update, dash.no_update
+    if not all([id_utente, especialidade, profissional, data, hora, sala]):
+        return html.Div("Preenche todos os campos antes de marcar a consulta.", className="resultado-inline resultado-inline--risco_moderado"), dash.no_update
+
+    data_hora = pd.Timestamp(f"{data} {hora}")
+    if _conflito_consulta(profissional, sala, data_hora):
+        return (
+            html.Div("Já existe uma consulta marcada para este profissional ou esta sala a essa hora.", className="resultado-inline resultado-inline--risco_elevado"),
+            dash.no_update,
+        )
+
+    nova_linha = pd.DataFrame(
+        [
+            {
+                "id_consulta": _proximo_id_consulta(),
+                "id_utente": id_utente,
+                "data_hora": data_hora,
+                "especialidade": especialidade,
+                "profissional": profissional,
+                "sala": sala,
+                "estado": "Agendada",
+            }
+        ]
+    )
+    DADOS["consultas"] = pd.concat([DADOS["consultas"], nova_linha], ignore_index=True)
+    _registar_historico(id_utente, profissional, "Agendou consulta")
+
+    mensagem = f"Consulta marcada para {_nome_utente(id_utente)} em {data_hora.strftime('%d/%m/%Y %H:%M')}."
+    return html.Div(mensagem, className="resultado-inline resultado-inline--risco_baixo"), (versao or 0) + 1
+
+
+@app.callback(Output("select-consulta-gerir", "options"), Input("consultas-atualizacao", "data"))
+def _opcoes_consultas_para_gerir(_versao):
+    agendadas = (
+        DADOS["consultas"][DADOS["consultas"]["estado"] == "Agendada"]
+        .merge(DADOS["utentes"][["id_utente", "nome"]], on="id_utente")
+        .sort_values("data_hora")
+    )
+    return [
+        {"label": f"{r['data_hora'].strftime('%d/%m %H:%M')} · {r['nome']} · {r['especialidade']}", "value": r["id_consulta"]}
+        for _idx, r in agendadas.iterrows()
+    ]
+
+
+@app.callback(
+    Output("mensagem-gerir-consulta", "children"),
+    Output("consultas-atualizacao", "data", allow_duplicate=True),
+    Input("botao-cancelar-consulta", "n_clicks"),
+    State("select-consulta-gerir", "value"),
+    State("consultas-atualizacao", "data"),
+    prevent_initial_call=True,
+)
+def _cancelar_consulta(n_clicks, id_consulta, versao):
+    if not n_clicks:
+        return dash.no_update, dash.no_update
+    if not id_consulta:
+        return html.Div("Escolhe primeiro uma consulta.", className="resultado-inline resultado-inline--risco_moderado"), dash.no_update
+    linha = DADOS["consultas"][DADOS["consultas"]["id_consulta"] == id_consulta]
+    if linha.empty:
+        return html.Div("Consulta não encontrada — a lista pode ter mudado.", className="resultado-inline resultado-inline--risco_elevado"), dash.no_update
+    DADOS["consultas"].loc[DADOS["consultas"]["id_consulta"] == id_consulta, "estado"] = "Cancelada"
+    _registar_historico(linha.iloc[0]["id_utente"], linha.iloc[0]["profissional"], "Alterou estado da consulta")
+    return html.Div("Consulta cancelada.", className="resultado-inline resultado-inline--risco_moderado"), (versao or 0) + 1
+
+
+@app.callback(
+    Output("mensagem-gerir-consulta", "children", allow_duplicate=True),
+    Output("consultas-atualizacao", "data", allow_duplicate=True),
+    Input("botao-reagendar-consulta", "n_clicks"),
+    State("select-consulta-gerir", "value"),
+    State("form-reagendar-data", "date"),
+    State("form-reagendar-hora", "value"),
+    State("form-reagendar-sala", "value"),
+    State("consultas-atualizacao", "data"),
+    prevent_initial_call=True,
+)
+def _reagendar_consulta(n_clicks, id_consulta, data, hora, sala, versao):
+    if not n_clicks:
+        return dash.no_update, dash.no_update
+    if not all([id_consulta, data, hora, sala]):
+        return html.Div("Escolhe a consulta e preenche a nova data, hora e sala.", className="resultado-inline resultado-inline--risco_moderado"), dash.no_update
+    linha = DADOS["consultas"][DADOS["consultas"]["id_consulta"] == id_consulta]
+    if linha.empty:
+        return html.Div("Consulta não encontrada — a lista pode ter mudado.", className="resultado-inline resultado-inline--risco_elevado"), dash.no_update
+
+    profissional = linha.iloc[0]["profissional"]
+    nova_data_hora = pd.Timestamp(f"{data} {hora}")
+    if _conflito_consulta(profissional, sala, nova_data_hora, excluir_id=id_consulta):
+        return (
+            html.Div("Já existe uma consulta marcada para este profissional ou esta sala a essa hora.", className="resultado-inline resultado-inline--risco_elevado"),
+            dash.no_update,
+        )
+
+    DADOS["consultas"].loc[DADOS["consultas"]["id_consulta"] == id_consulta, ["data_hora", "sala"]] = [nova_data_hora, sala]
+    _registar_historico(linha.iloc[0]["id_utente"], profissional, "Alterou estado da consulta")
+    mensagem = f"Consulta reagendada para {nova_data_hora.strftime('%d/%m/%Y %H:%M')}."
+    return html.Div(mensagem, className="resultado-inline resultado-inline--risco_baixo"), (versao or 0) + 1
+
+
+# --- Callbacks: profissionais — CRUD ------------------------------------------
+
+
+@app.callback(Output("corpo-tabela-profissionais", "children"), Input("profissionais-atualizacao", "data"))
+def _atualizar_tabela_profissionais(_versao):
+    return _tabela_profissionais()
+
+
+@app.callback(Output("select-profissional-gerir", "options"), Input("profissionais-atualizacao", "data"))
+def _opcoes_profissionais_para_gerir(_versao):
+    prof = DADOS["profissionais"].sort_values("nome")
+    return [{"label": f"{n} ({c})", "value": n} for n, c in zip(prof["nome"], prof["categoria"], strict=True)]
+
+
+@app.callback(
+    Output("mensagem-criar-profissional", "children"),
+    Output("profissionais-atualizacao", "data", allow_duplicate=True),
+    Input("botao-criar-profissional", "n_clicks"),
+    State("form-prof-nome", "value"),
+    State("form-prof-categoria", "value"),
+    State("form-prof-especialidade", "value"),
+    State("form-prof-contacto", "value"),
+    State("form-prof-cedula", "value"),
+    State("form-prof-admissao", "date"),
+    State("profissionais-atualizacao", "data"),
+    prevent_initial_call=True,
+)
+def _criar_profissional(n_clicks, nome, categoria, especialidade, contacto, cedula, admissao, versao):
+    if not n_clicks:
+        return dash.no_update, dash.no_update
+    nome = (nome or "").strip()
+    if not nome or not categoria:
+        return html.Div("Preenche pelo menos o nome e a categoria.", className="resultado-inline resultado-inline--risco_moderado"), dash.no_update
+    if categoria == "Médico" and not especialidade:
+        return (
+            html.Div("Escolhe a especialidade — é obrigatória para a categoria Médico.", className="resultado-inline resultado-inline--risco_moderado"),
+            dash.no_update,
+        )
+    if nome in DADOS["profissionais"]["nome"].values:
+        return html.Div("Já existe um profissional com este nome.", className="resultado-inline resultado-inline--risco_elevado"), dash.no_update
+
+    novo_id = f"P{len(DADOS['profissionais']) + 1:04d}"
+    nova_linha = pd.DataFrame(
+        [
+            {
+                "id_profissional": novo_id,
+                "nome": nome,
+                "categoria": categoria,
+                "especialidade": especialidade if categoria == "Médico" else "",
+                "contacto": contacto or "—",
+                "numero_cedula": cedula or "—",
+                "data_admissao": admissao or datetime.date.today().isoformat(),
+                "estado": "Ativo",
+            }
+        ]
+    )
+    DADOS["profissionais"] = pd.concat([DADOS["profissionais"], nova_linha], ignore_index=True)
+    return html.Div(f"Profissional {nome} adicionado.", className="resultado-inline resultado-inline--risco_baixo"), (versao or 0) + 1
+
+
+@app.callback(
+    Output("mensagem-gerir-profissional", "children"),
+    Output("profissionais-atualizacao", "data", allow_duplicate=True),
+    Input("botao-editar-profissional", "n_clicks"),
+    State("select-profissional-gerir", "value"),
+    State("form-prof-editar-contacto", "value"),
+    State("form-prof-editar-cedula", "value"),
+    State("form-prof-editar-especialidade", "value"),
+    State("profissionais-atualizacao", "data"),
+    prevent_initial_call=True,
+)
+def _editar_profissional(n_clicks, nome, contacto, cedula, especialidade, versao):
+    if not n_clicks:
+        return dash.no_update, dash.no_update
+    if not nome:
+        return html.Div("Escolhe primeiro um profissional.", className="resultado-inline resultado-inline--risco_moderado"), dash.no_update
+    mascara = DADOS["profissionais"]["nome"] == nome
+    if not mascara.any():
+        return html.Div("Profissional não encontrado — a lista pode ter mudado.", className="resultado-inline resultado-inline--risco_elevado"), dash.no_update
+    if not any([contacto, cedula, especialidade]):
+        return html.Div("Preenche pelo menos um campo para atualizar.", className="resultado-inline resultado-inline--risco_moderado"), dash.no_update
+
+    if contacto:
+        DADOS["profissionais"].loc[mascara, "contacto"] = contacto
+    if cedula:
+        DADOS["profissionais"].loc[mascara, "numero_cedula"] = cedula
+    categoria = DADOS["profissionais"].loc[mascara, "categoria"].iloc[0]
+    if especialidade and categoria == "Médico":
+        DADOS["profissionais"].loc[mascara, "especialidade"] = especialidade
+    elif especialidade:
+        return (
+            html.Div(f"{nome} não é Médico — a especialidade só se aplica a essa categoria; os outros campos foram guardados.", className="resultado-inline resultado-inline--risco_moderado"),
+            (versao or 0) + 1,
+        )
+    return html.Div(f"Dados de {nome} atualizados.", className="resultado-inline resultado-inline--risco_baixo"), (versao or 0) + 1
+
+
+@app.callback(
+    Output("mensagem-gerir-profissional", "children", allow_duplicate=True),
+    Output("profissionais-atualizacao", "data", allow_duplicate=True),
+    Input("botao-alternar-estado-profissional", "n_clicks"),
+    State("select-profissional-gerir", "value"),
+    State("profissionais-atualizacao", "data"),
+    prevent_initial_call=True,
+)
+def _alternar_estado_profissional(n_clicks, nome, versao):
+    if not n_clicks:
+        return dash.no_update, dash.no_update
+    if not nome:
+        return html.Div("Escolhe primeiro um profissional.", className="resultado-inline resultado-inline--risco_moderado"), dash.no_update
+    mascara = DADOS["profissionais"]["nome"] == nome
+    if not mascara.any():
+        return html.Div("Profissional não encontrado — a lista pode ter mudado.", className="resultado-inline resultado-inline--risco_elevado"), dash.no_update
+    atual = DADOS["profissionais"].loc[mascara, "estado"].iloc[0]
+    novo_estado = "Inativo" if atual == "Ativo" else "Ativo"
+    DADOS["profissionais"].loc[mascara, "estado"] = novo_estado
+    return html.Div(f"{nome} passou a {novo_estado}.", className="resultado-inline resultado-inline--risco_baixo"), (versao or 0) + 1
+
+
+@app.callback(
+    Output("mensagem-gerir-profissional", "children", allow_duplicate=True),
+    Output("profissionais-atualizacao", "data", allow_duplicate=True),
+    Input("botao-remover-profissional", "n_clicks"),
+    State("select-profissional-gerir", "value"),
+    State("profissionais-atualizacao", "data"),
+    prevent_initial_call=True,
+)
+def _remover_profissional(n_clicks, nome, versao):
+    if not n_clicks:
+        return dash.no_update, dash.no_update
+    if not nome:
+        return html.Div("Escolhe primeiro um profissional.", className="resultado-inline resultado-inline--risco_moderado"), dash.no_update
+    if _profissional_tem_historico(nome):
+        mensagem = (
+            f"{nome} tem consultas, plano de cuidados ou outro histórico associado — não pode ser removido "
+            "para não partir esses registos. Marca como Inativo em vez de remover."
+        )
+        return html.Div(mensagem, className="resultado-inline resultado-inline--risco_moderado"), dash.no_update
+    if nome not in DADOS["profissionais"]["nome"].values:
+        return html.Div("Profissional não encontrado — a lista pode ter mudado.", className="resultado-inline resultado-inline--risco_elevado"), dash.no_update
+    DADOS["profissionais"] = DADOS["profissionais"][DADOS["profissionais"]["nome"] != nome].reset_index(drop=True)
+    return html.Div(f"{nome} removido.", className="resultado-inline resultado-inline--risco_baixo"), (versao or 0) + 1
 
 
 # --- Callbacks: ficha do utente — sinais vitais -------------------------------
@@ -1434,29 +2041,29 @@ def _calcular_queda_tab(n_clicks, historico, secundario, apoio, soro, marcha, me
 )
 def _descarregar_csv_faturacao(n_clicks):
     fat = DADOS["faturacao"].merge(DADOS["utentes"][["id_utente", "nome", "tipo_cuidado"]], on="id_utente")
-    fat = fat.rename(
-        columns={
-            "nome": "Utente",
-            "tipo_cuidado": "Tipo",
-            "valor_a_pagar_utente": "Valor a pagar (€)",
-            "comparticipacao_ss": "Comparticipação SS (€)",
-            "ars_diarias_internamento": "ARS diárias (€)",
-            "ars_pacote_medicamentos": "ARS medicamentos (€)",
-            "ars_remuneracao_adicional": "ARS remuneração adicional (€)",
-            "seguradora": "Seguradora",
-            "numero_apolice": "Nº apólice",
-            "cobertura_percentual_seguro": "Cobertura seguro (%)",
-            "valor_seguradora": "Valor seguradora (€)",
-            "copagamento_utente": "Copagamento utente (€)",
-            "saldo_cc": "Saldo CC (€)",
-            "erro_fatura": "Erro de fatura",
-        }
-    )
-    # sep=";" e encoding="utf-8-sig": o Excel em português usa a vírgula como
-    # separador decimal, por isso espera ";" a separar colunas num CSV — com
-    # sep="," (o padrão do pandas) o ficheiro abre tudo numa única coluna. O
-    # "utf-8-sig" garante que os acentos (é, ç, ã...) aparecem corretos.
-    return dcc.send_data_frame(fat.to_csv, "faturacao.csv", index=False, sep=";", encoding="utf-8-sig")
+    fat = fat[list(COLUNAS_EXPORTACAO_FATURACAO.keys())].rename(columns=COLUNAS_EXPORTACAO_FATURACAO)
+    # sep=";" + decimal="," + encoding="utf-8-sig": o Excel em português usa
+    # a vírgula como separador decimal, por isso precisa de ";" a separar
+    # colunas (com sep="," o ficheiro abria tudo numa única coluna) E de ","
+    # nos números com casas decimais (com decimal="." — o padrão do pandas —
+    # o Excel em PT lê "721.4" como texto, não como número, porque não
+    # reconhece o ponto como separador decimal). O "utf-8-sig" garante que os
+    # acentos (é, ç, ã...) aparecem corretos. O Excel (.xlsx) acima não tem
+    # nenhuma destas ambiguidades — é o formato recomendado; este CSV fica
+    # como alternativa para quem precisar de importar noutra ferramenta.
+    return dcc.send_data_frame(fat.to_csv, "faturacao.csv", index=False, sep=";", decimal=",", encoding="utf-8-sig")
+
+
+@app.callback(
+    Output("descarregar-excel-faturacao", "data"),
+    Input("botao-excel-faturacao", "n_clicks"),
+    prevent_initial_call=True,
+)
+def _descarregar_excel_faturacao(n_clicks):
+    if not n_clicks:
+        return dash.no_update
+    conteudo = _gerar_excel_faturacao()
+    return dcc.send_bytes(lambda b: b.write(conteudo), "faturacao.xlsx")
 
 
 @app.callback(

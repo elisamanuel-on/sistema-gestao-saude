@@ -249,6 +249,8 @@ body {
 .etiqueta-estado--em-acompanhamento { background: var(--primaria-suave); color: var(--primaria); }
 .etiqueta-estado--alta { background: var(--risco-baixo-suave); color: var(--risco-baixo); }
 .etiqueta-estado--em-espera { background: var(--risco-moderado-suave); color: var(--risco-moderado); }
+.etiqueta-estado--ativo { background: var(--risco-baixo-suave); color: var(--risco-baixo); }
+.etiqueta-estado--inativo { background: var(--borda); color: var(--texto-suave); }
 
 /* Etiquetas de tipo de unidade (UCC/ERPI/SAD/Clínica-Hospital) — cor
    categórica, nunca a escala de risco. */
@@ -427,6 +429,37 @@ body {
 }
 
 .botao-secundario:hover { background: var(--primaria-suave); }
+
+/* Painéis retráteis (html.Details/Summary) — usados nos formulários de
+   criar/reagendar consulta e de novo profissional, para não sobrecarregar
+   a página com formulários sempre visíveis. */
+.painel-details {
+  background: var(--cartao);
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+}
+
+.painel-details .painel-details {
+  margin: 14px 0 0;
+  padding: 14px 16px;
+  background: var(--fundo);
+}
+
+.resumo-details {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--primaria);
+  font-size: 0.92rem;
+  padding: 2px 0;
+}
+
+.painel-details .grelha-formulario,
+.painel-details .botao-primario,
+.painel-details .botao-secundario {
+  margin-top: 12px;
+}
 
 /* Dropdowns (dcc.Dropdown) — mesmas classes internas já confirmadas por
    inspeção direta (Playwright) noutros projetos com esta versão do Dash:

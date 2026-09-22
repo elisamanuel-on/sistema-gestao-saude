@@ -69,13 +69,35 @@ funcional, combinada e depois redesenhada.
   taxa de comparência, faltas), gráfico de consultas por especialidade, e
   duas vistas: **lista** filtrável/pesquisável por utente, especialidade e
   estado (Agendada, Realizada, Cancelada, Falta), ou **calendário semanal**
-  (com navegação para a semana anterior/seguinte).
+  (com navegação para a semana anterior/seguinte). Inclui **CRUD completo de
+  agendamento**: formulário "+ Nova Consulta" (utente, especialidade →
+  profissional filtrado automaticamente pela especialidade escolhida, data,
+  hora, sala) com **validação de conflitos** (não deixa marcar duas
+  consultas para o mesmo profissional ou a mesma sala à mesma hora), e um
+  painel "Gerir consulta existente" para **cancelar** ou **reagendar**
+  (nova data/hora/sala, com a mesma validação de conflitos) qualquer
+  consulta com estado Agendada.
+- **Profissionais** — cadastro da equipa (médicos, com especialidade, para
+  as consultas; e equipa de apoio — enfermagem, fisioterapia, nutrição,
+  psicologia, serviço social — para o plano de cuidados), com KPIs
+  (total, ativos, inativos) e **CRUD completo**: formulário "+ Novo
+  Profissional" (nome, categoria, especialidade — só para Médico —,
+  contacto, nº de cédula profissional, data de admissão), e um painel
+  "Gerir profissional" para editar contacto/cédula/especialidade, alternar
+  entre Ativo/Inativo, ou remover. A **remoção é bloqueada** sempre que o
+  profissional tenha qualquer histórico associado (consultas, plano de
+  cuidados, diagnósticos, prescrições, visitas, exames ou histórico) — para
+  não partir esses registos — sugerindo marcar como **Inativo** em
+  alternativa (soft-delete).
 - **Faturação** — valor a pagar pelos utentes, comparticipação da Segurança
   Social, verbas ARS (diárias, medicamentos, remuneração adicional),
   **faturação a seguradoras privadas** (cobertura, valor pago pela
   seguradora, copagamento do utente), saldos e sinalização de erros de
-  fatura, com exportação para CSV (separador `;` e `utf-8-sig`, para abrir
-  corretamente acentos e colunas no Excel em português).
+  fatura, com **exportação em Excel** (`.xlsx`, formatado — cabeçalho a
+  negrito, valores em formato moeda, largura de colunas ajustada, linha de
+  cabeçalho fixa) como formato principal, e **CSV** como alternativa
+  secundária (separador `;`, vírgula decimal e `utf-8-sig`, para abrir
+  corretamente acentos, colunas e casas decimais no Excel em português).
 - **Sobre este projeto** (`/sobre`) — página dentro da própria aplicação,
   para quem abre o link em produção sem nunca ver o repositório.
 
@@ -84,10 +106,11 @@ funcional, combinada e depois redesenhada.
 **Nenhuma pessoa real, utente ou paciente está representada em nenhum
 ficheiro deste projeto.** Os 45 utentes (`dados/utentes.csv`), os sinais
 vitais, diagnósticos, prescrições, visitas, alergias, documentos, exames,
-plano de cuidados, consultas e faturação são **todos gerados
-sinteticamente** (`scripts/gerar_dados_utentes.py`, com as listas
-partilhadas em `constantes.py`), incluindo os nomes (biblioteca `Faker`,
-nunca uma pessoa real) e os nomes dos profissionais. As **seguradoras** que
+plano de cuidados, consultas, os 14 profissionais (`dados/profissionais.csv`)
+e faturação são **todos gerados sinteticamente**
+(`scripts/gerar_dados_utentes.py`, com as listas partilhadas em
+`constantes.py`), incluindo os nomes (biblioteca `Faker`, nunca uma pessoa
+real) e os contactos dos profissionais. As **seguradoras** que
 aparecem na faturação (SegurCuidar, ViverSeguro, Confiança Saúde,
 Proteger+) também têm nomes inventados — nenhuma é uma marca real. Os
 valores clínicos usados para pré-preencher os formulários de risco foram
@@ -188,7 +211,7 @@ pytest -v
 ruff check --select=F,E9,B .
 ```
 
-53 testes cobrem: limpeza/estruturação de dados, a escala de risco de queda
+67 testes cobrem: limpeza/estruturação de dados, a escala de risco de queda
 (incluindo as fronteiras exatas entre baixo/moderado/elevado), o resumo
 automático, o roteamento e os callbacks principais, a validade das
 previsões dos dois modelos de ML, o módulo Clínica/Hospital (coerência
@@ -196,16 +219,34 @@ profissional/especialidade nas consultas, coerência profissional/área no
 plano de cuidados, exames, e as colunas de seguro na faturação), o acesso
 por perfil (que secções cada perfil vê), a Visão Geral e o cálculo de
 utentes com risco elevado, a vista de calendário de consultas, a exportação
-em PDF da ficha (valida que o ficheiro gerado é um PDF válido), e o
-separador `;` na exportação CSV da faturação.
+em PDF da ficha (valida que o ficheiro gerado é um PDF válido), a
+exportação da faturação em CSV (separador `;` e vírgula decimal) e em Excel
+(valida que o ficheiro gerado é um `.xlsx` válido), o **CRUD de
+agendamento** (criar consulta sem conflito, bloquear conflito de
+profissional/sala/hora, exigir todos os campos, cancelar, reagendar), e o
+**CRUD de profissionais** (carregamento dos dados, recusar Médico sem
+especialidade, recusar nome duplicado, criar e remover sem histórico,
+bloquear remoção com histórico, alternar Ativo/Inativo, editar contacto, e
+o carregamento da página).
 
 ## O que ficaria para uma próxima iteração
 
 Sendo um projeto de portfólio, há decisões de âmbito deliberadas: o login
 por perfil é só uma simulação de interface (sem palavra-passe nem
 autenticação real — não há verificação de identidade nem proteção real dos
-dados por trás), sem persistência em base de dados (os dados vivem em CSV,
-carregados uma vez no arranque), sem exportação em Excel para os utentes
-(só CSV na faturação), sem conformidade RGPD/RNCCI formal, e a vista de
-calendário de consultas é semanal, sem arrastar/largar para reagendar —
-tudo isto seria o próximo passo natural para uma versão de produção.
+dados por trás), sem conformidade RGPD/RNCCI formal, e a vista de
+calendário de consultas é semanal, sem arrastar/largar para reagendar.
+
+**Persistência**: os dados-base (utentes, sinais vitais, diagnósticos, etc.)
+vivem em CSV, carregados uma vez no arranque. As **consultas criadas,
+canceladas ou reagendadas**, e os **profissionais criados, editados ou
+removidos**, através da aplicação ficam **apenas em memória do processo do
+servidor** — não são escritos de volta para o CSV, por isso são perdidos
+quando o servidor reinicia, e são partilhados por todas as pessoas a usar a
+mesma instância ao mesmo tempo (não há sessão isolada por utilizador). É
+uma decisão de âmbito consciente para uma demonstração de portfólio — a
+próxima iteração natural seria trocar os CSV por uma base de dados real
+(p.ex. PostgreSQL/SQLite) para persistência verdadeira e concorrência
+segura entre utilizadores.
+
+Tudo isto seria o próximo passo natural para uma versão de produção.

@@ -27,6 +27,7 @@ from constantes import (
     ESTADOS_AMBULATORIO,
     ESTADOS_INTERNAMENTO,
     PROFISSIONAIS,
+    PROFISSIONAIS_APOIO,
     PROFISSIONAIS_POR_AREA_CUIDADOS,
     PROFISSIONAL_ESPECIALIDADE,
     SEGURADORAS,
@@ -425,6 +426,60 @@ def _gerar_consultas(utentes):
     return pd.DataFrame(linhas).sort_values("data_hora").reset_index(drop=True)
 
 
+AREA_PARA_CATEGORIA = {
+    "Enfermagem": "Enfermeiro",
+    "Fisioterapia": "Fisioterapeuta",
+    "Nutrição": "Nutricionista",
+    "Psicologia": "Psicólogo",
+    "Serviço Social": "Assistente Social",
+}
+
+
+def _gerar_profissionais():
+    """Cadastro inicial de profissionais, gerado a partir das listas já
+    existentes (médicos com especialidade + equipa de apoio). Cada um fica
+    com contacto, nº de cédula e data de admissão fictícios, e estado
+    "Ativo" — este ficheiro passa a ser a fonte de verdade para o módulo
+    Profissionais (que permite adicionar/editar/inativar/remover a partir
+    da própria aplicação; ver app.py)."""
+    hoje = datetime.date.today()
+    linhas = []
+    contador = 1
+
+    for nome, especialidade in PROFISSIONAL_ESPECIALIDADE.items():
+        linhas.append(
+            {
+                "id_profissional": f"P{contador:04d}",
+                "nome": nome,
+                "categoria": "Médico",
+                "especialidade": especialidade,
+                "contacto": faker_pt.email(),
+                "numero_cedula": f"CP-{ALEATORIO.randint(10000, 99999)}",
+                "data_admissao": (hoje - datetime.timedelta(days=ALEATORIO.randint(200, 4000))).isoformat(),
+                "estado": "Ativo",
+            }
+        )
+        contador += 1
+
+    for area, nomes in PROFISSIONAIS_APOIO.items():
+        for nome in nomes:
+            linhas.append(
+                {
+                    "id_profissional": f"P{contador:04d}",
+                    "nome": nome,
+                    "categoria": AREA_PARA_CATEGORIA[area],
+                    "especialidade": "",
+                    "contacto": faker_pt.email(),
+                    "numero_cedula": f"CP-{ALEATORIO.randint(10000, 99999)}",
+                    "data_admissao": (hoje - datetime.timedelta(days=ALEATORIO.randint(200, 4000))).isoformat(),
+                    "estado": "Ativo",
+                }
+            )
+            contador += 1
+
+    return pd.DataFrame(linhas)
+
+
 def _gerar_historico(utentes):
     """Histórico/auditoria fictício por utente (quem alterou o quê e
     quando) — só para dar ao portfólio uma noção de rastreabilidade, típica
@@ -486,6 +541,7 @@ def gerar_tudo():
     _gerar_consultas(utentes).to_csv(PASTA_DADOS / "consultas.csv", index=False)
     _gerar_faturacao(utentes).to_csv(PASTA_DADOS / "faturacao.csv", index=False)
     _gerar_historico(utentes).to_csv(PASTA_DADOS / "historico.csv", index=False)
+    _gerar_profissionais().to_csv(PASTA_DADOS / "profissionais.csv", index=False)
     _gerar_altas(utentes).to_csv(PASTA_DADOS / "altas.csv", index=False)
 
     with open(PASTA_DADOS / "capacidade.json", "w", encoding="utf-8") as f:
