@@ -99,19 +99,31 @@ TIPOS_EXAME_POR_CATEGORIA = {
 
 # Perfis de acesso — demonstração de portfólio, sem autenticação real (sem
 # palavra-passe nem verificação de identidade). Cada perfil só vê as secções
-# de navegação relevantes ao seu papel: só o Administrativo vê a Faturação
-# (dados financeiros), refletindo a separação típica entre pessoal clínico e
-# administrativo num serviço real.
-PERFIS_ACESSO = ["Enfermeiro", "Médico", "Administrativo"]
+# de navegação relevantes ao seu papel.
+#
+# Receção herda exatamente as capacidades do antigo perfil único
+# "Administrativo": agenda, marcar/cancelar/reagendar consultas, faturação.
+# Admin tem tudo o que a Receção tem, mais a gestão do cadastro de
+# profissionais e a visão de relatórios de qualquer profissional (a Receção
+# só vê o relatório de uma consulta específica, não a atividade agregada de
+# um profissional — isso é informação de gestão, não de front-desk).
+PERFIS_ACESSO = ["Enfermeiro", "Médico", "Receção", "Admin"]
 
 SECCOES_POR_PERFIL = {
     "Enfermeiro": ["Início", "Geral", "Cuidados continuados", "Clínica & Hospital", "Relatórios"],
     "Médico": ["Início", "Geral", "Cuidados continuados", "Clínica & Hospital", "Relatórios"],
-    "Administrativo": ["Início", "Geral", "Cuidados continuados", "Clínica & Hospital", "Relatórios", "Gestão"],
+    "Receção": ["Início", "Geral", "Cuidados continuados", "Clínica & Hospital", "Relatórios", "Faturação"],
+    "Admin": ["Início", "Geral", "Cuidados continuados", "Clínica & Hospital", "Relatórios", "Faturação", "Profissionais"],
 }
 
-# "Profissionais" é gerido junto de "Gestão" (Faturação) — cadastro de
-# pessoal é tipicamente uma função administrativa, tal como a Faturação.
+# Perfis com acesso de gestão alargado (usados nas verificações de RBAC ao
+# longo do app.py, em vez de comparar sempre com uma string solta).
+PERFIS_GESTAO_AGENDA = {"Médico", "Receção", "Admin"}  # podem marcar/cancelar/reagendar consultas
+PERFIS_RELATORIO_QUALQUER_PROFISSIONAL = {"Admin"}  # escolhem livremente o profissional no relatório de atividade
+PERFIS_SEM_ATOS_CLINICOS = {"Receção"}  # não têm avaliação de risco, prescrições nem receita
+
+# "Profissionais" é gerido à parte — cadastro de pessoal é uma função de
+# gestão, reservada ao perfil Admin.
 
 # Ações fictícias para o histórico/auditoria de cada utente (quem alterou o
 # quê e quando) — dado sintético, tal como todo o resto (ver README).
