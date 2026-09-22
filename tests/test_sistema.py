@@ -658,17 +658,20 @@ def test_ficha_utente_mostra_avaliacao_risco_para_medico_enfermeiro_e_admin():
     assert "Avaliação de risco" in str(m._pagina_ficha_utente(id_utente))
 
 
-def test_pagina_consultas_esconde_paineis_de_gestao_para_enfermeiro():
-    html_enfermeiro = str(m._pagina_consultas("Enfermeiro"))
-    assert "+ Nova Consulta" not in html_enfermeiro
-    assert "Gerir consulta existente" not in html_enfermeiro
+def test_pagina_consultas_esconde_paineis_de_gestao_para_enfermeiro_e_medico():
+    # Marcar/cancelar/reagendar é tarefa de agenda/front-desk — só a
+    # Receção e o Admin. O Médico continua a ver a sua agenda (mais abaixo,
+    # test_filtrar_consultas_medico_ve_apenas_a_sua_agenda), só não a gere.
+    for perfil in ("Enfermeiro", "Médico"):
+        pagina = str(m._pagina_consultas(perfil))
+        assert "+ Nova Consulta" not in pagina
+        assert "Gerir consulta existente" not in pagina
 
 
-def test_pagina_consultas_mostra_paineis_de_gestao_para_medico_recepcao_e_admin():
-    html_medico = str(m._pagina_consultas("Médico"))
+def test_pagina_consultas_mostra_paineis_de_gestao_para_recepcao_e_admin():
     html_recepcao = str(m._pagina_consultas("Receção"))
     html_admin = str(m._pagina_consultas("Admin"))
-    for pagina in (html_medico, html_recepcao, html_admin):
+    for pagina in (html_recepcao, html_admin):
         assert "+ Nova Consulta" in pagina
         assert "Gerir consulta existente" in pagina
 

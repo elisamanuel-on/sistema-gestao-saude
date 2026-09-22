@@ -1426,8 +1426,9 @@ def _vista_calendario_consultas(df, inicio):
 
 
 def _pagina_consultas(perfil=None, profissional=None):
-    # Enfermeiro só consulta a agenda (sem marcar/cancelar/reagendar — isso
-    # é ação do Médico, da Receção ou do Admin, que gerem a agenda toda).
+    # Enfermeiro e Médico só consultam a agenda (o Médico vê a sua própria,
+    # filtrada — ver _filtrar_consultas); marcar/cancelar/reagendar é a
+    # Receção (ou o Admin) que faz, tal como aconteceria com contas reais.
     mostrar_gestao_consulta = perfil in PERFIS_GESTAO_AGENDA
     consultas = DADOS["consultas"]
     hoje = pd.Timestamp.now().normalize()

@@ -118,7 +118,11 @@ SECCOES_POR_PERFIL = {
 
 # Perfis com acesso de gestão alargado (usados nas verificações de RBAC ao
 # longo do app.py, em vez de comparar sempre com uma string solta).
-PERFIS_GESTAO_AGENDA = {"Médico", "Receção", "Admin"}  # podem marcar/cancelar/reagendar consultas
+# Marcar/cancelar/reagendar é uma tarefa de agenda/front-desk — só a
+# Receção (e o Admin, que vê tudo). O Médico continua a ver a sua agenda
+# (filtrada à própria identidade), mas só a gere através da Receção, tal
+# como aconteceria com contas reais.
+PERFIS_GESTAO_AGENDA = {"Receção", "Admin"}  # podem marcar/cancelar/reagendar consultas
 PERFIS_RELATORIO_QUALQUER_PROFISSIONAL = {"Admin"}  # escolhem livremente o profissional no relatório de atividade
 PERFIS_SEM_ATOS_CLINICOS = {"Receção"}  # não têm avaliação de risco, prescrições nem receita
 
