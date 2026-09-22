@@ -319,14 +319,22 @@ def test_faturacao_sem_seguro_aparece_como_travessao():
 # --- Visão Geral, login por perfil, PDF, calendário, histórico, sobre -------
 
 
-def test_perfis_de_acesso_tem_tres_opcoes():
-    assert constantes.PERFIS_ACESSO == ["Enfermeiro", "Médico", "Administrativo"]
+def test_perfis_de_acesso_tem_quatro_opcoes():
+    assert constantes.PERFIS_ACESSO == ["Enfermeiro", "Médico", "Receção", "Admin"]
 
 
-def test_so_administrativo_ve_a_seccao_gestao():
-    assert "Gestão" in constantes.SECCOES_POR_PERFIL["Administrativo"]
-    assert "Gestão" not in constantes.SECCOES_POR_PERFIL["Enfermeiro"]
-    assert "Gestão" not in constantes.SECCOES_POR_PERFIL["Médico"]
+def test_so_admin_ve_a_seccao_profissionais():
+    assert "Profissionais" in constantes.SECCOES_POR_PERFIL["Admin"]
+    assert "Profissionais" not in constantes.SECCOES_POR_PERFIL["Receção"]
+    assert "Profissionais" not in constantes.SECCOES_POR_PERFIL["Enfermeiro"]
+    assert "Profissionais" not in constantes.SECCOES_POR_PERFIL["Médico"]
+
+
+def test_recepcao_e_admin_veem_faturacao_mas_nao_enfermeiro_nem_medico():
+    assert "Faturação" in constantes.SECCOES_POR_PERFIL["Receção"]
+    assert "Faturação" in constantes.SECCOES_POR_PERFIL["Admin"]
+    assert "Faturação" not in constantes.SECCOES_POR_PERFIL["Enfermeiro"]
+    assert "Faturação" not in constantes.SECCOES_POR_PERFIL["Médico"]
 
 
 def test_pagina_login_tem_o_contentor_do_corpo_dinamico():
@@ -339,7 +347,7 @@ def test_pagina_login_tem_o_contentor_do_corpo_dinamico():
     assert "perfil-provisorio-login" in pagina
 
 
-def test_corpo_login_escolha_perfil_mostra_os_tres_perfis():
+def test_corpo_login_escolha_perfil_mostra_os_quatro_perfis():
     corpo = str(m._corpo_login_escolha_perfil())
     for perfil in constantes.PERFIS_ACESSO:
         assert perfil in corpo
@@ -358,12 +366,13 @@ def test_dados_sessao_aceita_formato_novo_e_antigo():
     assert m._dados_sessao(None) == (None, None)
     assert m._dados_sessao("Médico") == ("Médico", None)  # sessões antigas (só string)
     assert m._dados_sessao({"perfil": "Médico", "profissional": "Dr. Hugo Teixeira"}) == ("Médico", "Dr. Hugo Teixeira")
-    assert m._dados_sessao({"perfil": "Administrativo", "profissional": None}) == ("Administrativo", None)
+    assert m._dados_sessao({"perfil": "Receção", "profissional": None}) == ("Receção", None)
 
 
 def test_profissoes_com_profissional_sao_medico_e_enfermeiro():
     assert m.PERFIS_COM_PROFISSIONAL == {"Médico", "Enfermeiro"}
-    assert "Administrativo" not in m.PERFIS_COM_PROFISSIONAL
+    assert "Receção" not in m.PERFIS_COM_PROFISSIONAL
+    assert "Admin" not in m.PERFIS_COM_PROFISSIONAL
 
 
 def test_renderizar_corpo_login_sem_provisorio_mostra_perfis():
@@ -389,25 +398,74 @@ def test_barra_lateral_esconde_faturacao_para_enfermeiro():
     assert "Utentes" in barra
 
 
-def test_barra_lateral_mostra_faturacao_para_administrativo():
-    barra = str(m._barra_lateral("/", "Administrativo"))
-    assert "Faturação" in barra
+def test_barra_lateral_mostra_faturacao_para_recepcao_e_admin():
+    barra_recepcao = str(m._barra_lateral("/", "Receção"))
+    barra_admin = str(m._barra_lateral("/", "Admin"))
+    assert "Faturação" in barra_recepcao
+    assert "Faturação" in barra_admin
+
+
+def test_barra_lateral_mostra_profissionais_so_para_admin():
+    barra_admin = str(m._barra_lateral("/", "Admin"))
+    barra_recepcao = str(m._barra_lateral("/", "Receção"))
+    assert "Profissionais" in barra_admin
+    assert "Profissionais" not in barra_recepcao
 
 
 def test_rotear_pagina_sem_perfil_mostra_login():
-    pagina = str(m._rotear_pagina("/utentes", None, None))
+    pagina = str(m._rotear_pagina("/utentes", None, None, None))
     assert "perfil" in pagina.lower() or "Enfermeiro" in pagina
 
 
 def test_rotear_pagina_com_perfil_mostra_conteudo_pedido():
-    pagina = str(m._rotear_pagina("/utentes", None, "Médico"))
+    pagina = str(m._rotear_pagina("/utentes", None, "Médico", None))
     assert "Nenhum utente encontrado" not in pagina  # é a página de utentes, não a de login
     assert "corpo-tabela-utentes" in pagina
+
+
+def test_rotear_pagina_profissionais_recusa_recepcao_mas_permite_admin():
+    pagina_recepcao = str(m._rotear_pagina("/profissionais", None, "Receção", None))
+    assert "Acesso não disponível" in pagina_recepcao
+    assert "corpo-tabela-profissionais" not in pagina_recepcao
+
+    pagina_admin = str(m._rotear_pagina("/profissionais", None, "Admin", None))
+    assert "corpo-tabela-profissionais" in pagina_admin
+
+
+def test_rotear_pagina_inicio_mostra_banner_de_orientacao_uma_vez():
+    pagina_primeira_vez = str(m._rotear_pagina("/", None, "Receção", None))
+    assert "Entendi, não mostrar mais" in pagina_primeira_vez
+
+    pagina_dispensada = str(m._rotear_pagina("/", None, "Receção", {"Receção": True}))
+    assert "Entendi, não mostrar mais" not in pagina_dispensada
+
+    # Dispensar num perfil não esconde a orientação de outro perfil.
+    pagina_outro_perfil = str(m._rotear_pagina("/", None, "Admin", {"Receção": True}))
+    assert "Entendi, não mostrar mais" in pagina_outro_perfil
 
 
 def test_pagina_visao_geral_renderiza_com_kpis():
     pagina = str(m._pagina_visao_geral())
     assert "Visão Geral" in pagina
+
+
+def test_pagina_visao_geral_sem_perfil_nao_mostra_banner():
+    # Sessões antigas (sem perfil no _rotear_pagina) não devem partir.
+    assert "banner-orientacao" not in str(m._pagina_visao_geral())
+
+
+def test_banner_orientacao_tem_texto_para_os_quatro_perfis():
+    for perfil in constantes.PERFIS_ACESSO:
+        assert m._banner_orientacao(perfil) is not None
+
+
+def test_dispensar_orientacao_grava_por_perfil_sem_apagar_outros():
+    resultado = m._dispensar_orientacao(1, {"perfil": "Enfermeiro", "profissional": "Enf. Marta Sousa"}, {"Admin": True})
+    assert resultado == {"Admin": True, "Enfermeiro": True}
+
+
+def test_dispensar_orientacao_sem_cliques_nao_atualiza():
+    assert m._dispensar_orientacao(0, {"perfil": "Enfermeiro", "profissional": None}, None) is dash.no_update
 
 
 def test_ids_utentes_risco_elevado_e_subconjunto_dos_utentes():
@@ -585,16 +643,17 @@ def test_pagina_profissionais_renderiza():
 # --- Testes: acesso diferenciado por perfil (RBAC) --------------------------
 
 
-def test_ficha_utente_esconde_avaliacao_risco_para_administrativo():
+def test_ficha_utente_esconde_avaliacao_risco_para_recepcao():
     id_utente = _primeiro_utente()["id_utente"]
-    html_admin = str(m._pagina_ficha_utente(id_utente, "Administrativo"))
-    assert "Avaliação de risco" not in html_admin
+    html_recepcao = str(m._pagina_ficha_utente(id_utente, "Receção"))
+    assert "Avaliação de risco" not in html_recepcao
 
 
-def test_ficha_utente_mostra_avaliacao_risco_para_medico_e_enfermeiro():
+def test_ficha_utente_mostra_avaliacao_risco_para_medico_enfermeiro_e_admin():
     id_utente = _primeiro_utente()["id_utente"]
     assert "Avaliação de risco" in str(m._pagina_ficha_utente(id_utente, "Médico"))
     assert "Avaliação de risco" in str(m._pagina_ficha_utente(id_utente, "Enfermeiro"))
+    assert "Avaliação de risco" in str(m._pagina_ficha_utente(id_utente, "Admin"))
     # Sem perfil definido (sessões antigas) mantém o comportamento anterior: mostra.
     assert "Avaliação de risco" in str(m._pagina_ficha_utente(id_utente))
 
@@ -605,10 +664,11 @@ def test_pagina_consultas_esconde_paineis_de_gestao_para_enfermeiro():
     assert "Gerir consulta existente" not in html_enfermeiro
 
 
-def test_pagina_consultas_mostra_paineis_de_gestao_para_medico_e_administrativo():
+def test_pagina_consultas_mostra_paineis_de_gestao_para_medico_recepcao_e_admin():
     html_medico = str(m._pagina_consultas("Médico"))
-    html_admin = str(m._pagina_consultas("Administrativo"))
-    for pagina in (html_medico, html_admin):
+    html_recepcao = str(m._pagina_consultas("Receção"))
+    html_admin = str(m._pagina_consultas("Admin"))
+    for pagina in (html_medico, html_recepcao, html_admin):
         assert "+ Nova Consulta" in pagina
         assert "Gerir consulta existente" in pagina
 
@@ -632,10 +692,10 @@ def test_filtrar_consultas_medico_ve_apenas_a_sua_agenda():
 
 
 def test_filtrar_consultas_sem_perfil_medico_mostra_todas():
-    resultado_admin = str(m._filtrar_consultas(None, None, None, sessao={"perfil": "Administrativo", "profissional": None}))
+    resultado_recepcao = str(m._filtrar_consultas(None, None, None, sessao={"perfil": "Receção", "profissional": None}))
     resultado_sem_sessao = str(m._filtrar_consultas(None, None, None))
     # Sem filtragem por agenda própria, ambos devolvem a mesma tabela completa.
-    assert resultado_admin == resultado_sem_sessao
+    assert resultado_recepcao == resultado_sem_sessao
 
 
 def test_opcoes_consultas_para_gerir_filtra_por_medico_da_sessao():
@@ -643,7 +703,7 @@ def test_opcoes_consultas_para_gerir_filtra_por_medico_da_sessao():
         (m.DADOS["profissionais"]["categoria"] == "Médico") & (m.DADOS["profissionais"]["estado"] == "Ativo"), "nome"
     ].iloc[0]
     opcoes_medico = m._opcoes_consultas_para_gerir(0, sessao={"perfil": "Médico", "profissional": nome_medico})
-    opcoes_todas = m._opcoes_consultas_para_gerir(0, sessao={"perfil": "Administrativo", "profissional": None})
+    opcoes_todas = m._opcoes_consultas_para_gerir(0, sessao={"perfil": "Receção", "profissional": None})
     assert len(opcoes_medico) <= len(opcoes_todas)
 
 
@@ -652,7 +712,7 @@ def test_opcoes_consultas_para_gerir_filtra_por_medico_da_sessao():
 
 def test_aba_e_corpo_prescricoes_esconde_formulario_e_receita_para_nao_medico():
     utente = _primeiro_utente()
-    for perfil, profissional in [("Enfermeiro", "Enf. Marta Sousa"), ("Administrativo", None)]:
+    for perfil, profissional in [("Enfermeiro", "Enf. Marta Sousa"), ("Receção", None), ("Admin", None)]:
         aba = str(m._aba_prescricoes(utente["id_utente"], perfil, profissional))
         corpo = str(m._corpo_prescricoes(utente["id_utente"], perfil, profissional))
         assert "+ Nova Prescrição" not in aba
@@ -689,7 +749,7 @@ def test_criar_prescricao_fora_do_perfil_medico_e_recusada():
     antes = len(m.DADOS["prescricoes"])
     mensagem, versao = m._criar_prescricao(
         1, utente["id_utente"], "Paracetamol", "500mg, 1x/dia", None,
-        {"perfil": "Administrativo", "profissional": None}, 0,
+        {"perfil": "Receção", "profissional": None}, 0,
     )
     assert "risco_elevado" in mensagem.className
     assert versao is dash.no_update
@@ -752,19 +812,28 @@ def test_opcoes_relatorio_consulta_filtra_por_medico_da_sessao():
         (m.DADOS["profissionais"]["categoria"] == "Médico") & (m.DADOS["profissionais"]["estado"] == "Ativo"), "nome"
     ].iloc[0]
     opcoes_medico = m._opcoes_relatorio_consulta("Médico", nome_medico)
-    opcoes_todas = m._opcoes_relatorio_consulta("Administrativo", None)
+    opcoes_todas = m._opcoes_relatorio_consulta("Receção", None)
     assert len(opcoes_medico) <= len(opcoes_todas)
 
 
-def test_pagina_relatorios_administrativo_permite_escolher_profissional():
-    pagina = str(m._pagina_relatorios("Administrativo", None, None))
+def test_pagina_relatorios_admin_permite_escolher_profissional():
+    pagina = str(m._pagina_relatorios("Admin", None, None))
     assert "select-relatorio-profissional" in pagina
 
 
 def test_pagina_relatorios_le_profissional_da_query_string():
     medico = _medico_ativo_para_teste()
-    pagina = m._pagina_relatorios("Administrativo", None, f"?profissional={medico['nome']}")
+    pagina = m._pagina_relatorios("Admin", None, f"?profissional={medico['nome']}")
     assert medico["nome"] in str(pagina)
+
+
+def test_pagina_relatorios_recepcao_nao_tem_atividade_profissional():
+    # A Receção só vê o relatório de consulta — a atividade agregada de um
+    # profissional é informação de gestão, reservada ao Admin.
+    pagina = str(m._pagina_relatorios("Receção", None, None))
+    assert "select-relatorio-profissional" not in pagina
+    assert "Relatório de atividade profissional" not in pagina
+    assert "select-relatorio-consulta" in pagina
 
 
 def test_pagina_relatorios_medico_fica_preso_a_propria_identidade():

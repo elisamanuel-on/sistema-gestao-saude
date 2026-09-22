@@ -10,8 +10,8 @@ original, que cobre os dois tipos de contexto: cuidados continuados
 (UCC/ERPI/SAD) e ambulatório clínico/hospitalar.
 
 Módulos, navegação lateral agrupada por contexto (visível/oculta consoante
-o perfil de acesso escolhido no login — Enfermeiro, Médico ou
-Administrativo, uma simulação sem autenticação real):
+o perfil de acesso escolhido no login — Enfermeiro, Médico, Receção ou
+Admin, uma simulação sem autenticação real):
   /login              — escolha de perfil (mock, sem palavra-passe)
   /                   — Visão Geral: KPIs agregados de todos os módulos e
                          painel de alertas (risco elevado, exames por rever,
@@ -77,6 +77,9 @@ from constantes import (
     ESPECIALIDADES,
     HORARIOS_CONSULTA,
     PERFIS_ACESSO,
+    PERFIS_GESTAO_AGENDA,
+    PERFIS_RELATORIO_QUALQUER_PROFISSIONAL,
+    PERFIS_SEM_ATOS_CLINICOS,
     SALAS_CONSULTA,
     SECCOES_POR_PERFIL,
     TIPOS_CUIDADO,
@@ -150,7 +153,31 @@ CORES = {
     "tipo_erpi": "#4338b0",
     "tipo_sad": "#8f3569",
     "tipo_clinica_hospital": "#155696",
+    "tabela_zebra": "#f3f6f5",
 }
+
+# Estilo partilhado por todas as tabelas (dash_table.DataTable) — evita
+# repetir o mesmo dicionário em cada uma das tabelas da app e mantém a
+# densidade/leitura consistente: mais espaço vertical entre linhas do que
+# o valor por omissão, cabeçalho bem demarcado, e zebra-striping subtil
+# para acompanhar uma linha em tabelas mais longas sem ter de contar
+# colunas.
+ESTILO_CELULA_TABELA = {"padding": "10px 12px", "fontFamily": "inherit", "fontSize": "0.85rem", "lineHeight": "1.5"}
+ESTILO_CABECALHO_TABELA = {
+    "fontWeight": "600",
+    "backgroundColor": CORES["primaria_suave"],
+    "padding": "10px 12px",
+    "borderBottom": f"2px solid {CORES['primaria']}",
+}
+ZEBRA_TABELA = [{"if": {"row_index": "odd"}, "backgroundColor": CORES["tabela_zebra"]}]
+
+
+def _com_zebra(condicionais=None):
+    """Antepõe o zebra-striping a uma lista de regras style_data_conditional
+    já existente — as regras mais específicas (estado da consulta, exame
+    alterado, fatura com erro, etc.) vêm a seguir e por isso continuam a
+    ganhar sobre a cor de linha par/ímpar."""
+    return ZEBRA_TABELA + (condicionais or [])
 
 
 # --- Carregamento de dados (uma vez, ficheiros só de leitura) --------------
@@ -295,7 +322,8 @@ SECCOES_NAVEGACAO = [
     ("Cuidados continuados", [("/ocupacao", "Mapa de Ocupação")]),
     ("Clínica & Hospital", [("/consultas", "Consultas")]),
     ("Relatórios", [("/relatorios", "Relatórios")]),
-    ("Gestão", [("/faturacao", "Faturação"), ("/profissionais", "Profissionais")]),
+    ("Faturação", [("/faturacao", "Faturação")]),
+    ("Profissionais", [("/profissionais", "Profissionais")]),
 ]
 
 
@@ -355,14 +383,16 @@ def _etiqueta_tom(texto, tom, sufixo_classe="resultado-inline"):
 ICONES_PERFIL = {
     "Enfermeiro": "/assets/icones/enfermeiro.svg",
     "Médico": "/assets/icones/medico.svg",
-    "Administrativo": "/assets/icones/administrativo.svg",
+    "Receção": "/assets/icones/recepcao.svg",
+    "Admin": "/assets/icones/admin.svg",
 }
 
 # Enfermeiro e Médico exigem um segundo passo no login — escolher QUAL
 # profissional (nome vindo de profissionais.csv) — porque a agenda própria,
 # a receita assinada e o relatório de atividade só fazem sentido associados
-# a uma pessoa concreta, não a um perfil genérico. O Administrativo não
-# precisa: não gera receitas nem relatórios de atividade pessoal.
+# a uma pessoa concreta, não a um perfil genérico. Receção e Admin não
+# precisam: não geram receitas nem relatórios de atividade pessoal, agem em
+# nome do serviço como um todo.
 PERFIS_COM_PROFISSIONAL = {"Médico", "Enfermeiro"}
 
 
@@ -457,7 +487,36 @@ def _linha_alerta(tom, texto, href):
     )
 
 
-def _pagina_visao_geral():
+# Uma frase por perfil, para quem nunca viu o sistema perceber em segundos
+# o que pode fazer aqui — mostrado uma vez (guardado em localStorage, por
+# perfil, para reaparecer se entrar com outro perfil da próxima vez).
+ORIENTACAO_POR_PERFIL = {
+    "Enfermeiro": "Vês a ficha clínica dos utentes, registas sinais vitais e cuidados, e consultas a tua agenda — sem acesso a faturação nem à gestão de profissionais.",
+    "Médico": "Além da ficha clínica, podes prescrever medicação e emitir receitas em PDF, e consultas o teu relatório de atividade — sem acesso a faturação nem à gestão de profissionais.",
+    "Receção": "Marca, cancela e reagenda consultas, consultas a ocupação e emites faturação — sem acesso a atos clínicos (prescrições, avaliação de risco) nem à gestão de profissionais.",
+    "Admin": "Acesso total: tudo o que a Receção faz, mais a gestão do cadastro de profissionais e os relatórios de atividade de qualquer um deles.",
+}
+
+
+def _banner_orientacao(perfil):
+    texto = ORIENTACAO_POR_PERFIL.get(perfil)
+    if not texto:
+        return None
+    return html.Div(
+        [
+            html.Div(
+                [
+                    html.Strong(f"Perfil {perfil}: "),
+                    texto,
+                ]
+            ),
+            html.Button("Entendi, não mostrar mais", id="botao-dispensar-orientacao", className="botao-secundario", n_clicks=0),
+        ],
+        className="banner-orientacao",
+    )
+
+
+def _pagina_visao_geral(perfil=None, dispensada=None):
     utentes = DADOS["utentes"]
     total_utentes = len(utentes)
 
@@ -536,8 +595,13 @@ def _pagina_visao_geral():
         paper_bgcolor=CORES["cartao"], plot_bgcolor=CORES["cartao"], font_color=CORES["texto"],
     )
 
+    banner = None
+    if perfil and not (dispensada or {}).get(perfil):
+        banner = _banner_orientacao(perfil)
+
     return html.Div(
         [
+            *([banner] if banner else []),
             html.H1("Visão Geral"),
             html.P(
                 "Ponto de partida com os indicadores mais importantes de todos os módulos — cuidados "
@@ -582,7 +646,7 @@ def _pagina_sobre():
                     ),
                     html.Li("Mapa de ocupação (cuidados continuados) e agendamento de consultas com vista de lista e de calendário (Clínica/Hospital)."),
                     html.Li("Faturação com comparticipação da Segurança Social e seguradoras privadas."),
-                    html.Li("Visão Geral com KPIs agregados e alertas, e acesso por perfil (Enfermeiro/Médico/Administrativo)."),
+                    html.Li("Visão Geral com KPIs agregados e alertas, e acesso por perfil (Enfermeiro/Médico/Receção/Admin)."),
                 ]
             ),
             html.H3("Sobre os dados", className="titulo-secao-espacado"),
@@ -737,8 +801,9 @@ def _aba_alergias_diagnosticos(id_utente):
                 columns=[{"name": "Data", "id": "data"}, {"name": "Profissional", "id": "profissional"}, {"name": "Diagnóstico", "id": "diagnostico"}],
                 data=diagnosticos.to_dict("records"),
                 style_table={"overflowX": "auto"},
-                style_cell={"padding": "8px", "fontFamily": "inherit", "fontSize": "0.85rem"},
-                style_header={"fontWeight": "600", "backgroundColor": CORES["primaria_suave"]},
+                style_cell=ESTILO_CELULA_TABELA,
+                style_header=ESTILO_CABECALHO_TABELA,
+                style_data_conditional=_com_zebra(),
                 page_size=8,
             ),
         ]
@@ -791,8 +856,9 @@ def _corpo_prescricoes(id_utente, perfil=None, profissional=None):
         ],
         data=prescricoes.to_dict("records"),
         style_table={"overflowX": "auto"},
-        style_cell={"padding": "8px", "fontFamily": "inherit", "fontSize": "0.85rem"},
-        style_header={"fontWeight": "600", "backgroundColor": CORES["primaria_suave"]},
+        style_cell=ESTILO_CELULA_TABELA,
+        style_header=ESTILO_CABECALHO_TABELA,
+        style_data_conditional=_com_zebra(),
         page_size=10,
     )
 
@@ -832,8 +898,9 @@ def _aba_visitas(id_utente):
         columns=[{"name": "Data/Hora", "id": "data_hora"}, {"name": "Tipo", "id": "tipo"}, {"name": "Registado por", "id": "registado_por"}],
         data=visitas.to_dict("records"),
         style_table={"overflowX": "auto"},
-        style_cell={"padding": "8px", "fontFamily": "inherit", "fontSize": "0.85rem"},
-        style_header={"fontWeight": "600", "backgroundColor": CORES["primaria_suave"]},
+        style_cell=ESTILO_CELULA_TABELA,
+        style_header=ESTILO_CABECALHO_TABELA,
+        style_data_conditional=_com_zebra(),
         page_size=10,
     )
 
@@ -870,12 +937,14 @@ def _aba_exames(id_utente):
         ],
         data=exames.to_dict("records"),
         style_table={"overflowX": "auto"},
-        style_cell={"padding": "8px", "fontFamily": "inherit", "fontSize": "0.85rem"},
-        style_header={"fontWeight": "600", "backgroundColor": CORES["primaria_suave"]},
-        style_data_conditional=[
-            {"if": {"filter_query": '{estado} = "Alterado"'}, "backgroundColor": CORES["risco_elevado_suave"]},
-            {"if": {"filter_query": '{estado} = "Pendente"'}, "backgroundColor": CORES["risco_moderado_suave"]},
-        ],
+        style_cell=ESTILO_CELULA_TABELA,
+        style_header=ESTILO_CABECALHO_TABELA,
+        style_data_conditional=_com_zebra(
+            [
+                {"if": {"filter_query": '{estado} = "Alterado"'}, "backgroundColor": CORES["risco_elevado_suave"]},
+                {"if": {"filter_query": '{estado} = "Pendente"'}, "backgroundColor": CORES["risco_moderado_suave"]},
+            ]
+        ),
         page_size=10,
     )
 
@@ -922,8 +991,9 @@ def _aba_historico(id_utente):
         ],
         data=tabela.to_dict("records"),
         style_table={"overflowX": "auto"},
-        style_cell={"padding": "8px", "fontFamily": "inherit", "fontSize": "0.85rem"},
-        style_header={"fontWeight": "600", "backgroundColor": CORES["primaria_suave"]},
+        style_cell=ESTILO_CELULA_TABELA,
+        style_header=ESTILO_CABECALHO_TABELA,
+        style_data_conditional=_com_zebra(),
         sort_action="native",
         page_size=12,
     )
@@ -1060,9 +1130,9 @@ def _pagina_ficha_utente(id_utente, perfil=None, profissional=None):
         dcc.Tab(label="Histórico", value="historico", children=[_aba_historico(id_utente)]),
     ]
     # Avaliação de risco é um ato clínico (calcular/registar um risco), não
-    # uma simples consulta de dados — por isso fica de fora para o
-    # Administrativo, que só tem acesso de leitura à ficha do utente.
-    if perfil != "Administrativo":
+    # uma simples consulta de dados — por isso fica de fora para a Receção,
+    # que só tem acesso de leitura à ficha do utente. Admin vê tudo.
+    if perfil not in PERFIS_SEM_ATOS_CLINICOS:
         abas.append(dcc.Tab(label="Avaliação de risco", value="risco", children=[_aba_avaliacao_risco(id_utente)]))
 
     return html.Div(
@@ -1178,13 +1248,15 @@ def _tabela_consultas(df):
         ],
         data=tabela.to_dict("records"),
         style_table={"overflowX": "auto"},
-        style_cell={"padding": "8px", "fontFamily": "inherit", "fontSize": "0.85rem"},
-        style_header={"fontWeight": "600", "backgroundColor": CORES["primaria_suave"]},
-        style_data_conditional=[
-            {"if": {"filter_query": '{estado} = "Agendada"'}, "backgroundColor": CORES["primaria_suave"]},
-            {"if": {"filter_query": '{estado} = "Falta"'}, "backgroundColor": CORES["risco_elevado_suave"]},
-            {"if": {"filter_query": '{estado} = "Cancelada"'}, "backgroundColor": CORES["borda"]},
-        ],
+        style_cell=ESTILO_CELULA_TABELA,
+        style_header=ESTILO_CABECALHO_TABELA,
+        style_data_conditional=_com_zebra(
+            [
+                {"if": {"filter_query": '{estado} = "Agendada"'}, "backgroundColor": CORES["primaria_suave"]},
+                {"if": {"filter_query": '{estado} = "Falta"'}, "backgroundColor": CORES["risco_elevado_suave"]},
+                {"if": {"filter_query": '{estado} = "Cancelada"'}, "backgroundColor": CORES["borda"]},
+            ]
+        ),
         sort_action="native",
         page_size=14,
     )
@@ -1224,7 +1296,14 @@ def _formulario_nova_consulta():
                         className="filtro-dropdown",
                     ),
                     dcc.Dropdown(id="form-consulta-profissional", placeholder="Profissional (escolhe a especialidade primeiro)", className="filtro-dropdown"),
-                    dcc.DatePickerSingle(id="form-consulta-data", placeholder="Data", display_format="DD/MM/YYYY", min_date_allowed=datetime.date.today()),
+                    dcc.DatePickerSingle(
+                        id="form-consulta-data",
+                        placeholder="Data",
+                        display_format="DD/MM/YYYY",
+                        month_format="MM/YYYY",
+                        first_day_of_week=1,
+                        min_date_allowed=datetime.date.today(),
+                    ),
                     dcc.Dropdown(
                         id="form-consulta-hora",
                         options=[{"label": h, "value": h} for h in HORARIOS_CONSULTA],
@@ -1258,7 +1337,12 @@ def _painel_gerir_consulta():
                     html.Div(
                         [
                             dcc.DatePickerSingle(
-                                id="form-reagendar-data", placeholder="Nova data", display_format="DD/MM/YYYY", min_date_allowed=datetime.date.today()
+                                id="form-reagendar-data",
+                                placeholder="Nova data",
+                                display_format="DD/MM/YYYY",
+                                month_format="MM/YYYY",
+                                first_day_of_week=1,
+                                min_date_allowed=datetime.date.today(),
                             ),
                             dcc.Dropdown(
                                 id="form-reagendar-hora",
@@ -1343,8 +1427,8 @@ def _vista_calendario_consultas(df, inicio):
 
 def _pagina_consultas(perfil=None, profissional=None):
     # Enfermeiro só consulta a agenda (sem marcar/cancelar/reagendar — isso
-    # é ação do Médico ou do Administrativo, que gere a agenda toda).
-    mostrar_gestao_consulta = perfil != "Enfermeiro"
+    # é ação do Médico, da Receção ou do Admin, que gerem a agenda toda).
+    mostrar_gestao_consulta = perfil in PERFIS_GESTAO_AGENDA
     consultas = DADOS["consultas"]
     hoje = pd.Timestamp.now().normalize()
     daqui_7_dias = hoje + pd.Timedelta(days=7)
@@ -1525,9 +1609,9 @@ def _pagina_faturacao():
         ],
         data=fat.round(2).to_dict("records"),
         style_table={"overflowX": "auto"},
-        style_cell={"padding": "8px", "fontFamily": "inherit", "fontSize": "0.82rem"},
-        style_header={"fontWeight": "600", "backgroundColor": CORES["primaria_suave"]},
-        style_data_conditional=[{"if": {"filter_query": "{erro_fatura} = true"}, "backgroundColor": CORES["risco_elevado_suave"]}],
+        style_cell={**ESTILO_CELULA_TABELA, "fontSize": "0.82rem"},
+        style_header=ESTILO_CABECALHO_TABELA,
+        style_data_conditional=_com_zebra([{"if": {"filter_query": "{erro_fatura} = true"}, "backgroundColor": CORES["risco_elevado_suave"]}]),
         sort_action="native",
         filter_action="native",
         page_size=12,
@@ -1696,7 +1780,12 @@ def _formulario_novo_profissional():
                     dcc.Input(id="form-prof-contacto", type="text", placeholder="Contacto (email ou telefone)", className="campo-pesquisa"),
                     dcc.Input(id="form-prof-cedula", type="text", placeholder="Nº de cédula profissional", className="campo-pesquisa"),
                     dcc.DatePickerSingle(
-                        id="form-prof-admissao", placeholder="Data de admissão", display_format="DD/MM/YYYY", max_date_allowed=datetime.date.today()
+                        id="form-prof-admissao",
+                        placeholder="Data de admissão",
+                        display_format="DD/MM/YYYY",
+                        month_format="MM/YYYY",
+                        first_day_of_week=1,
+                        max_date_allowed=datetime.date.today(),
                     ),
                 ],
                 className="grelha-formulario",
@@ -1770,63 +1859,76 @@ def _pagina_profissionais():
 
 
 def _pagina_relatorios(perfil=None, profissional=None, query_search=None):
-    if perfil == "Administrativo":
-        # Administrativo escolhe qualquer profissional — inclui o valor
-        # vindo do atalho "Ver relatório" na página Profissionais (?profissional=...).
-        profissional_pre = None
-        if query_search:
-            parametros = urllib.parse.parse_qs(query_search.lstrip("?"))
-            valores = parametros.get("profissional")
-            if valores:
-                profissional_pre = valores[0]
-        opcoes_profissional = [{"label": n, "value": n} for n in DADOS["profissionais"].sort_values("nome")["nome"]]
-        dropdown_profissional = dcc.Dropdown(
-            id="select-relatorio-profissional",
-            options=opcoes_profissional,
-            value=profissional_pre,
-            placeholder="Escolhe um profissional...",
-            className="filtro-dropdown",
+    # A Receção não tem uma secção de "atividade profissional" (é um
+    # relatório de gestão, não uma tarefa de front-desk) — vê só o
+    # relatório de consulta, mais abaixo. Enfermeiro/Médico veem a sua
+    # própria atividade; Admin escolhe qualquer profissional.
+    mostrar_atividade = perfil != "Receção"
+
+    if mostrar_atividade:
+        if perfil in PERFIS_RELATORIO_QUALQUER_PROFISSIONAL:
+            # Admin escolhe qualquer profissional — inclui o valor vindo do
+            # atalho "Ver relatório" na página Profissionais (?profissional=...).
+            profissional_pre = None
+            if query_search:
+                parametros = urllib.parse.parse_qs(query_search.lstrip("?"))
+                valores = parametros.get("profissional")
+                if valores:
+                    profissional_pre = valores[0]
+            opcoes_profissional = [{"label": n, "value": n} for n in DADOS["profissionais"].sort_values("nome")["nome"]]
+            dropdown_profissional = dcc.Dropdown(
+                id="select-relatorio-profissional",
+                options=opcoes_profissional,
+                value=profissional_pre,
+                placeholder="Escolhe um profissional...",
+                className="filtro-dropdown",
+            )
+        else:
+            # Médico/Enfermeiro só veem a sua própria atividade — agenda
+            # própria, tal como o resto do módulo de Consultas.
+            dropdown_profissional = dcc.Dropdown(
+                id="select-relatorio-profissional",
+                options=[{"label": profissional, "value": profissional}] if profissional else [],
+                value=profissional,
+                disabled=True,
+                className="filtro-dropdown",
+            )
+
+        secao_atividade = html.Div(
+            [
+                html.H2("Relatório de atividade profissional"),
+                html.P(
+                    "Número de consultas, taxa de comparência e distribuição por especialidade, num período à escolha.",
+                    className="texto-explicativo",
+                ),
+                html.Div(
+                    [
+                        dropdown_profissional,
+                        dcc.DatePickerSingle(
+                            id="periodo-relatorio-inicio", placeholder="De", display_format="DD/MM/YYYY", month_format="MM/YYYY", first_day_of_week=1
+                        ),
+                        dcc.DatePickerSingle(
+                            id="periodo-relatorio-fim", placeholder="Até", display_format="DD/MM/YYYY", month_format="MM/YYYY", first_day_of_week=1
+                        ),
+                    ],
+                    className="grelha-formulario",
+                ),
+                html.Div(id="corpo-relatorio-atividade"),
+                html.Div(
+                    [
+                        html.Button("Descarregar PDF", id="botao-pdf-relatorio-atividade", className="botao-secundario", n_clicks=0),
+                        html.Button("Descarregar Excel", id="botao-excel-relatorio-atividade", className="botao-secundario", n_clicks=0),
+                    ],
+                    className="botoes-exportar",
+                ),
+                dcc.Download(id="descarregar-pdf-relatorio-atividade"),
+                dcc.Download(id="descarregar-excel-relatorio-atividade"),
+                html.Div(id="mensagem-relatorio-atividade", className="resultado-mini"),
+            ],
+            className="cartao-secao",
         )
     else:
-        # Médico/Enfermeiro só veem a sua própria atividade — agenda
-        # própria, tal como o resto do módulo de Consultas.
-        dropdown_profissional = dcc.Dropdown(
-            id="select-relatorio-profissional",
-            options=[{"label": profissional, "value": profissional}] if profissional else [],
-            value=profissional,
-            disabled=True,
-            className="filtro-dropdown",
-        )
-
-    secao_atividade = html.Div(
-        [
-            html.H2("Relatório de atividade profissional"),
-            html.P(
-                "Número de consultas, taxa de comparência e distribuição por especialidade, num período à escolha.",
-                className="texto-explicativo",
-            ),
-            html.Div(
-                [
-                    dropdown_profissional,
-                    dcc.DatePickerSingle(id="periodo-relatorio-inicio", placeholder="De", display_format="DD/MM/YYYY"),
-                    dcc.DatePickerSingle(id="periodo-relatorio-fim", placeholder="Até", display_format="DD/MM/YYYY"),
-                ],
-                className="grelha-formulario",
-            ),
-            html.Div(id="corpo-relatorio-atividade"),
-            html.Div(
-                [
-                    html.Button("Descarregar PDF", id="botao-pdf-relatorio-atividade", className="botao-secundario", n_clicks=0),
-                    html.Button("Descarregar Excel", id="botao-excel-relatorio-atividade", className="botao-secundario", n_clicks=0),
-                ],
-                className="botoes-exportar",
-            ),
-            dcc.Download(id="descarregar-pdf-relatorio-atividade"),
-            dcc.Download(id="descarregar-excel-relatorio-atividade"),
-            html.Div(id="mensagem-relatorio-atividade", className="resultado-mini"),
-        ],
-        className="cartao-secao",
-    )
+        secao_atividade = None
 
     secao_consulta = html.Div(
         [
@@ -1856,11 +1958,11 @@ def _pagina_relatorios(perfil=None, profissional=None, query_search=None):
         [
             html.H1("Relatórios"),
             html.P(
-                "Documentação e exportação — atividade de um profissional (Médico/Enfermeiro veem só a sua) "
-                "ou o resumo de uma consulta específica.",
+                "Documentação e exportação — atividade de um profissional (Médico/Enfermeiro veem só a sua, "
+                "Admin escolhe qualquer um) ou o resumo de uma consulta específica.",
                 className="texto-explicativo",
             ),
-            secao_atividade,
+            *([secao_atividade] if mostrar_atividade else []),
             secao_consulta,
         ]
     )
@@ -1878,6 +1980,7 @@ def _construir_layout():
         [
             dcc.Location(id="url"),
             dcc.Store(id="perfil-sessao", storage_type="session"),
+            dcc.Store(id="onboarding-dispensada", storage_type="local"),
             html.Div(id="barra-lateral-app"),
             html.Div(html.Div(id="conteudo-pagina", className="pagina"), className="area-principal"),
         ],
@@ -1903,7 +2006,7 @@ def _escolher_perfil_login(cliques):
         return dash.no_update, dash.no_update, dash.no_update
     perfil = ctx.triggered_id["perfil"]
     if perfil not in PERFIS_COM_PROFISSIONAL:
-        # Administrativo não tem identidade de profissional — entra logo.
+        # Receção/Admin não têm identidade de profissional — entram logo.
         return dash.no_update, {"perfil": perfil, "profissional": None}, "/"
     # Médico/Enfermeiro: fica à espera da escolha do profissional (2º passo).
     return perfil, dash.no_update, dash.no_update
@@ -1952,6 +2055,24 @@ def _sair_sessao(n_clicks):
     return None, "/login"
 
 
+@app.callback(
+    Output("onboarding-dispensada", "data"),
+    Input("botao-dispensar-orientacao", "n_clicks"),
+    State("perfil-sessao", "data"),
+    State("onboarding-dispensada", "data"),
+    prevent_initial_call=True,
+)
+def _dispensar_orientacao(n_clicks, sessao, dispensada):
+    if not n_clicks:
+        return dash.no_update
+    perfil, _profissional = _dados_sessao(sessao)
+    if not perfil:
+        return dash.no_update
+    atualizado = dict(dispensada or {})
+    atualizado[perfil] = True
+    return atualizado
+
+
 # --- Callbacks: navegação ----------------------------------------------------
 
 
@@ -1968,8 +2089,9 @@ def _atualizar_barra_lateral(caminho, sessao):
     Input("url", "pathname"),
     Input("url", "search"),
     Input("perfil-sessao", "data"),
+    Input("onboarding-dispensada", "data"),
 )
-def _rotear_pagina(caminho, query_search, sessao):
+def _rotear_pagina(caminho, query_search, sessao, onboarding_dispensada):
     perfil, profissional = _dados_sessao(sessao)
     caminho = caminho or "/"
     if caminho != "/login" and not perfil:
@@ -1977,7 +2099,7 @@ def _rotear_pagina(caminho, query_search, sessao):
     if caminho == "/login":
         return _pagina_login()
     if caminho == "/":
-        return _pagina_visao_geral()
+        return _pagina_visao_geral(perfil, onboarding_dispensada)
     if caminho == "/utentes":
         return _pagina_utentes()
     if caminho.startswith("/utentes/"):
@@ -1992,6 +2114,15 @@ def _rotear_pagina(caminho, query_search, sessao):
     if caminho == "/faturacao":
         return _pagina_faturacao()
     if caminho == "/profissionais":
+        if perfil != "Admin":
+            # Gestão do cadastro de profissionais é reservada ao Admin.
+            return html.Div(
+                [
+                    html.H2("Acesso não disponível"),
+                    html.P("Este perfil não tem acesso à gestão de profissionais.", className="texto-explicativo"),
+                    dcc.Link("Voltar ao início", href="/", className="ligacao-voltar"),
+                ]
+            )
         return _pagina_profissionais()
     if caminho == "/sobre":
         return _pagina_sobre()

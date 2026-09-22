@@ -176,6 +176,29 @@ body {
   line-height: 1.5;
 }
 
+/* Banner de orientação (1ª vez que se entra na Visão Geral com um dado
+   perfil) — tom informativo, não de aviso, por isso usa a cor primária em
+   vez da cor de risco moderado do .aviso-medico acima. */
+.banner-orientacao {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--primaria-suave);
+  border: 1px solid var(--primaria);
+  color: var(--texto);
+  border-radius: var(--raio-sm);
+  padding: 12px 16px;
+  font-size: var(--texto-sm);
+  margin-bottom: 18px;
+  line-height: 1.5;
+}
+
+.banner-orientacao .botao-secundario {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
 .kpis-linha {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -271,6 +294,25 @@ body {
 
 .tabela-utentes tbody tr:hover {
   background: var(--fundo);
+}
+
+/* dash_table.DataTable (Consultas, Faturação, e as tabelas nas abas da
+   ficha do utente) — mesma moldura/cantos/sombra que as tabelas HTML "à
+   mão" acima (.tabela-utentes) já tinham; sem isto ficavam visivelmente
+   mais planas, sem margem nem contorno nenhum. Classes confirmadas por
+   inspeção direta do DOM: .dash-table-container/.dash-spreadsheet-container
+   (moldura), .dash-cell/.dash-header (células). */
+.dash-table-container .dash-spreadsheet-container {
+  border: 1px solid var(--borda) !important;
+  border-radius: var(--raio-md) !important;
+  box-shadow: var(--sombra-cartao) !important;
+  overflow: hidden !important;
+}
+.dash-table-container .dash-header {
+  color: var(--texto-suave) !important;
+}
+.dash-table-container tr:hover .dash-cell {
+  background-color: var(--fundo) !important;
 }
 
 .ligacao-tabela {
@@ -512,44 +554,120 @@ body {
   margin-top: 12px;
 }
 
-/* Dropdowns (dcc.Dropdown) — mesmas classes internas já confirmadas por
-   inspeção direta (Playwright) noutros projetos com esta versão do Dash:
-   .dash-dropdown-* (não o antigo react-select .Select-*). */
+/* Dropdowns (dcc.Dropdown) — classes internas confirmadas por inspeção
+   direta do DOM renderizado NESTE projeto (Playwright, Dash 4.4.1):
+   botão fechado = .dash-dropdown, valor = .dash-dropdown-value, painel
+   aberto = .dash-options-list.dash-dropdown-options (não .dash-dropdown-content,
+   como uma versão anterior desta folha de estilos assumia por engano —
+   era essa discrepância que deixava o painel de pesquisa sem estilo
+   nenhum, a aparecer como uma caixa branca genérica do browser). */
 .filtro-dropdown,
 .campo-formulario .dash-dropdown {
   background-color: var(--cartao) !important;
   border-color: var(--borda) !important;
+  border-radius: var(--raio-sm) !important;
   color: var(--texto) !important;
 }
-.dash-dropdown-value-item,
-.dash-dropdown-value-item * { color: var(--texto) !important; }
-.dash-dropdown-placeholder { color: var(--texto-suave) !important; }
+.dash-dropdown-value,
+.dash-dropdown-value * { color: var(--texto) !important; }
+.dash-dropdown-placeholder,
+.dash-dropdown-placeholder * { color: var(--texto-suave) !important; }
 .dash-dropdown-trigger-icon,
 .dash-dropdown-search-icon { color: var(--texto-suave) !important; }
-.dash-dropdown-content {
+
+/* Painel flutuante (pesquisa + lista de opções) que abre por cima da página */
+.dash-options-list.dash-dropdown-options {
   background-color: var(--cartao) !important;
   border: 1px solid var(--borda) !important;
   border-radius: var(--raio-sm) !important;
   box-shadow: var(--sombra-flutuante) !important;
   color: var(--texto) !important;
+  padding: 4px !important;
+  z-index: 60;
 }
-.dash-dropdown-option,
-.dash-dropdown-option * {
+.dash-dropdown-search-container {
+  background-color: var(--cartao) !important;
+  border-bottom: 1px solid var(--borda) !important;
+  padding: 6px 8px !important;
+}
+.dash-dropdown-search {
   background-color: var(--cartao) !important;
   color: var(--texto) !important;
+  border: 1px solid var(--borda) !important;
+  border-radius: var(--raio-xs) !important;
+  padding: 6px 8px !important;
+  font-family: inherit !important;
+  font-size: var(--texto-sm) !important;
 }
-.dash-dropdown-option.selected,
-.dash-dropdown-option.selected *,
-.dash-dropdown-option:hover,
-.dash-dropdown-option:hover *,
-.dash-dropdown-option[aria-selected="true"],
-.dash-dropdown-option[aria-selected="true"] * {
+.dash-dropdown-search:focus {
+  outline: 2px solid var(--primaria) !important;
+  outline-offset: 1px;
+}
+.dash-options-list-option.dash-dropdown-option,
+.dash-options-list-option.dash-dropdown-option * {
+  background-color: var(--cartao) !important;
+  color: var(--texto) !important;
+  border-radius: var(--raio-xs) !important;
+}
+.dash-options-list-option.dash-dropdown-option {
+  padding: 6px 8px !important;
+  cursor: pointer;
+}
+.dash-options-list-option.dash-dropdown-option:hover,
+.dash-options-list-option.dash-dropdown-option:hover *,
+.dash-options-list-option.dash-dropdown-option[aria-selected="true"],
+.dash-options-list-option.dash-dropdown-option[aria-selected="true"] * {
   background-color: var(--primaria-suave) !important;
   color: var(--texto) !important;
 }
 
 /* dcc.Tabs */
 .tab--selected { color: var(--primaria) !important; border-color: var(--primaria) !important; }
+
+/* Seletores de data (dcc.DatePickerSingle) — mesmo princípio dos dropdowns
+   acima: classes confirmadas por inspeção direta do DOM (.dash-datepicker-*). */
+.dash-datepicker-input {
+  background-color: var(--cartao) !important;
+  border: 1px solid var(--borda) !important;
+  border-radius: var(--raio-sm) !important;
+  color: var(--texto) !important;
+  padding: 8px 10px !important;
+  font-family: inherit !important;
+  font-size: var(--texto-sm) !important;
+}
+.dash-datepicker-input:focus {
+  outline: 2px solid var(--primaria) !important;
+  outline-offset: 1px;
+}
+.dash-datepicker-content {
+  background-color: var(--cartao) !important;
+  border: 1px solid var(--borda) !important;
+  border-radius: var(--raio-sm) !important;
+  box-shadow: var(--sombra-flutuante) !important;
+  color: var(--texto) !important;
+  padding: 10px !important;
+  z-index: 60;
+}
+.dash-datepicker-controls,
+.dash-datepicker-month-nav {
+  color: var(--texto) !important;
+}
+.dash-datepicker-month-nav:hover {
+  background-color: var(--primaria-suave) !important;
+  border-radius: var(--raio-xs) !important;
+}
+.dash-datepicker-calendar-date-inside {
+  color: var(--texto) !important;
+  border-radius: var(--raio-xs) !important;
+}
+.dash-datepicker-calendar-date-outside {
+  color: var(--texto-suave) !important;
+}
+.dash-datepicker-calendar-date-inside:hover,
+.dash-datepicker-calendar-date-inside[aria-selected="true"] {
+  background-color: var(--primaria-suave) !important;
+  color: var(--texto) !important;
+}
 
 /* Rodapé da barra lateral: perfil atual, "Sobre" e "Sair" */
 
