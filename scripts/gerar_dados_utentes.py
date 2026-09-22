@@ -21,6 +21,7 @@ import pandas as pd
 from faker import Faker
 
 from constantes import (
+    ACOES_HISTORICO,
     AREAS_PLANO_CUIDADOS,
     CATEGORIAS_EXAME,
     ESTADOS_AMBULATORIO,
@@ -424,6 +425,30 @@ def _gerar_consultas(utentes):
     return pd.DataFrame(linhas).sort_values("data_hora").reset_index(drop=True)
 
 
+def _gerar_historico(utentes):
+    """Histórico/auditoria fictício por utente (quem alterou o quê e
+    quando) — só para dar ao portfólio uma noção de rastreabilidade, típica
+    de sistemas clínicos reais. Dado sintético, tal como todo o resto."""
+    linhas = []
+    agora = datetime.datetime.now()
+    contador = 1
+    for id_utente in utentes["id_utente"]:
+        for _ in range(ALEATORIO.randint(3, 10)):
+            linhas.append(
+                {
+                    "id_evento": f"H{contador:05d}",
+                    "id_utente": id_utente,
+                    "data_hora": (
+                        agora - datetime.timedelta(days=ALEATORIO.randint(0, 180), hours=ALEATORIO.randint(0, 23))
+                    ).isoformat(timespec="minutes"),
+                    "profissional": ALEATORIO.choice(PROFISSIONAIS),
+                    "acao": ALEATORIO.choice(ACOES_HISTORICO),
+                }
+            )
+            contador += 1
+    return pd.DataFrame(linhas).sort_values(["id_utente", "data_hora"], ascending=[True, False]).reset_index(drop=True)
+
+
 def _gerar_altas(utentes):
     linhas = []
     hoje = datetime.date.today()
@@ -460,6 +485,7 @@ def gerar_tudo():
     _gerar_plano_cuidados(utentes).to_csv(PASTA_DADOS / "plano_cuidados.csv", index=False)
     _gerar_consultas(utentes).to_csv(PASTA_DADOS / "consultas.csv", index=False)
     _gerar_faturacao(utentes).to_csv(PASTA_DADOS / "faturacao.csv", index=False)
+    _gerar_historico(utentes).to_csv(PASTA_DADOS / "historico.csv", index=False)
     _gerar_altas(utentes).to_csv(PASTA_DADOS / "altas.csv", index=False)
 
     with open(PASTA_DADOS / "capacidade.json", "w", encoding="utf-8") as f:

@@ -1,232 +1,232 @@
 id_utente,data_hora,tipo,registado_por
-U0001,2026-09-16T00:39,Psicologia,Dr. Tiago Matos
-U0001,2026-09-14T00:39,Enfermagem,Dra. Sofia Ramalho
-U0001,2026-09-12T00:39,Consulta médica,Dr. Tiago Matos
-U0001,2026-08-09T00:39,Fisioterapia,Dr. Nuno Barreto
-U0001,2026-08-09T00:39,Visita familiar,Dr. Ricardo Rocha
-U0001,2026-07-17T00:39,Fisioterapia,Enf. Marta Sousa
-U0001,2026-06-08T00:39,Enfermagem,Dra. Sofia Ramalho
-U0001,2026-05-30T00:39,Enfermagem,Dra. Carla Nogueira
-U0002,2026-08-28T00:39,Enfermagem,Dr. Nuno Barreto
-U0002,2026-08-25T00:39,Fisioterapia,Dr. Hugo Teixeira
-U0002,2026-08-23T00:39,Visita familiar,Dr. Hugo Teixeira
-U0002,2026-08-23T00:39,Psicologia,Dra. Carla Nogueira
-U0002,2026-08-21T00:39,Visita familiar,Dra. Patrícia Gomes
-U0002,2026-08-08T00:39,Visita familiar,Fisio. Beatriz Lima
-U0002,2026-07-08T00:39,Psicologia,Enf. Paulo Cardoso
-U0003,2026-08-15T00:39,Psicologia,Dr. Tiago Matos
-U0003,2026-08-14T00:39,Enfermagem,Dra. Inês Fonseca
-U0003,2026-07-11T00:39,Consulta médica,Dr. Hugo Teixeira
-U0003,2026-06-20T00:39,Enfermagem,Fisio. Beatriz Lima
-U0004,2026-09-11T00:39,Consulta médica,Fisio. Beatriz Lima
-U0004,2026-06-13T00:39,Enfermagem,Enf. Marta Sousa
-U0005,2026-08-26T00:39,Consulta médica,Dra. Sofia Ramalho
-U0005,2026-08-04T00:39,Enfermagem,Dra. Sofia Ramalho
-U0005,2026-07-20T00:39,Enfermagem,Dra. Patrícia Gomes
-U0005,2026-07-13T00:39,Enfermagem,Dr. Tiago Matos
-U0005,2026-06-29T00:39,Fisioterapia,Dra. Inês Fonseca
-U0005,2026-06-13T00:39,Enfermagem,Dr. Tiago Matos
-U0005,2026-06-13T00:39,Enfermagem,Dra. Sofia Ramalho
-U0005,2026-05-29T00:39,Consulta médica,Ass. Social Miguel Nunes
-U0006,2026-09-14T00:39,Visita familiar,Ass. Social Miguel Nunes
-U0006,2026-07-21T00:39,Consulta médica,Dra. Sofia Ramalho
-U0006,2026-07-13T00:39,Psicologia,Nutric. Renata Alves
-U0006,2026-05-29T00:39,Consulta médica,Dr. Ricardo Rocha
-U0007,2026-09-14T00:39,Enfermagem,Dr. Hugo Teixeira
-U0007,2026-07-30T00:39,Enfermagem,Dr. Hugo Teixeira
-U0008,2026-09-05T00:39,Enfermagem,Dr. Hugo Teixeira
-U0008,2026-08-29T00:39,Enfermagem,Dr. Hugo Teixeira
-U0008,2026-08-25T00:39,Fisioterapia,Dr. Tiago Matos
-U0008,2026-06-25T00:39,Enfermagem,Ass. Social Miguel Nunes
-U0008,2026-06-12T00:39,Fisioterapia,Dr. Ricardo Rocha
-U0009,2026-09-16T00:39,Consulta médica,Dra. Carla Nogueira
-U0009,2026-09-07T00:39,Fisioterapia,Enf. Marta Sousa
-U0009,2026-09-04T00:39,Consulta médica,Dr. Hugo Teixeira
-U0009,2026-08-12T00:39,Enfermagem,Enf. Paulo Cardoso
-U0009,2026-08-06T00:39,Consulta médica,Dra. Carla Nogueira
-U0009,2026-06-22T00:39,Fisioterapia,Fisio. Beatriz Lima
-U0009,2026-06-01T00:39,Visita familiar,Dr. Tiago Matos
-U0010,2026-09-11T00:39,Consulta médica,Fisio. Beatriz Lima
-U0010,2026-08-25T00:39,Consulta médica,Dra. Inês Fonseca
-U0010,2026-07-15T00:39,Psicologia,Dra. Patrícia Gomes
-U0010,2026-06-17T00:39,Psicologia,Dra. Carla Nogueira
-U0010,2026-05-28T00:39,Fisioterapia,Psic. Vera Matos
-U0010,2026-05-26T00:39,Psicologia,Dr. Hugo Teixeira
-U0011,2026-08-16T00:39,Visita familiar,Psic. Vera Matos
-U0011,2026-08-11T00:39,Psicologia,Dra. Inês Fonseca
-U0011,2026-05-31T00:39,Psicologia,Dra. Patrícia Gomes
-U0012,2026-09-19T00:39,Visita familiar,Psic. Vera Matos
-U0012,2026-09-18T00:39,Enfermagem,Dr. Hugo Teixeira
-U0012,2026-07-07T00:39,Visita familiar,Dra. Patrícia Gomes
-U0012,2026-05-25T00:39,Visita familiar,Fisio. Beatriz Lima
-U0013,2026-09-19T00:39,Enfermagem,Dra. Sofia Ramalho
-U0013,2026-08-31T00:39,Visita familiar,Nutric. Renata Alves
-U0013,2026-08-17T00:39,Enfermagem,Dr. Ricardo Rocha
-U0013,2026-08-02T00:39,Psicologia,Dr. Ricardo Rocha
-U0013,2026-06-12T00:39,Visita familiar,Enf. Paulo Cardoso
-U0013,2026-06-09T00:39,Enfermagem,Dr. Ricardo Rocha
-U0014,2026-09-14T00:39,Visita familiar,Dr. Ricardo Rocha
-U0014,2026-09-01T00:39,Fisioterapia,Dr. Ricardo Rocha
-U0014,2026-08-30T00:39,Fisioterapia,Dr. Ricardo Rocha
-U0014,2026-08-10T00:39,Fisioterapia,Ass. Social Miguel Nunes
-U0014,2026-07-05T00:39,Psicologia,Dr. Tiago Matos
-U0014,2026-07-05T00:39,Fisioterapia,Dr. Hugo Teixeira
-U0014,2026-06-26T00:39,Visita familiar,Dra. Carla Nogueira
-U0015,2026-09-04T00:39,Psicologia,Enf. Paulo Cardoso
-U0015,2026-08-21T00:39,Fisioterapia,Dra. Patrícia Gomes
-U0015,2026-07-15T00:39,Psicologia,Dra. Patrícia Gomes
-U0015,2026-07-06T00:39,Visita familiar,Dra. Sofia Ramalho
-U0016,2026-07-19T00:39,Psicologia,Dra. Carla Nogueira
-U0016,2026-06-28T00:39,Psicologia,Ass. Social Miguel Nunes
-U0016,2026-05-31T00:39,Enfermagem,Dra. Patrícia Gomes
-U0017,2026-09-02T00:39,Fisioterapia,Dra. Carla Nogueira
-U0017,2026-09-01T00:39,Fisioterapia,Dr. Nuno Barreto
-U0017,2026-08-05T00:39,Consulta médica,Fisio. Beatriz Lima
-U0017,2026-07-23T00:39,Psicologia,Dra. Inês Fonseca
-U0017,2026-07-21T00:39,Psicologia,Fisio. Beatriz Lima
-U0017,2026-07-13T00:39,Psicologia,Dra. Sofia Ramalho
-U0017,2026-07-03T00:39,Consulta médica,Fisio. Beatriz Lima
-U0017,2026-06-27T00:39,Consulta médica,Dr. Tiago Matos
-U0018,2026-09-15T00:39,Consulta médica,Dr. Tiago Matos
-U0018,2026-08-02T00:39,Fisioterapia,Dra. Patrícia Gomes
-U0018,2026-07-21T00:39,Visita familiar,Dr. Ricardo Rocha
-U0018,2026-07-11T00:39,Psicologia,Dra. Patrícia Gomes
-U0018,2026-07-02T00:39,Enfermagem,Dr. Ricardo Rocha
-U0019,2026-09-16T00:39,Enfermagem,Enf. Paulo Cardoso
-U0019,2026-09-12T00:39,Fisioterapia,Psic. Vera Matos
-U0019,2026-07-16T00:39,Visita familiar,Dr. Ricardo Rocha
-U0019,2026-06-08T00:39,Visita familiar,Psic. Vera Matos
-U0020,2026-08-21T00:39,Enfermagem,Fisio. Beatriz Lima
-U0020,2026-07-20T00:39,Consulta médica,Dra. Sofia Ramalho
-U0021,2026-08-16T00:39,Fisioterapia,Ass. Social Miguel Nunes
-U0021,2026-07-22T00:39,Visita familiar,Dr. Hugo Teixeira
-U0021,2026-07-13T00:39,Consulta médica,Dra. Inês Fonseca
-U0021,2026-06-29T00:39,Psicologia,Enf. Marta Sousa
-U0022,2026-08-26T00:39,Visita familiar,Psic. Vera Matos
-U0022,2026-08-22T00:39,Fisioterapia,Psic. Vera Matos
-U0022,2026-08-15T00:39,Enfermagem,Fisio. Beatriz Lima
-U0022,2026-05-27T00:39,Enfermagem,Fisio. Beatriz Lima
-U0023,2026-06-23T00:39,Enfermagem,Dr. Ricardo Rocha
-U0023,2026-06-12T00:39,Enfermagem,Dra. Inês Fonseca
-U0023,2026-06-10T00:39,Visita familiar,Dra. Carla Nogueira
-U0023,2026-05-28T00:39,Consulta médica,Enf. Marta Sousa
-U0024,2026-09-02T00:39,Consulta médica,Dra. Carla Nogueira
-U0024,2026-08-21T00:39,Enfermagem,Enf. Paulo Cardoso
-U0024,2026-08-17T00:39,Visita familiar,Dra. Carla Nogueira
-U0024,2026-08-10T00:39,Visita familiar,Psic. Vera Matos
-U0024,2026-07-02T00:39,Psicologia,Fisio. Beatriz Lima
-U0024,2026-06-04T00:39,Consulta médica,Fisio. Beatriz Lima
-U0024,2026-05-29T00:39,Visita familiar,Fisio. Beatriz Lima
-U0025,2026-08-20T00:39,Visita familiar,Fisio. Beatriz Lima
-U0025,2026-08-03T00:39,Consulta médica,Enf. Paulo Cardoso
-U0025,2026-07-05T00:39,Enfermagem,Nutric. Renata Alves
-U0025,2026-06-21T00:39,Consulta médica,Dra. Sofia Ramalho
-U0025,2026-06-15T00:39,Fisioterapia,Nutric. Renata Alves
-U0025,2026-06-03T00:39,Visita familiar,Psic. Vera Matos
-U0025,2026-05-27T00:39,Visita familiar,Dr. Nuno Barreto
-U0026,2026-09-20T00:39,Enfermagem,Dra. Patrícia Gomes
-U0026,2026-09-07T00:39,Enfermagem,Enf. Marta Sousa
-U0026,2026-07-01T00:39,Psicologia,Psic. Vera Matos
-U0026,2026-06-23T00:39,Fisioterapia,Dr. Ricardo Rocha
-U0026,2026-06-13T00:39,Enfermagem,Dr. Nuno Barreto
-U0027,2026-08-13T00:39,Visita familiar,Dra. Carla Nogueira
-U0027,2026-08-11T00:39,Consulta médica,Dr. Ricardo Rocha
-U0027,2026-07-02T00:39,Fisioterapia,Fisio. Beatriz Lima
-U0027,2026-06-26T00:39,Enfermagem,Dr. Ricardo Rocha
-U0027,2026-06-16T00:39,Consulta médica,Dr. Tiago Matos
-U0028,2026-09-15T00:39,Fisioterapia,Dra. Inês Fonseca
-U0028,2026-08-18T00:39,Enfermagem,Enf. Marta Sousa
-U0028,2026-08-15T00:39,Visita familiar,Psic. Vera Matos
-U0028,2026-07-16T00:39,Psicologia,Enf. Paulo Cardoso
-U0029,2026-09-14T00:39,Consulta médica,Dra. Inês Fonseca
-U0029,2026-08-17T00:39,Enfermagem,Enf. Paulo Cardoso
-U0029,2026-08-07T00:39,Enfermagem,Dra. Sofia Ramalho
-U0029,2026-07-24T00:39,Psicologia,Dr. Nuno Barreto
-U0029,2026-06-04T00:39,Psicologia,Dr. Ricardo Rocha
-U0030,2026-09-16T00:39,Fisioterapia,Dra. Carla Nogueira
-U0030,2026-08-26T00:39,Visita familiar,Dr. Nuno Barreto
-U0030,2026-08-03T00:39,Consulta médica,Dr. Tiago Matos
-U0030,2026-07-17T00:39,Psicologia,Dra. Sofia Ramalho
-U0031,2026-09-21T00:39,Psicologia,Dra. Inês Fonseca
-U0031,2026-08-29T00:39,Enfermagem,Psic. Vera Matos
-U0031,2026-07-30T00:39,Visita familiar,Dra. Patrícia Gomes
-U0031,2026-07-24T00:39,Consulta médica,Dra. Inês Fonseca
-U0031,2026-07-09T00:39,Psicologia,Dra. Sofia Ramalho
-U0031,2026-07-04T00:39,Psicologia,Psic. Vera Matos
-U0031,2026-07-02T00:39,Psicologia,Dra. Carla Nogueira
-U0031,2026-06-27T00:39,Visita familiar,Psic. Vera Matos
-U0032,2026-07-14T00:39,Fisioterapia,Psic. Vera Matos
-U0032,2026-07-06T00:39,Enfermagem,Dr. Hugo Teixeira
-U0033,2026-09-15T00:39,Visita familiar,Dr. Ricardo Rocha
-U0033,2026-08-29T00:39,Fisioterapia,Dr. Ricardo Rocha
-U0033,2026-08-19T00:39,Visita familiar,Nutric. Renata Alves
-U0033,2026-07-29T00:39,Consulta médica,Dra. Patrícia Gomes
-U0033,2026-07-14T00:39,Consulta médica,Dr. Ricardo Rocha
-U0033,2026-07-10T00:39,Fisioterapia,Dra. Carla Nogueira
-U0033,2026-06-16T00:39,Consulta médica,Nutric. Renata Alves
-U0034,2026-09-17T00:39,Consulta médica,Nutric. Renata Alves
-U0034,2026-07-28T00:39,Enfermagem,Dra. Sofia Ramalho
-U0034,2026-07-21T00:39,Psicologia,Psic. Vera Matos
-U0034,2026-06-19T00:39,Enfermagem,Dra. Sofia Ramalho
-U0034,2026-06-10T00:39,Enfermagem,Fisio. Beatriz Lima
-U0034,2026-06-04T00:39,Psicologia,Dra. Sofia Ramalho
-U0035,2026-09-20T00:39,Visita familiar,Dra. Inês Fonseca
-U0035,2026-09-06T00:39,Enfermagem,Dr. Ricardo Rocha
-U0035,2026-08-27T00:39,Enfermagem,Ass. Social Miguel Nunes
-U0035,2026-07-25T00:39,Psicologia,Dra. Inês Fonseca
-U0035,2026-07-11T00:39,Visita familiar,Dra. Sofia Ramalho
-U0035,2026-06-19T00:39,Visita familiar,Nutric. Renata Alves
-U0036,2026-09-18T00:39,Consulta médica,Nutric. Renata Alves
-U0036,2026-08-15T00:39,Consulta médica,Dr. Nuno Barreto
-U0036,2026-08-13T00:39,Consulta médica,Dr. Tiago Matos
-U0036,2026-08-01T00:39,Visita familiar,Ass. Social Miguel Nunes
-U0036,2026-07-22T00:39,Psicologia,Ass. Social Miguel Nunes
-U0036,2026-06-08T00:39,Psicologia,Enf. Paulo Cardoso
-U0036,2026-06-01T00:39,Enfermagem,Dra. Carla Nogueira
-U0037,2026-08-26T00:39,Psicologia,Dr. Ricardo Rocha
-U0037,2026-07-27T00:39,Enfermagem,Dr. Tiago Matos
-U0037,2026-07-27T00:39,Visita familiar,Dr. Tiago Matos
-U0037,2026-06-30T00:39,Visita familiar,Dr. Nuno Barreto
-U0038,2026-06-30T00:39,Visita familiar,Fisio. Beatriz Lima
-U0038,2026-06-20T00:39,Visita familiar,Fisio. Beatriz Lima
-U0038,2026-06-16T00:39,Consulta médica,Dra. Patrícia Gomes
-U0038,2026-06-03T00:39,Fisioterapia,Enf. Paulo Cardoso
-U0038,2026-06-02T00:39,Psicologia,Dra. Patrícia Gomes
-U0039,2026-09-13T00:39,Enfermagem,Dra. Carla Nogueira
-U0039,2026-08-26T00:39,Fisioterapia,Dr. Nuno Barreto
-U0039,2026-08-24T00:39,Psicologia,Enf. Paulo Cardoso
-U0039,2026-07-08T00:39,Consulta médica,Enf. Marta Sousa
-U0039,2026-07-01T00:39,Visita familiar,Dra. Sofia Ramalho
-U0039,2026-06-12T00:39,Visita familiar,Fisio. Beatriz Lima
-U0040,2026-09-11T00:39,Psicologia,Dra. Sofia Ramalho
-U0040,2026-08-25T00:39,Visita familiar,Dra. Carla Nogueira
-U0040,2026-06-23T00:39,Visita familiar,Dr. Ricardo Rocha
-U0040,2026-06-21T00:39,Fisioterapia,Enf. Paulo Cardoso
-U0040,2026-06-16T00:39,Visita familiar,Dra. Carla Nogueira
-U0040,2026-06-07T00:39,Visita familiar,Dr. Tiago Matos
-U0041,2026-07-21T00:39,Psicologia,Dr. Ricardo Rocha
-U0041,2026-06-19T00:39,Visita familiar,Dr. Ricardo Rocha
-U0041,2026-06-09T00:39,Enfermagem,Ass. Social Miguel Nunes
-U0042,2026-09-05T00:39,Psicologia,Dr. Tiago Matos
-U0042,2026-08-21T00:39,Fisioterapia,Nutric. Renata Alves
-U0042,2026-08-07T00:39,Psicologia,Dra. Patrícia Gomes
-U0042,2026-08-03T00:39,Consulta médica,Enf. Paulo Cardoso
-U0042,2026-07-15T00:39,Enfermagem,Dr. Ricardo Rocha
-U0042,2026-06-27T00:39,Psicologia,Dra. Sofia Ramalho
-U0042,2026-06-23T00:39,Fisioterapia,Nutric. Renata Alves
-U0043,2026-09-01T00:39,Visita familiar,Fisio. Beatriz Lima
-U0043,2026-08-18T00:39,Psicologia,Dr. Tiago Matos
-U0043,2026-07-31T00:39,Enfermagem,Dra. Inês Fonseca
-U0043,2026-07-25T00:39,Psicologia,Enf. Marta Sousa
-U0043,2026-07-22T00:39,Fisioterapia,Psic. Vera Matos
-U0043,2026-07-17T00:39,Visita familiar,Dr. Tiago Matos
-U0043,2026-07-07T00:39,Consulta médica,Dra. Patrícia Gomes
-U0043,2026-06-21T00:39,Psicologia,Dr. Ricardo Rocha
-U0044,2026-09-16T00:39,Consulta médica,Dr. Ricardo Rocha
-U0044,2026-09-01T00:39,Fisioterapia,Ass. Social Miguel Nunes
-U0044,2026-08-15T00:39,Psicologia,Nutric. Renata Alves
-U0044,2026-08-08T00:39,Visita familiar,Psic. Vera Matos
-U0044,2026-07-12T00:39,Consulta médica,Dra. Carla Nogueira
-U0045,2026-08-08T00:39,Psicologia,Enf. Marta Sousa
-U0045,2026-08-05T00:39,Fisioterapia,Dr. Hugo Teixeira
-U0045,2026-07-19T00:39,Consulta médica,Enf. Marta Sousa
+U0001,2026-09-16T10:55,Psicologia,Dr. Tiago Matos
+U0001,2026-09-14T10:55,Enfermagem,Dra. Sofia Ramalho
+U0001,2026-09-12T10:55,Consulta médica,Dr. Tiago Matos
+U0001,2026-08-09T10:55,Fisioterapia,Dr. Nuno Barreto
+U0001,2026-08-09T10:55,Visita familiar,Dr. Ricardo Rocha
+U0001,2026-07-17T10:55,Fisioterapia,Enf. Marta Sousa
+U0001,2026-06-08T10:55,Enfermagem,Dra. Sofia Ramalho
+U0001,2026-05-30T10:55,Enfermagem,Dra. Carla Nogueira
+U0002,2026-08-28T10:55,Enfermagem,Dr. Nuno Barreto
+U0002,2026-08-25T10:55,Fisioterapia,Dr. Hugo Teixeira
+U0002,2026-08-23T10:55,Visita familiar,Dr. Hugo Teixeira
+U0002,2026-08-23T10:55,Psicologia,Dra. Carla Nogueira
+U0002,2026-08-21T10:55,Visita familiar,Dra. Patrícia Gomes
+U0002,2026-08-08T10:55,Visita familiar,Fisio. Beatriz Lima
+U0002,2026-07-08T10:55,Psicologia,Enf. Paulo Cardoso
+U0003,2026-08-15T10:55,Psicologia,Dr. Tiago Matos
+U0003,2026-08-14T10:55,Enfermagem,Dra. Inês Fonseca
+U0003,2026-07-11T10:55,Consulta médica,Dr. Hugo Teixeira
+U0003,2026-06-20T10:55,Enfermagem,Fisio. Beatriz Lima
+U0004,2026-09-11T10:55,Consulta médica,Fisio. Beatriz Lima
+U0004,2026-06-13T10:55,Enfermagem,Enf. Marta Sousa
+U0005,2026-08-26T10:55,Consulta médica,Dra. Sofia Ramalho
+U0005,2026-08-04T10:55,Enfermagem,Dra. Sofia Ramalho
+U0005,2026-07-20T10:55,Enfermagem,Dra. Patrícia Gomes
+U0005,2026-07-13T10:55,Enfermagem,Dr. Tiago Matos
+U0005,2026-06-29T10:55,Fisioterapia,Dra. Inês Fonseca
+U0005,2026-06-13T10:55,Enfermagem,Dr. Tiago Matos
+U0005,2026-06-13T10:55,Enfermagem,Dra. Sofia Ramalho
+U0005,2026-05-29T10:55,Consulta médica,Ass. Social Miguel Nunes
+U0006,2026-09-14T10:55,Visita familiar,Ass. Social Miguel Nunes
+U0006,2026-07-21T10:55,Consulta médica,Dra. Sofia Ramalho
+U0006,2026-07-13T10:55,Psicologia,Nutric. Renata Alves
+U0006,2026-05-29T10:55,Consulta médica,Dr. Ricardo Rocha
+U0007,2026-09-14T10:55,Enfermagem,Dr. Hugo Teixeira
+U0007,2026-07-30T10:55,Enfermagem,Dr. Hugo Teixeira
+U0008,2026-09-05T10:55,Enfermagem,Dr. Hugo Teixeira
+U0008,2026-08-29T10:55,Enfermagem,Dr. Hugo Teixeira
+U0008,2026-08-25T10:55,Fisioterapia,Dr. Tiago Matos
+U0008,2026-06-25T10:55,Enfermagem,Ass. Social Miguel Nunes
+U0008,2026-06-12T10:55,Fisioterapia,Dr. Ricardo Rocha
+U0009,2026-09-16T10:55,Consulta médica,Dra. Carla Nogueira
+U0009,2026-09-07T10:55,Fisioterapia,Enf. Marta Sousa
+U0009,2026-09-04T10:55,Consulta médica,Dr. Hugo Teixeira
+U0009,2026-08-12T10:55,Enfermagem,Enf. Paulo Cardoso
+U0009,2026-08-06T10:55,Consulta médica,Dra. Carla Nogueira
+U0009,2026-06-22T10:55,Fisioterapia,Fisio. Beatriz Lima
+U0009,2026-06-01T10:55,Visita familiar,Dr. Tiago Matos
+U0010,2026-09-11T10:55,Consulta médica,Fisio. Beatriz Lima
+U0010,2026-08-25T10:55,Consulta médica,Dra. Inês Fonseca
+U0010,2026-07-15T10:55,Psicologia,Dra. Patrícia Gomes
+U0010,2026-06-17T10:55,Psicologia,Dra. Carla Nogueira
+U0010,2026-05-28T10:55,Fisioterapia,Psic. Vera Matos
+U0010,2026-05-26T10:55,Psicologia,Dr. Hugo Teixeira
+U0011,2026-08-16T10:55,Visita familiar,Psic. Vera Matos
+U0011,2026-08-11T10:55,Psicologia,Dra. Inês Fonseca
+U0011,2026-05-31T10:55,Psicologia,Dra. Patrícia Gomes
+U0012,2026-09-19T10:55,Visita familiar,Psic. Vera Matos
+U0012,2026-09-18T10:55,Enfermagem,Dr. Hugo Teixeira
+U0012,2026-07-07T10:55,Visita familiar,Dra. Patrícia Gomes
+U0012,2026-05-25T10:55,Visita familiar,Fisio. Beatriz Lima
+U0013,2026-09-19T10:55,Enfermagem,Dra. Sofia Ramalho
+U0013,2026-08-31T10:55,Visita familiar,Nutric. Renata Alves
+U0013,2026-08-17T10:55,Enfermagem,Dr. Ricardo Rocha
+U0013,2026-08-02T10:55,Psicologia,Dr. Ricardo Rocha
+U0013,2026-06-12T10:55,Visita familiar,Enf. Paulo Cardoso
+U0013,2026-06-09T10:55,Enfermagem,Dr. Ricardo Rocha
+U0014,2026-09-14T10:55,Visita familiar,Dr. Ricardo Rocha
+U0014,2026-09-01T10:55,Fisioterapia,Dr. Ricardo Rocha
+U0014,2026-08-30T10:55,Fisioterapia,Dr. Ricardo Rocha
+U0014,2026-08-10T10:55,Fisioterapia,Ass. Social Miguel Nunes
+U0014,2026-07-05T10:55,Psicologia,Dr. Tiago Matos
+U0014,2026-07-05T10:55,Fisioterapia,Dr. Hugo Teixeira
+U0014,2026-06-26T10:55,Visita familiar,Dra. Carla Nogueira
+U0015,2026-09-04T10:55,Psicologia,Enf. Paulo Cardoso
+U0015,2026-08-21T10:55,Fisioterapia,Dra. Patrícia Gomes
+U0015,2026-07-15T10:55,Psicologia,Dra. Patrícia Gomes
+U0015,2026-07-06T10:55,Visita familiar,Dra. Sofia Ramalho
+U0016,2026-07-19T10:55,Psicologia,Dra. Carla Nogueira
+U0016,2026-06-28T10:55,Psicologia,Ass. Social Miguel Nunes
+U0016,2026-05-31T10:55,Enfermagem,Dra. Patrícia Gomes
+U0017,2026-09-02T10:55,Fisioterapia,Dra. Carla Nogueira
+U0017,2026-09-01T10:55,Fisioterapia,Dr. Nuno Barreto
+U0017,2026-08-05T10:55,Consulta médica,Fisio. Beatriz Lima
+U0017,2026-07-23T10:55,Psicologia,Dra. Inês Fonseca
+U0017,2026-07-21T10:55,Psicologia,Fisio. Beatriz Lima
+U0017,2026-07-13T10:55,Psicologia,Dra. Sofia Ramalho
+U0017,2026-07-03T10:55,Consulta médica,Fisio. Beatriz Lima
+U0017,2026-06-27T10:55,Consulta médica,Dr. Tiago Matos
+U0018,2026-09-15T10:55,Consulta médica,Dr. Tiago Matos
+U0018,2026-08-02T10:55,Fisioterapia,Dra. Patrícia Gomes
+U0018,2026-07-21T10:55,Visita familiar,Dr. Ricardo Rocha
+U0018,2026-07-11T10:55,Psicologia,Dra. Patrícia Gomes
+U0018,2026-07-02T10:55,Enfermagem,Dr. Ricardo Rocha
+U0019,2026-09-16T10:55,Enfermagem,Enf. Paulo Cardoso
+U0019,2026-09-12T10:55,Fisioterapia,Psic. Vera Matos
+U0019,2026-07-16T10:55,Visita familiar,Dr. Ricardo Rocha
+U0019,2026-06-08T10:55,Visita familiar,Psic. Vera Matos
+U0020,2026-08-21T10:55,Enfermagem,Fisio. Beatriz Lima
+U0020,2026-07-20T10:55,Consulta médica,Dra. Sofia Ramalho
+U0021,2026-08-16T10:55,Fisioterapia,Ass. Social Miguel Nunes
+U0021,2026-07-22T10:55,Visita familiar,Dr. Hugo Teixeira
+U0021,2026-07-13T10:55,Consulta médica,Dra. Inês Fonseca
+U0021,2026-06-29T10:55,Psicologia,Enf. Marta Sousa
+U0022,2026-08-26T10:55,Visita familiar,Psic. Vera Matos
+U0022,2026-08-22T10:55,Fisioterapia,Psic. Vera Matos
+U0022,2026-08-15T10:55,Enfermagem,Fisio. Beatriz Lima
+U0022,2026-05-27T10:55,Enfermagem,Fisio. Beatriz Lima
+U0023,2026-06-23T10:55,Enfermagem,Dr. Ricardo Rocha
+U0023,2026-06-12T10:55,Enfermagem,Dra. Inês Fonseca
+U0023,2026-06-10T10:55,Visita familiar,Dra. Carla Nogueira
+U0023,2026-05-28T10:55,Consulta médica,Enf. Marta Sousa
+U0024,2026-09-02T10:55,Consulta médica,Dra. Carla Nogueira
+U0024,2026-08-21T10:55,Enfermagem,Enf. Paulo Cardoso
+U0024,2026-08-17T10:55,Visita familiar,Dra. Carla Nogueira
+U0024,2026-08-10T10:55,Visita familiar,Psic. Vera Matos
+U0024,2026-07-02T10:55,Psicologia,Fisio. Beatriz Lima
+U0024,2026-06-04T10:55,Consulta médica,Fisio. Beatriz Lima
+U0024,2026-05-29T10:55,Visita familiar,Fisio. Beatriz Lima
+U0025,2026-08-20T10:55,Visita familiar,Fisio. Beatriz Lima
+U0025,2026-08-03T10:55,Consulta médica,Enf. Paulo Cardoso
+U0025,2026-07-05T10:55,Enfermagem,Nutric. Renata Alves
+U0025,2026-06-21T10:55,Consulta médica,Dra. Sofia Ramalho
+U0025,2026-06-15T10:55,Fisioterapia,Nutric. Renata Alves
+U0025,2026-06-03T10:55,Visita familiar,Psic. Vera Matos
+U0025,2026-05-27T10:55,Visita familiar,Dr. Nuno Barreto
+U0026,2026-09-20T10:55,Enfermagem,Dra. Patrícia Gomes
+U0026,2026-09-07T10:55,Enfermagem,Enf. Marta Sousa
+U0026,2026-07-01T10:55,Psicologia,Psic. Vera Matos
+U0026,2026-06-23T10:55,Fisioterapia,Dr. Ricardo Rocha
+U0026,2026-06-13T10:55,Enfermagem,Dr. Nuno Barreto
+U0027,2026-08-13T10:55,Visita familiar,Dra. Carla Nogueira
+U0027,2026-08-11T10:55,Consulta médica,Dr. Ricardo Rocha
+U0027,2026-07-02T10:55,Fisioterapia,Fisio. Beatriz Lima
+U0027,2026-06-26T10:55,Enfermagem,Dr. Ricardo Rocha
+U0027,2026-06-16T10:55,Consulta médica,Dr. Tiago Matos
+U0028,2026-09-15T10:55,Fisioterapia,Dra. Inês Fonseca
+U0028,2026-08-18T10:55,Enfermagem,Enf. Marta Sousa
+U0028,2026-08-15T10:55,Visita familiar,Psic. Vera Matos
+U0028,2026-07-16T10:55,Psicologia,Enf. Paulo Cardoso
+U0029,2026-09-14T10:55,Consulta médica,Dra. Inês Fonseca
+U0029,2026-08-17T10:55,Enfermagem,Enf. Paulo Cardoso
+U0029,2026-08-07T10:55,Enfermagem,Dra. Sofia Ramalho
+U0029,2026-07-24T10:55,Psicologia,Dr. Nuno Barreto
+U0029,2026-06-04T10:55,Psicologia,Dr. Ricardo Rocha
+U0030,2026-09-16T10:55,Fisioterapia,Dra. Carla Nogueira
+U0030,2026-08-26T10:55,Visita familiar,Dr. Nuno Barreto
+U0030,2026-08-03T10:55,Consulta médica,Dr. Tiago Matos
+U0030,2026-07-17T10:55,Psicologia,Dra. Sofia Ramalho
+U0031,2026-09-21T10:55,Psicologia,Dra. Inês Fonseca
+U0031,2026-08-29T10:55,Enfermagem,Psic. Vera Matos
+U0031,2026-07-30T10:55,Visita familiar,Dra. Patrícia Gomes
+U0031,2026-07-24T10:55,Consulta médica,Dra. Inês Fonseca
+U0031,2026-07-09T10:55,Psicologia,Dra. Sofia Ramalho
+U0031,2026-07-04T10:55,Psicologia,Psic. Vera Matos
+U0031,2026-07-02T10:55,Psicologia,Dra. Carla Nogueira
+U0031,2026-06-27T10:55,Visita familiar,Psic. Vera Matos
+U0032,2026-07-14T10:55,Fisioterapia,Psic. Vera Matos
+U0032,2026-07-06T10:55,Enfermagem,Dr. Hugo Teixeira
+U0033,2026-09-15T10:55,Visita familiar,Dr. Ricardo Rocha
+U0033,2026-08-29T10:55,Fisioterapia,Dr. Ricardo Rocha
+U0033,2026-08-19T10:55,Visita familiar,Nutric. Renata Alves
+U0033,2026-07-29T10:55,Consulta médica,Dra. Patrícia Gomes
+U0033,2026-07-14T10:55,Consulta médica,Dr. Ricardo Rocha
+U0033,2026-07-10T10:55,Fisioterapia,Dra. Carla Nogueira
+U0033,2026-06-16T10:55,Consulta médica,Nutric. Renata Alves
+U0034,2026-09-17T10:55,Consulta médica,Nutric. Renata Alves
+U0034,2026-07-28T10:55,Enfermagem,Dra. Sofia Ramalho
+U0034,2026-07-21T10:55,Psicologia,Psic. Vera Matos
+U0034,2026-06-19T10:55,Enfermagem,Dra. Sofia Ramalho
+U0034,2026-06-10T10:55,Enfermagem,Fisio. Beatriz Lima
+U0034,2026-06-04T10:55,Psicologia,Dra. Sofia Ramalho
+U0035,2026-09-20T10:55,Visita familiar,Dra. Inês Fonseca
+U0035,2026-09-06T10:55,Enfermagem,Dr. Ricardo Rocha
+U0035,2026-08-27T10:55,Enfermagem,Ass. Social Miguel Nunes
+U0035,2026-07-25T10:55,Psicologia,Dra. Inês Fonseca
+U0035,2026-07-11T10:55,Visita familiar,Dra. Sofia Ramalho
+U0035,2026-06-19T10:55,Visita familiar,Nutric. Renata Alves
+U0036,2026-09-18T10:55,Consulta médica,Nutric. Renata Alves
+U0036,2026-08-15T10:55,Consulta médica,Dr. Nuno Barreto
+U0036,2026-08-13T10:55,Consulta médica,Dr. Tiago Matos
+U0036,2026-08-01T10:55,Visita familiar,Ass. Social Miguel Nunes
+U0036,2026-07-22T10:55,Psicologia,Ass. Social Miguel Nunes
+U0036,2026-06-08T10:55,Psicologia,Enf. Paulo Cardoso
+U0036,2026-06-01T10:55,Enfermagem,Dra. Carla Nogueira
+U0037,2026-08-26T10:55,Psicologia,Dr. Ricardo Rocha
+U0037,2026-07-27T10:55,Enfermagem,Dr. Tiago Matos
+U0037,2026-07-27T10:55,Visita familiar,Dr. Tiago Matos
+U0037,2026-06-30T10:55,Visita familiar,Dr. Nuno Barreto
+U0038,2026-06-30T10:55,Visita familiar,Fisio. Beatriz Lima
+U0038,2026-06-20T10:55,Visita familiar,Fisio. Beatriz Lima
+U0038,2026-06-16T10:55,Consulta médica,Dra. Patrícia Gomes
+U0038,2026-06-03T10:55,Fisioterapia,Enf. Paulo Cardoso
+U0038,2026-06-02T10:55,Psicologia,Dra. Patrícia Gomes
+U0039,2026-09-13T10:55,Enfermagem,Dra. Carla Nogueira
+U0039,2026-08-26T10:55,Fisioterapia,Dr. Nuno Barreto
+U0039,2026-08-24T10:55,Psicologia,Enf. Paulo Cardoso
+U0039,2026-07-08T10:55,Consulta médica,Enf. Marta Sousa
+U0039,2026-07-01T10:55,Visita familiar,Dra. Sofia Ramalho
+U0039,2026-06-12T10:55,Visita familiar,Fisio. Beatriz Lima
+U0040,2026-09-11T10:55,Psicologia,Dra. Sofia Ramalho
+U0040,2026-08-25T10:55,Visita familiar,Dra. Carla Nogueira
+U0040,2026-06-23T10:55,Visita familiar,Dr. Ricardo Rocha
+U0040,2026-06-21T10:55,Fisioterapia,Enf. Paulo Cardoso
+U0040,2026-06-16T10:55,Visita familiar,Dra. Carla Nogueira
+U0040,2026-06-07T10:55,Visita familiar,Dr. Tiago Matos
+U0041,2026-07-21T10:55,Psicologia,Dr. Ricardo Rocha
+U0041,2026-06-19T10:55,Visita familiar,Dr. Ricardo Rocha
+U0041,2026-06-09T10:55,Enfermagem,Ass. Social Miguel Nunes
+U0042,2026-09-05T10:55,Psicologia,Dr. Tiago Matos
+U0042,2026-08-21T10:55,Fisioterapia,Nutric. Renata Alves
+U0042,2026-08-07T10:55,Psicologia,Dra. Patrícia Gomes
+U0042,2026-08-03T10:55,Consulta médica,Enf. Paulo Cardoso
+U0042,2026-07-15T10:55,Enfermagem,Dr. Ricardo Rocha
+U0042,2026-06-27T10:55,Psicologia,Dra. Sofia Ramalho
+U0042,2026-06-23T10:55,Fisioterapia,Nutric. Renata Alves
+U0043,2026-09-01T10:55,Visita familiar,Fisio. Beatriz Lima
+U0043,2026-08-18T10:55,Psicologia,Dr. Tiago Matos
+U0043,2026-07-31T10:55,Enfermagem,Dra. Inês Fonseca
+U0043,2026-07-25T10:55,Psicologia,Enf. Marta Sousa
+U0043,2026-07-22T10:55,Fisioterapia,Psic. Vera Matos
+U0043,2026-07-17T10:55,Visita familiar,Dr. Tiago Matos
+U0043,2026-07-07T10:55,Consulta médica,Dra. Patrícia Gomes
+U0043,2026-06-21T10:55,Psicologia,Dr. Ricardo Rocha
+U0044,2026-09-16T10:55,Consulta médica,Dr. Ricardo Rocha
+U0044,2026-09-01T10:55,Fisioterapia,Ass. Social Miguel Nunes
+U0044,2026-08-15T10:55,Psicologia,Nutric. Renata Alves
+U0044,2026-08-08T10:55,Visita familiar,Psic. Vera Matos
+U0044,2026-07-12T10:55,Consulta médica,Dra. Carla Nogueira
+U0045,2026-08-08T10:55,Psicologia,Enf. Marta Sousa
+U0045,2026-08-05T10:55,Fisioterapia,Dr. Hugo Teixeira
+U0045,2026-07-19T10:55,Consulta médica,Enf. Marta Sousa

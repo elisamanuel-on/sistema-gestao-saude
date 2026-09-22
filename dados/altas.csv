@@ -1,7 +1,7 @@
 id_utente,tipo_cuidado,data_alta,motivo
-U0015,SAD,2026-04-23,Alta a pedido da família
-U0017,Clínica/Hospital,2026-05-05,Transferência para outra unidade
-U0027,ERPI,2026-06-21,Óbito
-U0028,UCC,2026-07-08,Melhoria clínica
-U0030,UCC,2026-09-07,Transferência para outra unidade
-U0037,Clínica/Hospital,2026-07-05,Melhoria clínica
+U0015,SAD,2026-04-13,Melhoria clínica
+U0017,Clínica/Hospital,2026-07-06,Alta a pedido da família
+U0027,ERPI,2026-04-05,Transferência para outra unidade
+U0028,UCC,2026-08-19,Transferência para outra unidade
+U0030,UCC,2026-09-20,Alta a pedido da família
+U0037,Clínica/Hospital,2026-09-06,Melhoria clínica

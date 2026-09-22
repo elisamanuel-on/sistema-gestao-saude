@@ -311,3 +311,84 @@ def test_faturacao_sem_seguro_aparece_como_travessao():
     fat = m.DADOS["faturacao"]
     # depois do fillna em _carregar_todos_os_dados, nunca deve sobrar NaN
     assert fat["seguradora"].isna().sum() == 0
+
+
+# --- Visão Geral, login por perfil, PDF, calendário, histórico, sobre -------
+
+
+def test_perfis_de_acesso_tem_tres_opcoes():
+    assert constantes.PERFIS_ACESSO == ["Enfermeiro", "Médico", "Administrativo"]
+
+
+def test_so_administrativo_ve_a_seccao_gestao():
+    assert "Gestão" in constantes.SECCOES_POR_PERFIL["Administrativo"]
+    assert "Gestão" not in constantes.SECCOES_POR_PERFIL["Enfermeiro"]
+    assert "Gestão" not in constantes.SECCOES_POR_PERFIL["Médico"]
+
+
+def test_pagina_login_mostra_os_tres_perfis():
+    pagina = str(m._pagina_login())
+    for perfil in constantes.PERFIS_ACESSO:
+        assert perfil in pagina
+
+
+def test_barra_lateral_esconde_faturacao_para_enfermeiro():
+    barra = str(m._barra_lateral("/", "Enfermeiro"))
+    assert "Faturação" not in barra
+    assert "Utentes" in barra
+
+
+def test_barra_lateral_mostra_faturacao_para_administrativo():
+    barra = str(m._barra_lateral("/", "Administrativo"))
+    assert "Faturação" in barra
+
+
+def test_rotear_pagina_sem_perfil_mostra_login():
+    pagina = str(m._rotear_pagina("/utentes", None))
+    assert "perfil" in pagina.lower() or "Enfermeiro" in pagina
+
+
+def test_rotear_pagina_com_perfil_mostra_conteudo_pedido():
+    pagina = str(m._rotear_pagina("/utentes", "Médico"))
+    assert "Nenhum utente encontrado" not in pagina  # é a página de utentes, não a de login
+    assert "corpo-tabela-utentes" in pagina
+
+
+def test_pagina_visao_geral_renderiza_com_kpis():
+    pagina = str(m._pagina_visao_geral())
+    assert "Visão Geral" in pagina
+
+
+def test_ids_utentes_risco_elevado_e_subconjunto_dos_utentes():
+    ids_risco = m._ids_utentes_risco_elevado()
+    assert set(ids_risco) <= set(m.DADOS["utentes"]["id_utente"])
+
+
+def test_pagina_sobre_renderiza():
+    pagina = str(m._pagina_sobre())
+    assert "Sobre este projeto" in pagina
+
+
+def test_aba_historico_renderiza_para_utente_com_historico():
+    utente = _primeiro_utente_com("historico")
+    assert m._aba_historico(utente["id_utente"]) is not None
+
+
+def test_gerar_pdf_ficha_produz_pdf_valido():
+    utente = _primeiro_utente()
+    conteudo = m._gerar_pdf_ficha(utente["id_utente"])
+    assert conteudo[:4] == b"%PDF"
+
+
+def test_vista_calendario_de_consultas_nao_rebenta():
+    resultado = m._filtrar_consultas(None, None, None, "calendario", None)
+    assert resultado is not None
+
+
+def test_exportar_csv_faturacao_usa_ponto_virgula_como_separador():
+    # Excel em português usa "," como separador decimal, por isso o CSV
+    # exportado tem de usar ";" a separar colunas (ver app.py).
+    resultado = m._descarregar_csv_faturacao(1)
+    primeira_linha = resultado["content"].splitlines()[0]
+    assert ";" in primeira_linha
+    assert "," not in primeira_linha

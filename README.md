@@ -19,18 +19,31 @@ funcional, combinada e depois redesenhada.
 
 ## Módulos
 
+- **Login por perfil** (`/login`) — simulação de acesso sem autenticação
+  real (sem palavra-passe): Enfermeiro, Médico ou Administrativo. Só o
+  perfil Administrativo vê a secção "Gestão" (Faturação) na barra lateral —
+  reflete a separação típica entre pessoal clínico e administrativo. O
+  perfil escolhido fica guardado na sessão do browser (`sessionStorage`) e
+  há um botão "Sair" para trocar de perfil.
+- **Visão Geral** (`/`) — dashboard inicial com KPIs agregados de todos os
+  módulos (total de utentes, ocupação, consultas hoje, utentes com risco
+  elevado, exames por rever, faturas com erro) e um painel de **alertas**
+  com ligação direta para o utente/página relevante.
 - **Utentes** — registo único, pesquisável/filtrável, para **todos os tipos
   de unidade** (UCC, ERPI, SAD e Clínica/Hospital), com KPIs gerais e uma
   etiqueta de cor por tipo de unidade.
 - **Ficha do utente** — resumo, sinais vitais (gráfico ao longo do tempo),
   alergias & diagnósticos, **exames**, prescrições, **plano de cuidados
-  multidisciplinar**, visitas, documentos, e **avaliação de risco**.
+  multidisciplinar**, visitas, documentos, **histórico/auditoria**, e
+  **avaliação de risco** — com **exportação da ficha em PDF** (reportlab).
   - **Exames** — análises, imagiologia, cardiológico e outros, com estado
     (Normal / Alterado / Pendente) e resumo do resultado.
   - **Plano de cuidados multidisciplinar** — objetivos e intervenções por
     área profissional (Enfermagem, Medicina, Fisioterapia, Nutrição,
     Psicologia, Serviço Social), cada um com profissional responsável,
     datas de início/revisão, estado e barra de progresso.
+  - **Histórico** — registo (fictício) de quem alterou o quê e quando, para
+    dar uma noção de rastreabilidade, típica de sistemas clínicos reais.
 - **Avaliação de risco** — três domínios clínicos, cada um com o seu
   formulário (pré-preenchido com os últimos valores conhecidos do utente):
   - **Risco de diabetes** — modelo de machine learning (random forest)
@@ -54,13 +67,17 @@ funcional, combinada e depois redesenhada.
 - **Consultas** (módulo Clínica/Hospital) — agendamento por especialidade e
   profissional, com KPIs (consultas hoje, agendadas nos próximos 7 dias,
   taxa de comparência, faltas), gráfico de consultas por especialidade, e
-  lista filtrável/pesquisável por utente, especialidade e estado (Agendada,
-  Realizada, Cancelada, Falta).
+  duas vistas: **lista** filtrável/pesquisável por utente, especialidade e
+  estado (Agendada, Realizada, Cancelada, Falta), ou **calendário semanal**
+  (com navegação para a semana anterior/seguinte).
 - **Faturação** — valor a pagar pelos utentes, comparticipação da Segurança
   Social, verbas ARS (diárias, medicamentos, remuneração adicional),
   **faturação a seguradoras privadas** (cobertura, valor pago pela
   seguradora, copagamento do utente), saldos e sinalização de erros de
-  fatura, com exportação para CSV.
+  fatura, com exportação para CSV (separador `;` e `utf-8-sig`, para abrir
+  corretamente acentos e colunas no Excel em português).
+- **Sobre este projeto** (`/sobre`) — página dentro da própria aplicação,
+  para quem abre o link em produção sem nunca ver o repositório.
 
 ## Sobre os dados — nada disto é real
 
@@ -171,19 +188,24 @@ pytest -v
 ruff check --select=F,E9,B .
 ```
 
-39 testes cobrem: limpeza/estruturação de dados, a escala de risco de queda
+53 testes cobrem: limpeza/estruturação de dados, a escala de risco de queda
 (incluindo as fronteiras exatas entre baixo/moderado/elevado), o resumo
 automático, o roteamento e os callbacks principais, a validade das
-previsões dos dois modelos de ML, e o módulo Clínica/Hospital (coerência
+previsões dos dois modelos de ML, o módulo Clínica/Hospital (coerência
 profissional/especialidade nas consultas, coerência profissional/área no
-plano de cuidados, exames, e as colunas de seguro na faturação).
+plano de cuidados, exames, e as colunas de seguro na faturação), o acesso
+por perfil (que secções cada perfil vê), a Visão Geral e o cálculo de
+utentes com risco elevado, a vista de calendário de consultas, a exportação
+em PDF da ficha (valida que o ficheiro gerado é um PDF válido), e o
+separador `;` na exportação CSV da faturação.
 
 ## O que ficaria para uma próxima iteração
 
-Sendo um projeto de portfólio, há decisões de âmbito deliberadas: sem
-autenticação/permissões por utilizador, sem persistência em base de dados
-(os dados vivem em CSV, carregados uma vez no arranque), sem exportação em
-Excel para os utentes (só CSV na faturação), sem conformidade RGPD/RNCCI
-formal, e a página de Consultas é uma lista filtrável em vez de uma vista de
-calendário — tudo isto seria o próximo passo natural para uma versão de
-produção.
+Sendo um projeto de portfólio, há decisões de âmbito deliberadas: o login
+por perfil é só uma simulação de interface (sem palavra-passe nem
+autenticação real — não há verificação de identidade nem proteção real dos
+dados por trás), sem persistência em base de dados (os dados vivem em CSV,
+carregados uma vez no arranque), sem exportação em Excel para os utentes
+(só CSV na faturação), sem conformidade RGPD/RNCCI formal, e a vista de
+calendário de consultas é semanal, sem arrastar/largar para reagendar —
+tudo isto seria o próximo passo natural para uma versão de produção.

@@ -9,20 +9,29 @@ de marca ou o layout exato de nenhum dos dois — é uma implementação
 original, que cobre os dois tipos de contexto: cuidados continuados
 (UCC/ERPI/SAD) e ambulatório clínico/hospitalar.
 
-Módulos, navegação lateral agrupada por contexto:
-  /utentes           — lista de utentes de todas as unidades (pesquisa/filtro)
+Módulos, navegação lateral agrupada por contexto (visível/oculta consoante
+o perfil de acesso escolhido no login — Enfermeiro, Médico ou
+Administrativo, uma simulação sem autenticação real):
+  /login              — escolha de perfil (mock, sem palavra-passe)
+  /                   — Visão Geral: KPIs agregados de todos os módulos e
+                         painel de alertas (risco elevado, exames por rever,
+                         faturas com erro)
+  /utentes            — lista de utentes de todas as unidades (pesquisa/filtro)
   /utentes/<id>       — ficha do utente: resumo, sinais vitais, alergias &
                          diagnósticos, exames, prescrições, plano de cuidados
-                         multidisciplinar, visitas, documentos, e avaliação
-                         de risco (diabetes + cardiovascular, por machine
-                         learning, + risco de queda pela Morse Fall Scale —
-                         instrumento clínico publicado), com um resumo
-                         automático em linguagem natural (motor de regras
-                         local, sem API externa) para o profissional ler em
-                         segundos antes de decidir.
+                         multidisciplinar, visitas, documentos, histórico/
+                         auditoria, e avaliação de risco (diabetes +
+                         cardiovascular, por machine learning, + risco de
+                         queda pela Morse Fall Scale — instrumento clínico
+                         publicado), com um resumo automático em linguagem
+                         natural (motor de regras local, sem API externa)
+                         para o profissional ler em segundos antes de
+                         decidir, e exportação da ficha em PDF.
   /ocupacao           — capacidade, ocupação e altas (cuidados continuados)
-  /consultas          — agendamento/consultas (módulo Clínica/Hospital)
+  /consultas          — agendamento/consultas (módulo Clínica/Hospital),
+                         em vista de lista ou de calendário semanal
   /faturacao          — valores a pagar, comparticipação, ARS, seguros, saldos
+  /sobre              — sobre este projeto (para quem abre o link direto)
 
 Dados: tudo sintético (ver scripts/gerar_dados_utentes.py e constantes.py).
 Os modelos de risco são treinados em datasets públicos e anonimizados (Pima
@@ -33,6 +42,7 @@ ferramenta é uma demonstração técnica de portfólio, não um sistema clínic
 certificado.
 """
 import datetime
+import io
 import json
 import pathlib
 import unicodedata
@@ -41,9 +51,12 @@ import dash
 import joblib
 import pandas as pd
 import plotly.graph_objects as go
-from dash import Input, Output, State, dash_table, dcc, html
+from dash import ALL, Input, Output, State, ctx, dash_table, dcc, html
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import mm
+from reportlab.pdfgen import canvas as pdf_canvas
 
-from constantes import ESPECIALIDADES, TIPOS_CUIDADO
+from constantes import ESPECIALIDADES, PERFIS_ACESSO, SECCOES_POR_PERFIL, TIPOS_CUIDADO
 from limpeza import LIMITES_PLAUSIVEIS
 from riscos import (
     OPCOES_APOIO_MARCHA,
@@ -137,6 +150,7 @@ def _carregar_todos_os_dados():
     dados["faturacao"] = pd.read_csv(PASTA_DADOS / "faturacao.csv")
     dados["faturacao"]["seguradora"] = dados["faturacao"]["seguradora"].fillna("—")
     dados["faturacao"]["numero_apolice"] = dados["faturacao"]["numero_apolice"].fillna("—")
+    dados["historico"] = pd.read_csv(PASTA_DADOS / "historico.csv", parse_dates=["data_hora"])
     dados["altas"] = pd.read_csv(PASTA_DADOS / "altas.csv")
     return dados
 
@@ -178,6 +192,30 @@ def _idade_utente(data_nascimento):
     return hoje.year - nascimento.year - ((hoje.month, hoje.day) < (nascimento.month, nascimento.day))
 
 
+def _ids_utentes_risco_elevado():
+    """IDs de utentes com risco elevado em pelo menos um dos três domínios
+    (diabetes, cardiovascular ou queda), usando os modelos já treinados e a
+    Morse Fall Scale sobre os dados clínicos guardados — a mesma lógica de
+    classificar_risco()/calcular_risco_queda() usada nos formulários,
+    aplicada de uma vez a todos os utentes para a Visão Geral."""
+    x_diabetes = DADOS["avaliacao_diabetes"][list(RES_DIABETES.keys())]
+    prob_diabetes = MODELO_DIABETES.predict_proba(x_diabetes)[:, 1]
+    diabetes_elevado = pd.Series(prob_diabetes >= 0.66, index=DADOS["avaliacao_diabetes"].index)
+
+    x_cardio = DADOS["avaliacao_cardio"][COLUNAS_CARDIO]
+    prob_cardio = MODELO_CARDIO.predict_proba(x_cardio)[:, 1]
+    cardio_elevado = pd.Series(prob_cardio >= 0.66, index=DADOS["avaliacao_cardio"].index)
+
+    queda_elevado = DADOS["avaliacao_queda"]["classificacao"] == "Risco elevado"
+
+    elevado = (
+        diabetes_elevado.reindex(queda_elevado.index, fill_value=False)
+        | cardio_elevado.reindex(queda_elevado.index, fill_value=False)
+        | queda_elevado
+    )
+    return elevado[elevado].index.tolist()
+
+
 # --- Componentes reutilizáveis ----------------------------------------------
 
 
@@ -202,6 +240,7 @@ def _aviso_medico():
 
 
 SECCOES_NAVEGACAO = [
+    ("Início", [("/", "Visão Geral")]),
     ("Geral", [("/utentes", "Utentes")]),
     ("Cuidados continuados", [("/ocupacao", "Mapa de Ocupação")]),
     ("Clínica & Hospital", [("/consultas", "Consultas")]),
@@ -209,9 +248,12 @@ SECCOES_NAVEGACAO = [
 ]
 
 
-def _barra_lateral(caminho_atual):
+def _barra_lateral(caminho_atual, perfil):
+    seccoes_visiveis = SECCOES_POR_PERFIL.get(perfil, [titulo for titulo, _itens in SECCOES_NAVEGACAO])
     seccoes = []
     for titulo_seccao, itens in SECCOES_NAVEGACAO:
+        if titulo_seccao not in seccoes_visiveis:
+            continue
         ligacoes = []
         for destino, rotulo in itens:
             ativa = caminho_atual == destino or (destino == "/utentes" and caminho_atual.startswith("/utentes"))
@@ -227,6 +269,14 @@ def _barra_lateral(caminho_atual):
         [
             html.Div([html.Span("Gestão de Saúde", className="logotipo-lateral-texto")], className="logotipo-lateral"),
             html.Div(seccoes, className="grupo-nav-lateral"),
+            html.Div(
+                [
+                    html.Div(f"Perfil: {perfil}", className="perfil-atual-lateral"),
+                    dcc.Link("Sobre este projeto", href="/sobre", className="ligacao-lateral ligacao-lateral--sobre"),
+                    html.Button("Sair", id="botao-sair-sessao", className="botao-sair-lateral", n_clicks=0),
+                ],
+                className="rodape-lateral",
+            ),
         ],
         className="barra-lateral",
     )
@@ -238,6 +288,202 @@ def _etiqueta_tipo_cuidado(tipo):
 
 def _etiqueta_tom(texto, tom, sufixo_classe="resultado-inline"):
     return html.Span(texto, className=f"{sufixo_classe} {sufixo_classe}--{tom}")
+
+
+# --- Página: Login (demonstração, sem autenticação real) --------------------
+
+ICONES_PERFIL = {"Enfermeiro": "🩺", "Médico": "⚕️", "Administrativo": "🗂️"}
+
+
+def _pagina_login():
+    botoes = [
+        html.Button(
+            [html.Span(ICONES_PERFIL.get(perfil, ""), className="icone-perfil-login"), html.Span(perfil)],
+            id={"type": "botao-login-perfil", "perfil": perfil},
+            n_clicks=0,
+            className="botao-perfil-login",
+        )
+        for perfil in PERFIS_ACESSO
+    ]
+    return html.Div(
+        html.Div(
+            [
+                html.Div("✚", className="logotipo-login"),
+                html.H1("Gestão de Saúde"),
+                html.P(
+                    "Escolhe um perfil para entrar. Cada perfil vê um conjunto diferente de módulos, "
+                    "tal como aconteceria com contas reais.",
+                    className="texto-explicativo",
+                ),
+                html.Div(botoes, className="grupo-botoes-perfil-login"),
+                html.P(
+                    "Isto é uma simulação de acesso por perfil para fins de portfólio — não há "
+                    "palavra-passe, autenticação real, nem dados sensíveis protegidos.",
+                    className="nota-rodape-login",
+                ),
+            ],
+            className="cartao-login",
+        ),
+        className="ecra-login",
+    )
+
+
+# --- Página: Visão Geral (dashboard inicial) ---------------------------------
+
+
+def _linha_alerta(tom, texto, href):
+    return dcc.Link(
+        html.Div([html.Span(className=f"ponto-alerta ponto-alerta--{tom}"), html.Span(texto)], className="linha-alerta"),
+        href=href,
+        className="ligacao-alerta",
+    )
+
+
+def _pagina_visao_geral():
+    utentes = DADOS["utentes"]
+    total_utentes = len(utentes)
+
+    with open(PASTA_DADOS / "capacidade.json", encoding="utf-8") as f:
+        capacidade = json.load(f)
+    internados_por_tipo = utentes[utentes["estado"] == "Internado"].groupby("tipo_cuidado").size()
+    ocupados_total = sum(int(internados_por_tipo.get(t, 0)) for t in capacidade)
+    capacidade_total = sum(capacidade.values())
+    taxa_ocupacao = ocupados_total / capacidade_total * 100 if capacidade_total else 0
+
+    consultas = DADOS["consultas"]
+    hoje = pd.Timestamp.now().normalize()
+    consultas_hoje = int((consultas["data_hora"].dt.normalize() == hoje).sum())
+
+    exames = DADOS["exames"]
+    exames_pendentes = int((exames["estado"] == "Pendente").sum())
+    exames_alterados = int((exames["estado"] == "Alterado").sum())
+
+    ids_risco_elevado = _ids_utentes_risco_elevado()
+    n_risco_elevado = len(ids_risco_elevado)
+
+    fat = DADOS["faturacao"]
+    erros_fatura = int(fat["erro_fatura"].sum())
+
+    kpis = html.Div(
+        [
+            _cartao_kpi("Total de utentes", total_utentes),
+            _cartao_kpi(
+                "Ocupação (cuidados continuados)",
+                f"{taxa_ocupacao:.0f}%",
+                nota=f"{ocupados_total} / {capacidade_total} camas",
+                tom="risco_elevado" if taxa_ocupacao >= 90 else ("risco_moderado" if taxa_ocupacao >= 70 else "risco_baixo"),
+            ),
+            _cartao_kpi("Consultas hoje", consultas_hoje, tom="primaria"),
+            _cartao_kpi("Utentes com risco elevado", n_risco_elevado, tom="risco_elevado" if n_risco_elevado else "risco_baixo"),
+            _cartao_kpi(
+                "Exames por rever",
+                exames_pendentes + exames_alterados,
+                nota=f"{exames_alterados} alterados · {exames_pendentes} pendentes",
+                tom="risco_moderado" if (exames_pendentes + exames_alterados) else "risco_baixo",
+            ),
+            _cartao_kpi("Faturas com erro", erros_fatura, tom="risco_elevado" if erros_fatura else "risco_baixo"),
+        ],
+        className="kpis-linha",
+    )
+
+    alertas = []
+    for id_utente in ids_risco_elevado[:5]:
+        alertas.append(_linha_alerta("risco_elevado", f"{_nome_utente(id_utente)} — risco clínico elevado por rever", f"/utentes/{id_utente}"))
+    alterados = (
+        exames[exames["estado"] == "Alterado"]
+        .merge(utentes[["id_utente", "nome"]], on="id_utente")
+        .sort_values("data", ascending=False)
+        .head(5)
+    )
+    for _idx, ex in alterados.iterrows():
+        alertas.append(_linha_alerta("risco_moderado", f"{ex['nome']} — exame \"{ex['tipo_exame']}\" alterado, por rever", f"/utentes/{ex['id_utente']}"))
+    if erros_fatura:
+        faturas_erro = fat[fat["erro_fatura"]].merge(utentes[["id_utente", "nome"]], on="id_utente").head(5)
+        for _idx, fx in faturas_erro.iterrows():
+            alertas.append(_linha_alerta("risco_moderado", f"{fx['nome']} — fatura com erro por corrigir", "/faturacao"))
+
+    painel_alertas = html.Div(
+        [
+            html.H3("Alertas"),
+            html.Div(alertas, className="lista-alertas") if alertas else html.P("Sem alertas de momento.", className="texto-explicativo"),
+        ],
+        className="cartao-secao",
+    )
+
+    contagem_tipo = utentes["tipo_cuidado"].value_counts()
+    cores_tipo = [CORES[f"tipo_{_slug(t).replace('-', '_')}"] for t in contagem_tipo.index]
+    fig_tipo = go.Figure(go.Bar(x=contagem_tipo.index, y=contagem_tipo.values, marker_color=cores_tipo))
+    fig_tipo.update_layout(
+        template="plotly_white", height=280, margin=dict(t=20, l=40, r=20, b=40),
+        paper_bgcolor=CORES["cartao"], plot_bgcolor=CORES["cartao"], font_color=CORES["texto"],
+    )
+
+    return html.Div(
+        [
+            html.H1("Visão Geral"),
+            html.P(
+                "Ponto de partida com os indicadores mais importantes de todos os módulos — cuidados "
+                "continuados e ambulatório clínico/hospitalar.",
+                className="texto-explicativo",
+            ),
+            kpis,
+            painel_alertas,
+            html.Div(
+                [html.H3("Utentes por tipo de unidade"), dcc.Graph(figure=fig_tipo, config={"displayModeBar": False})],
+                className="cartao-secao",
+            ),
+        ]
+    )
+
+
+# --- Página: Sobre este projeto ----------------------------------------------
+
+
+def _pagina_sobre():
+    return html.Div(
+        [
+            html.H1("Sobre este projeto"),
+            html.P(
+                "Projeto de portfólio: um sistema de gestão de utentes e cuidados de saúde que combina dois "
+                "contextos — cuidados continuados/residências sénior (UCC/ERPI/SAD) e ambulatório clínico/"
+                "hospitalar (Clínica/Hospital) — com avaliação de risco clínico por machine learning.",
+                className="texto-explicativo",
+            ),
+            html.H3("O que inclui", className="titulo-secao-espacado"),
+            html.Ul(
+                [
+                    html.Li("Registo de utentes para os 4 tipos de unidade, com pesquisa e filtros."),
+                    html.Li(
+                        "Ficha clínica: sinais vitais, alergias/diagnósticos, exames, prescrições, plano de "
+                        "cuidados multidisciplinar, visitas, documentos e histórico/auditoria — com "
+                        "exportação em PDF."
+                    ),
+                    html.Li(
+                        "Avaliação de risco: diabetes e risco cardiovascular por machine learning (random "
+                        "forest), risco de queda pela Morse Fall Scale, e resumo automático em português."
+                    ),
+                    html.Li("Mapa de ocupação (cuidados continuados) e agendamento de consultas com vista de lista e de calendário (Clínica/Hospital)."),
+                    html.Li("Faturação com comparticipação da Segurança Social e seguradoras privadas."),
+                    html.Li("Visão Geral com KPIs agregados e alertas, e acesso por perfil (Enfermeiro/Médico/Administrativo)."),
+                ]
+            ),
+            html.H3("Sobre os dados", className="titulo-secao-espacado"),
+            html.P(
+                "Nenhuma pessoa real está representada: todos os utentes, profissionais e dados clínicos são "
+                "gerados sinteticamente. Os valores usados para pré-preencher a avaliação de risco vêm de dois "
+                "datasets públicos e anonimizados (Pima Indians Diabetes, UCI Heart Disease), usados só para "
+                "manter distribuições realistas — nunca de pacientes reais.",
+                className="texto-explicativo",
+            ),
+            _aviso_medico(),
+            html.H3("Stack técnica", className="titulo-secao-espacado"),
+            html.P(
+                "Python, Dash + Plotly (interface e gráficos), scikit-learn (modelos de risco), pandas "
+                "(dados), reportlab (exportação em PDF), pytest (testes automatizados) e deploy no Render.",
+                className="texto-explicativo",
+            ),
+        ]
+    )
 
 
 # --- Página: Lista de utentes -----------------------------------------------
@@ -473,6 +719,27 @@ def _aba_plano_cuidados(id_utente):
     return html.Div(itens, className="lista-plano-cuidados")
 
 
+def _aba_historico(id_utente):
+    historico = DADOS["historico"][DADOS["historico"]["id_utente"] == id_utente].sort_values("data_hora", ascending=False)
+    if historico.empty:
+        return html.P("Sem histórico registado.", className="texto-explicativo")
+    tabela = historico.copy()
+    tabela["data_hora"] = tabela["data_hora"].dt.strftime("%Y-%m-%d %H:%M")
+    return dash_table.DataTable(
+        columns=[
+            {"name": "Data/Hora", "id": "data_hora"},
+            {"name": "Profissional", "id": "profissional"},
+            {"name": "Ação", "id": "acao"},
+        ],
+        data=tabela.to_dict("records"),
+        style_table={"overflowX": "auto"},
+        style_cell={"padding": "8px", "fontFamily": "inherit", "fontSize": "0.85rem"},
+        style_header={"fontWeight": "600", "backgroundColor": CORES["primaria_suave"]},
+        sort_action="native",
+        page_size=12,
+    )
+
+
 def _campo_numerico(id_campo, rotulo, minimo, maximo, valor, passo=1):
     return html.Div(
         [html.Label(rotulo), dcc.Input(id=id_campo, type="number", min=minimo, max=maximo, step=passo, value=valor)],
@@ -594,7 +861,14 @@ def _pagina_ficha_utente(id_utente):
 
     return html.Div(
         [
-            dcc.Link("← Voltar à lista de utentes", href="/utentes", className="ligacao-voltar"),
+            html.Div(
+                [
+                    dcc.Link("← Voltar à lista de utentes", href="/utentes", className="ligacao-voltar"),
+                    html.Button("Descarregar PDF", id="botao-pdf-ficha", className="botao-secundario"),
+                    dcc.Download(id="descarregar-pdf-ficha"),
+                ],
+                className="cabecalho-ficha-utente",
+            ),
             html.Div(
                 [
                     html.H1(utente["nome"]),
@@ -617,6 +891,7 @@ def _pagina_ficha_utente(id_utente):
                     dcc.Tab(label="Plano de Cuidados", value="plano_cuidados", children=[_aba_plano_cuidados(id_utente)]),
                     dcc.Tab(label="Visitas", value="visitas", children=[_aba_visitas(id_utente)]),
                     dcc.Tab(label="Documentos", value="documentos", children=[_aba_documentos(id_utente)]),
+                    dcc.Tab(label="Histórico", value="historico", children=[_aba_historico(id_utente)]),
                     dcc.Tab(label="Avaliação de risco", value="risco", children=[_aba_avaliacao_risco(id_utente)]),
                 ],
             ),
@@ -724,6 +999,67 @@ def _tabela_consultas(df):
     )
 
 
+def _inicio_semana_atual():
+    hoje = pd.Timestamp.now().normalize()
+    return hoje - pd.Timedelta(days=hoje.dayofweek)
+
+
+def _vista_calendario_consultas(df, inicio):
+    fim = inicio + pd.Timedelta(days=7)
+    semana = df[(df["data_hora"] >= inicio) & (df["data_hora"] < fim)].merge(DADOS["utentes"][["id_utente", "nome"]], on="id_utente")
+    dias_rotulos = [(inicio + pd.Timedelta(days=i)).strftime("%a %d/%m") for i in range(7)]
+
+    cores_estado = {
+        "Agendada": CORES["primaria"],
+        "Realizada": CORES["risco_baixo"],
+        "Cancelada": CORES["texto_suave"],
+        "Falta": CORES["risco_elevado"],
+    }
+    fig = go.Figure()
+    for estado_c, cor in cores_estado.items():
+        subset = semana[semana["estado"] == estado_c]
+        if subset.empty:
+            continue
+        fig.add_trace(
+            go.Scatter(
+                x=subset["data_hora"].dt.strftime("%a %d/%m"),
+                y=subset["data_hora"].dt.hour + subset["data_hora"].dt.minute / 60,
+                mode="markers",
+                marker=dict(size=14, color=cor, symbol="square"),
+                name=estado_c,
+                text=[
+                    f"{n} · {e} · {h}"
+                    for n, e, h in zip(subset["nome"], subset["especialidade"], subset["data_hora"].dt.strftime("%H:%M"), strict=True)
+                ],
+                hovertemplate="%{text}<extra></extra>",
+            )
+        )
+    fig.update_xaxes(categoryorder="array", categoryarray=dias_rotulos, title="")
+    fig.update_yaxes(title="Hora", dtick=1, range=[19, 7])
+    fig.update_layout(
+        template="plotly_white", height=460, margin=dict(t=20, l=50, r=20, b=40),
+        paper_bgcolor=CORES["cartao"], plot_bgcolor=CORES["cartao"], font_color=CORES["texto"],
+        legend=dict(orientation="h", y=-0.15),
+    )
+
+    return html.Div(
+        [
+            html.Div(
+                [
+                    html.Button("‹ Semana anterior", id="botao-semana-anterior", className="botao-secundario", n_clicks=0),
+                    html.Span(
+                        f"{inicio.strftime('%d/%m/%Y')} – {(fim - pd.Timedelta(days=1)).strftime('%d/%m/%Y')}",
+                        className="rotulo-semana",
+                    ),
+                    html.Button("Semana seguinte ›", id="botao-semana-seguinte", className="botao-secundario", n_clicks=0),
+                ],
+                className="navegacao-semana",
+            ),
+            dcc.Graph(figure=fig, config={"displayModeBar": False}),
+        ]
+    )
+
+
 def _pagina_consultas():
     consultas = DADOS["consultas"]
     hoje = pd.Timestamp.now().normalize()
@@ -777,9 +1113,17 @@ def _pagina_consultas():
                         placeholder="Estado",
                         className="filtro-dropdown",
                     ),
+                    dcc.RadioItems(
+                        id="modo-vista-consultas",
+                        options=[{"label": "Vista em lista", "value": "lista"}, {"label": "Vista de calendário", "value": "calendario"}],
+                        value="lista",
+                        className="alternador-vista-consultas",
+                        inline=True,
+                    ),
                 ],
                 className="filtros-utentes",
             ),
+            dcc.Store(id="semana-consultas-inicio"),
             html.Div(id="corpo-tabela-consultas"),
         ]
     )
@@ -868,6 +1212,7 @@ def _construir_layout():
     return html.Div(
         [
             dcc.Location(id="url"),
+            dcc.Store(id="perfil-sessao", storage_type="session"),
             html.Div(id="barra-lateral-app"),
             html.Div(html.Div(id="conteudo-pagina", className="pagina"), className="area-principal"),
         ],
@@ -878,18 +1223,53 @@ def _construir_layout():
 app.layout = _construir_layout
 
 
+# --- Callbacks: sessão (login/logout, mock — sem autenticação real) ----------
+
+
+@app.callback(
+    Output("perfil-sessao", "data", allow_duplicate=True),
+    Output("url", "pathname", allow_duplicate=True),
+    Input({"type": "botao-login-perfil", "perfil": ALL}, "n_clicks"),
+    prevent_initial_call=True,
+)
+def _entrar_com_perfil(cliques):
+    if not ctx.triggered_id or not any(cliques):
+        return dash.no_update, dash.no_update
+    return ctx.triggered_id["perfil"], "/"
+
+
+@app.callback(
+    Output("perfil-sessao", "data", allow_duplicate=True),
+    Output("url", "pathname", allow_duplicate=True),
+    Input("botao-sair-sessao", "n_clicks"),
+    prevent_initial_call=True,
+)
+def _sair_sessao(n_clicks):
+    if not n_clicks:
+        return dash.no_update, dash.no_update
+    return None, "/login"
+
+
 # --- Callbacks: navegação ----------------------------------------------------
 
 
-@app.callback(Output("barra-lateral-app", "children"), Input("url", "pathname"))
-def _atualizar_barra_lateral(caminho):
-    return _barra_lateral(caminho or "/utentes")
+@app.callback(Output("barra-lateral-app", "children"), Input("url", "pathname"), Input("perfil-sessao", "data"))
+def _atualizar_barra_lateral(caminho, perfil):
+    if not perfil:
+        return None
+    return _barra_lateral(caminho or "/", perfil)
 
 
-@app.callback(Output("conteudo-pagina", "children"), Input("url", "pathname"))
-def _rotear_pagina(caminho):
-    caminho = caminho or "/utentes"
-    if caminho in ("/", "/utentes"):
+@app.callback(Output("conteudo-pagina", "children"), Input("url", "pathname"), Input("perfil-sessao", "data"))
+def _rotear_pagina(caminho, perfil):
+    caminho = caminho or "/"
+    if caminho != "/login" and not perfil:
+        return _pagina_login()
+    if caminho == "/login":
+        return _pagina_login()
+    if caminho == "/":
+        return _pagina_visao_geral()
+    if caminho == "/utentes":
         return _pagina_utentes()
     if caminho.startswith("/utentes/"):
         id_utente = caminho.split("/utentes/")[-1]
@@ -900,7 +1280,9 @@ def _rotear_pagina(caminho):
         return _pagina_consultas()
     if caminho == "/faturacao":
         return _pagina_faturacao()
-    return html.Div([html.H2("Página não encontrada"), dcc.Link("Voltar ao início", href="/utentes")])
+    if caminho == "/sobre":
+        return _pagina_sobre()
+    return html.Div([html.H2("Página não encontrada"), dcc.Link("Voltar ao início", href="/")])
 
 
 @app.callback(
@@ -925,8 +1307,10 @@ def _filtrar_utentes(texto_pesquisa, tipo_cuidado, estado):
     Input("pesquisa-consulta", "value"),
     Input("filtro-especialidade", "value"),
     Input("filtro-estado-consulta", "value"),
+    Input("modo-vista-consultas", "value"),
+    Input("semana-consultas-inicio", "data"),
 )
-def _filtrar_consultas(texto_pesquisa, especialidade, estado):
+def _filtrar_consultas(texto_pesquisa, especialidade, estado, modo="lista", semana_inicio_iso=None):
     df = DADOS["consultas"]
     if texto_pesquisa:
         ids_correspondentes = DADOS["utentes"][DADOS["utentes"]["nome"].str.contains(texto_pesquisa, case=False, na=False)]["id_utente"]
@@ -935,7 +1319,26 @@ def _filtrar_consultas(texto_pesquisa, especialidade, estado):
         df = df[df["especialidade"] == especialidade]
     if estado:
         df = df[df["estado"] == estado]
+    if modo == "calendario":
+        inicio = pd.Timestamp(semana_inicio_iso) if semana_inicio_iso else _inicio_semana_atual()
+        return _vista_calendario_consultas(df, inicio)
     return _tabela_consultas(df)
+
+
+@app.callback(
+    Output("semana-consultas-inicio", "data"),
+    Input("botao-semana-anterior", "n_clicks"),
+    Input("botao-semana-seguinte", "n_clicks"),
+    State("semana-consultas-inicio", "data"),
+    prevent_initial_call=True,
+)
+def _navegar_semana_consultas(n_anterior, n_seguinte, semana_atual_iso):
+    inicio = pd.Timestamp(semana_atual_iso) if semana_atual_iso else _inicio_semana_atual()
+    if ctx.triggered_id == "botao-semana-anterior":
+        inicio -= pd.Timedelta(days=7)
+    elif ctx.triggered_id == "botao-semana-seguinte":
+        inicio += pd.Timedelta(days=7)
+    return inicio.date().isoformat()
 
 
 # --- Callbacks: ficha do utente — sinais vitais -------------------------------
@@ -1049,7 +1452,11 @@ def _descarregar_csv_faturacao(n_clicks):
             "erro_fatura": "Erro de fatura",
         }
     )
-    return dcc.send_data_frame(fat.to_csv, "faturacao.csv", index=False)
+    # sep=";" e encoding="utf-8-sig": o Excel em português usa a vírgula como
+    # separador decimal, por isso espera ";" a separar colunas num CSV — com
+    # sep="," (o padrão do pandas) o ficheiro abre tudo numa única coluna. O
+    # "utf-8-sig" garante que os acentos (é, ç, ã...) aparecem corretos.
+    return dcc.send_data_frame(fat.to_csv, "faturacao.csv", index=False, sep=";", encoding="utf-8-sig")
 
 
 @app.callback(
@@ -1071,6 +1478,95 @@ def _gerar_resumo(n_clicks, res_diabetes, res_cardio, res_queda, nome_utente):
         resultado_queda=tuple(res_queda) if res_queda else None,
     )
     return resumo
+
+
+# --- Exportação em PDF da ficha do utente -------------------------------------
+
+
+def _gerar_pdf_ficha(id_utente):
+    utente = DADOS["utentes"].loc[DADOS["utentes"]["id_utente"] == id_utente].iloc[0]
+    buffer = io.BytesIO()
+    c = pdf_canvas.Canvas(buffer, pagesize=A4)
+    largura, altura = A4
+    margem_esquerda = 20 * mm
+    posicao_y = altura - 20 * mm
+
+    def escrever(texto, tamanho=10, negrito=False, espaco=6 * mm):
+        nonlocal posicao_y
+        if posicao_y < 25 * mm:
+            c.showPage()
+            posicao_y = altura - 20 * mm
+        c.setFont("Helvetica-Bold" if negrito else "Helvetica", tamanho)
+        c.drawString(margem_esquerda, posicao_y, texto)
+        posicao_y -= espaco
+
+    escrever(f"Ficha clínica — {utente['nome']}", 16, negrito=True, espaco=10 * mm)
+    escrever(
+        f"{utente['genero']} · {_idade_utente(utente['data_nascimento'])} anos · "
+        f"{utente['tipo_cuidado']} · Processo {utente['processo']}",
+        10,
+    )
+    escrever(f"Estado: {utente['estado']}   Admissão: {utente['data_admissao']}", 10, espaco=10 * mm)
+
+    alergias = DADOS["alergias"][DADOS["alergias"]["id_utente"] == id_utente]["alergia"].tolist()
+    escrever("Alergias", 12, negrito=True)
+    escrever(", ".join(alergias) if alergias else "Nenhuma conhecida", 10, espaco=10 * mm)
+
+    diagnosticos = DADOS["diagnosticos"][DADOS["diagnosticos"]["id_utente"] == id_utente].sort_values("data", ascending=False)
+    escrever("Diagnósticos", 12, negrito=True)
+    if diagnosticos.empty:
+        escrever("Sem diagnósticos registados.", 10)
+    for _idx, d in diagnosticos.iterrows():
+        escrever(f"- {d['data']}: {d['diagnostico']} ({d['profissional']})", 9, espaco=5 * mm)
+    posicao_y -= 4 * mm
+
+    plano = DADOS["plano_cuidados"][DADOS["plano_cuidados"]["id_utente"] == id_utente]
+    escrever("Plano de cuidados multidisciplinar", 12, negrito=True)
+    if plano.empty:
+        escrever("Sem plano de cuidados registado.", 10)
+    for _idx, p in plano.iterrows():
+        escrever(
+            f"- [{p['area_profissional']}] {p['objetivo']} — {p['estado']} ({p['progresso_percent']}%) · "
+            f"Resp.: {p['profissional_responsavel']}",
+            9,
+            espaco=5 * mm,
+        )
+    posicao_y -= 4 * mm
+
+    ultimos_vitais = DADOS["vitais"][DADOS["vitais"]["id_utente"] == id_utente].sort_values("data_hora").tail(1)
+    escrever("Últimos sinais vitais", 12, negrito=True)
+    if len(ultimos_vitais):
+        v = ultimos_vitais.iloc[0]
+        escrever(
+            f"Glicemia: {v['glicemia']} mg/dL · Peso: {v['peso_kg']} kg · "
+            f"Tensão: {v['tensao_sistolica']}/{v['tensao_diastolica']} mmHg · Temp.: {v['temperatura']}°C",
+            10,
+        )
+    else:
+        escrever("Sem sinais vitais registados.", 10)
+
+    c.setFont("Helvetica-Oblique", 8)
+    c.drawString(
+        margem_esquerda, 15 * mm,
+        "Documento gerado automaticamente — demonstração técnica de portfólio, dados sintéticos, não usar com pacientes reais.",
+    )
+
+    c.save()
+    buffer.seek(0)
+    return buffer.getvalue()
+
+
+@app.callback(
+    Output("descarregar-pdf-ficha", "data"),
+    Input("botao-pdf-ficha", "n_clicks"),
+    State("utente-atual-id", "data"),
+    prevent_initial_call=True,
+)
+def _descarregar_pdf_ficha(n_clicks, id_utente):
+    if not n_clicks or not id_utente:
+        return dash.no_update
+    pdf_bytes = _gerar_pdf_ficha(id_utente)
+    return dcc.send_bytes(lambda b: b.write(pdf_bytes), f"ficha_{id_utente}.pdf")
 
 
 if __name__ == "__main__":

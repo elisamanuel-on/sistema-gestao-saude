@@ -96,3 +96,25 @@ TIPOS_EXAME_POR_CATEGORIA = {
     "Cardiológico": ["Eletrocardiograma", "Ecocardiograma", "Prova de esforço"],
     "Outro": ["Espirometria", "Audiograma", "Exame oftalmológico"],
 }
+
+# Perfis de acesso — demonstração de portfólio, sem autenticação real (sem
+# palavra-passe nem verificação de identidade). Cada perfil só vê as secções
+# de navegação relevantes ao seu papel: só o Administrativo vê a Faturação
+# (dados financeiros), refletindo a separação típica entre pessoal clínico e
+# administrativo num serviço real.
+PERFIS_ACESSO = ["Enfermeiro", "Médico", "Administrativo"]
+
+SECCOES_POR_PERFIL = {
+    "Enfermeiro": ["Início", "Geral", "Cuidados continuados", "Clínica & Hospital"],
+    "Médico": ["Início", "Geral", "Cuidados continuados", "Clínica & Hospital"],
+    "Administrativo": ["Início", "Geral", "Cuidados continuados", "Clínica & Hospital", "Gestão"],
+}
+
+# Ações fictícias para o histórico/auditoria de cada utente (quem alterou o
+# quê e quando) — dado sintético, tal como todo o resto (ver README).
+ACOES_HISTORICO = [
+    "Atualizou sinais vitais", "Registou novo diagnóstico", "Atualizou prescrição",
+    "Registou visita", "Atualizou plano de cuidados", "Registou resultado de exame",
+    "Agendou consulta", "Alterou estado da consulta", "Consultou avaliação de risco",
+    "Atualizou dados de faturação",
+]
