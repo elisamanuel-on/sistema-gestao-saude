@@ -468,6 +468,107 @@ def test_dispensar_orientacao_sem_cliques_nao_atualiza():
     assert m._dispensar_orientacao(0, {"perfil": "Enfermeiro", "profissional": None}, None) is dash.no_update
 
 
+# --- Vitrine (landing page pública) e Simulação -------------------------------
+
+
+def test_pagina_vitrine_tem_os_dois_botoes_de_entrada():
+    pagina = str(m._pagina_vitrine())
+    assert "href='/simulacao'" in pagina
+    assert "href='/login'" in pagina
+    assert "Simulação" in pagina
+    assert "Ver o sistema inteiro" in pagina
+
+
+def test_rotear_pagina_raiz_sem_sessao_mostra_vitrine():
+    pagina = str(m._rotear_pagina("/", None, None, None))
+    assert "Simulação" in pagina
+    assert "href='/simulacao'" in pagina
+
+
+def test_rotear_pagina_vitrine_e_publica_mesmo_sem_sessao():
+    pagina = str(m._rotear_pagina("/vitrine", None, None, None))
+    assert "Simulação" in pagina
+
+
+def test_rotear_pagina_utentes_sem_sessao_continua_a_mostrar_login():
+    # Só a raiz ("/") passou a mostrar a vitrine para visitantes sem sessão —
+    # qualquer outro caminho continua a cair no login, tal como antes.
+    pagina = str(m._rotear_pagina("/utentes", None, None, None))
+    assert "perfil" in pagina.lower() or "Enfermeiro" in pagina
+
+
+def test_pagina_login_simulacao_tem_texto_proprio_e_ligacao_de_volta():
+    pagina_normal = str(m._pagina_login())
+    pagina_simulacao = str(m._pagina_login(simulacao=True))
+    assert "Modo simulação" not in pagina_normal
+    assert "Modo simulação" in pagina_simulacao
+    assert "href='/vitrine'" in pagina_simulacao
+
+
+def test_rotear_pagina_simulacao_mostra_escolha_de_perfil_em_modo_simulacao():
+    pagina = str(m._rotear_pagina("/simulacao", None, None, None))
+    assert "Modo simulação" in pagina
+    # o corpo-login (escolha de perfil) só é preenchido pelo callback
+    # _renderizar_corpo_login — a mesma função usada em /login — já coberto
+    # por test_corpo_login_escolha_perfil_mostra_os_quatro_perfis.
+    corpo = str(m._renderizar_corpo_login(None))
+    for perfil in constantes.PERFIS_ACESSO:
+        assert perfil in corpo
+
+
+def test_e_simulacao_le_a_flag_gravada_na_sessao():
+    assert m._e_simulacao({"perfil": "Receção", "profissional": None, "simulacao": True}) is True
+    assert m._e_simulacao({"perfil": "Receção", "profissional": None, "simulacao": False}) is False
+    assert m._e_simulacao({"perfil": "Receção", "profissional": None}) is False
+    assert m._e_simulacao("Receção") is False  # sessões antigas (string simples)
+    assert m._e_simulacao(None) is False
+
+
+# _escolher_perfil_login e _escolher_profissional_login dependem de
+# dash.ctx.triggered_id (preenchido pelo Dash a partir do componente que
+# disparou o clique, algo que só existe num callback real em execução — tal
+# como já acontecia antes desta funcionalidade, não são testados diretamente
+# aqui) — a propagação da flag "simulacao" através deles está coberta pela
+# verificação Playwright (clicar em "Simulação" na vitrine → escolher perfil
+# → sessão gravada com simulacao=True → banner visível).
+
+
+def test_sair_sessao_de_simulacao_volta_para_a_vitrine():
+    _sessao, destino = m._sair_sessao(1, {"perfil": "Receção", "profissional": None, "simulacao": True})
+    assert destino == "/vitrine"
+
+
+def test_sair_sessao_normal_volta_para_o_login():
+    _sessao, destino = m._sair_sessao(1, {"perfil": "Receção", "profissional": None, "simulacao": False})
+    assert destino == "/login"
+
+
+def test_rotear_pagina_mostra_banner_de_simulacao_fora_das_paginas_publicas():
+    sessao = {"perfil": "Receção", "profissional": None, "simulacao": True}
+    pagina_consultas = str(m._rotear_pagina("/consultas", None, sessao, None))
+    assert "banner-simulacao" in pagina_consultas
+    assert "Modo simulação" in pagina_consultas
+
+    # nas páginas públicas o aviso não aparece — lá já é óbvio que ainda não
+    # se entrou em nenhuma área da app
+    pagina_vitrine = str(m._rotear_pagina("/vitrine", None, sessao, None))
+    assert "banner-simulacao" not in pagina_vitrine
+
+
+def test_rotear_pagina_sessao_normal_nunca_mostra_banner_de_simulacao():
+    sessao = {"perfil": "Receção", "profissional": None, "simulacao": False}
+    pagina = str(m._rotear_pagina("/consultas", None, sessao, None))
+    assert "banner-simulacao" not in pagina
+
+
+def test_barra_lateral_escondida_nas_paginas_publicas_mesmo_com_sessao():
+    sessao = {"perfil": "Receção", "profissional": None, "simulacao": True}
+    assert m._atualizar_barra_lateral("/vitrine", sessao) is None
+    assert m._atualizar_barra_lateral("/simulacao", sessao) is None
+    assert m._atualizar_barra_lateral("/login", sessao) is None
+    assert m._atualizar_barra_lateral("/consultas", sessao) is not None
+
+
 def test_ids_utentes_risco_elevado_e_subconjunto_dos_utentes():
     ids_risco = m._ids_utentes_risco_elevado()
     assert set(ids_risco) <= set(m.DADOS["utentes"]["id_utente"])

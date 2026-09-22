@@ -407,14 +407,38 @@ def _dados_sessao(sessao):
     return sessao.get("perfil"), sessao.get("profissional")
 
 
-def _pagina_login():
+def _e_simulacao(sessao):
+    """True se a sessão atual entrou através de /simulacao ("Modo simulação"), em vez
+    do /login real. Usado só para mostrar o aviso de simulação e mandar o "Sair" de
+    volta para a vitrine em vez do login — não muda o formato de _dados_sessao acima
+    (muitos pontos do código dependem do tuplo (perfil, profissional) que essa função
+    devolve)."""
+    if not sessao or isinstance(sessao, str):
+        return False
+    return bool(sessao.get("simulacao"))
+
+
+def _pagina_login(simulacao=False):
     return html.Div(
         html.Div(
             [
                 html.Img(src="/assets/icones/logo.svg", className="logotipo-login"),
-                html.H1("Gestão de Saúde"),
+                html.H1("Modo simulação" if simulacao else "Gestão de Saúde"),
+                *(
+                    [
+                        html.P(
+                            "Entras diretamente num perfil de demonstração, com os mesmos dados reais do "
+                            "sistema. Podes sair a qualquer momento, sem precisar de voltar aqui.",
+                            className="texto-explicativo",
+                        )
+                    ]
+                    if simulacao
+                    else []
+                ),
                 dcc.Store(id="perfil-provisorio-login", storage_type="memory"),
+                dcc.Store(id="simulacao-login-flag", storage_type="memory", data=simulacao),
                 html.Div(id="corpo-login"),
+                *([dcc.Link("‹ Voltar à vitrine", href="/vitrine", className="ligacao-voltar")] if simulacao else []),
             ],
             className="cartao-login",
         ),
@@ -473,6 +497,86 @@ def _corpo_login_escolha_profissional(perfil):
             corpo_lista,
             html.Button("‹ Voltar", id="botao-voltar-login", className="botao-secundario", n_clicks=0),
         ]
+    )
+
+
+# --- Página: Vitrine (landing page pública, sem sessão) -----------------------
+
+
+def _cartao_funcionalidade_vitrine(titulo, texto):
+    return html.Div([html.H3(titulo), html.P(texto, className="texto-explicativo")], className="cartao-funcionalidade-vitrine")
+
+
+def _pagina_vitrine():
+    return html.Div(
+        html.Div(
+            [
+                html.Img(src="/assets/icones/logo.svg", className="logotipo-login"),
+                html.H1("Gestão de Saúde"),
+                html.P(
+                    "Sistema de gestão de utentes e cuidados de saúde — cuidados continuados "
+                    "(UCC/ERPI/SAD) e ambulatório clínico/hospitalar, com avaliação de risco clínico "
+                    "por machine learning e acesso por perfil.",
+                    className="texto-explicativo",
+                ),
+                html.Div(
+                    [
+                        dcc.Link("Simulação", href="/simulacao", className="botao-vitrine-primario"),
+                        dcc.Link("Ver o sistema inteiro", href="/login", className="botao-vitrine-secundario"),
+                    ],
+                    className="grupo-botoes-vitrine",
+                ),
+                html.Div(
+                    [
+                        _cartao_funcionalidade_vitrine(
+                            "Ficha clínica completa",
+                            "Sinais vitais, diagnósticos, prescrições, exames, plano de cuidados "
+                            "multidisciplinar e histórico — com exportação em PDF.",
+                        ),
+                        _cartao_funcionalidade_vitrine(
+                            "Avaliação de risco por machine learning",
+                            "Diabetes e risco cardiovascular (random forest) e risco de queda (Morse "
+                            "Fall Scale), com resumo automático em português.",
+                        ),
+                        _cartao_funcionalidade_vitrine(
+                            "Agenda e faturação",
+                            "Marcação, cancelamento e reagendamento de consultas, mapa de ocupação e "
+                            "faturação com comparticipação da Segurança Social e seguradoras privadas.",
+                        ),
+                        _cartao_funcionalidade_vitrine(
+                            "Acesso por perfil",
+                            "Enfermeiro, Médico, Receção e Admin — cada um só vê os módulos relevantes "
+                            "ao seu papel, tal como aconteceria com contas reais.",
+                        ),
+                    ],
+                    className="grelha-funcionalidades-vitrine",
+                ),
+                html.P(
+                    "Projeto de portfólio: nenhuma pessoa real está representada, todos os dados são "
+                    "sintéticos, e a ferramenta não é um sistema clínico certificado nem substitui "
+                    "avaliação por um profissional de saúde.",
+                    className="nota-rodape-login",
+                ),
+            ],
+            className="cartao-vitrine",
+        ),
+        className="ecra-vitrine",
+    )
+
+
+def _banner_simulacao():
+    return html.Div(
+        [
+            html.Div(
+                [
+                    html.Strong("Modo simulação: "),
+                    "estás a ver o sistema com um perfil de demonstração e dados de exemplo, sem "
+                    "sessão real. Podes sair a qualquer momento.",
+                ]
+            ),
+            dcc.Link("Ver o sistema inteiro", href="/login", className="botao-secundario"),
+        ],
+        className="banner-simulacao",
     )
 
 
@@ -2000,15 +2104,16 @@ app.layout = _construir_layout
     Output("perfil-sessao", "data", allow_duplicate=True),
     Output("url", "pathname", allow_duplicate=True),
     Input({"type": "botao-login-perfil", "perfil": ALL}, "n_clicks"),
+    State("simulacao-login-flag", "data"),
     prevent_initial_call=True,
 )
-def _escolher_perfil_login(cliques):
+def _escolher_perfil_login(cliques, simulacao):
     if not ctx.triggered_id or not any(cliques):
         return dash.no_update, dash.no_update, dash.no_update
     perfil = ctx.triggered_id["perfil"]
     if perfil not in PERFIS_COM_PROFISSIONAL:
         # Receção/Admin não têm identidade de profissional — entram logo.
-        return dash.no_update, {"perfil": perfil, "profissional": None}, "/"
+        return dash.no_update, {"perfil": perfil, "profissional": None, "simulacao": bool(simulacao)}, "/"
     # Médico/Enfermeiro: fica à espera da escolha do profissional (2º passo).
     return perfil, dash.no_update, dash.no_update
 
@@ -2029,12 +2134,13 @@ def _voltar_login(n_clicks):
     Output("url", "pathname", allow_duplicate=True),
     Input({"type": "botao-login-profissional", "nome": ALL}, "n_clicks"),
     State("perfil-provisorio-login", "data"),
+    State("simulacao-login-flag", "data"),
     prevent_initial_call=True,
 )
-def _escolher_profissional_login(cliques, perfil_provisorio):
+def _escolher_profissional_login(cliques, perfil_provisorio, simulacao):
     if not ctx.triggered_id or not any(cliques) or not perfil_provisorio:
         return dash.no_update, dash.no_update
-    return {"perfil": perfil_provisorio, "profissional": ctx.triggered_id["nome"]}, "/"
+    return {"perfil": perfil_provisorio, "profissional": ctx.triggered_id["nome"], "simulacao": bool(simulacao)}, "/"
 
 
 @app.callback(Output("corpo-login", "children"), Input("perfil-provisorio-login", "data"))
@@ -2048,12 +2154,16 @@ def _renderizar_corpo_login(perfil_provisorio):
     Output("perfil-sessao", "data", allow_duplicate=True),
     Output("url", "pathname", allow_duplicate=True),
     Input("botao-sair-sessao", "n_clicks"),
+    State("perfil-sessao", "data"),
     prevent_initial_call=True,
 )
-def _sair_sessao(n_clicks):
+def _sair_sessao(n_clicks, sessao):
     if not n_clicks:
         return dash.no_update, dash.no_update
-    return None, "/login"
+    # Uma sessão de simulação volta para a vitrine (é de lá que veio); uma sessão
+    # real volta para o login, tal como sempre.
+    destino = "/vitrine" if _e_simulacao(sessao) else "/login"
+    return None, destino
 
 
 @app.callback(
@@ -2080,7 +2190,7 @@ def _dispensar_orientacao(n_clicks, sessao, dispensada):
 @app.callback(Output("barra-lateral-app", "children"), Input("url", "pathname"), Input("perfil-sessao", "data"))
 def _atualizar_barra_lateral(caminho, sessao):
     perfil, profissional = _dados_sessao(sessao)
-    if not perfil:
+    if not perfil or (caminho or "/") in ("/vitrine", "/simulacao", "/login"):
         return None
     return _barra_lateral(caminho or "/", perfil, profissional)
 
@@ -2095,10 +2205,26 @@ def _atualizar_barra_lateral(caminho, sessao):
 def _rotear_pagina(caminho, query_search, sessao, onboarding_dispensada):
     perfil, profissional = _dados_sessao(sessao)
     caminho = caminho or "/"
-    if caminho != "/login" and not perfil:
-        return _pagina_login()
+    conteudo = _conteudo_rota(caminho, query_search, sessao, perfil, profissional, onboarding_dispensada)
+    # O aviso de "Modo simulação" aparece em todas as páginas de uma sessão de
+    # simulação, exceto nas públicas (vitrine/simulação/login) — lá já é óbvio
+    # que ainda não se entrou em nenhuma área da app.
+    if perfil and _e_simulacao(sessao) and caminho not in ("/vitrine", "/simulacao", "/login"):
+        return html.Div([_banner_simulacao(), conteudo])
+    return conteudo
+
+
+def _conteudo_rota(caminho, query_search, sessao, perfil, profissional, onboarding_dispensada):
+    if caminho == "/vitrine":
+        return _pagina_vitrine()
+    if caminho == "/simulacao":
+        return _pagina_login(simulacao=True)
     if caminho == "/login":
         return _pagina_login()
+    if not perfil:
+        # A vitrine é a porta de entrada pública; qualquer outro caminho sem
+        # sessão cai no login real, tal como antes.
+        return _pagina_vitrine() if caminho == "/" else _pagina_login()
     if caminho == "/":
         return _pagina_visao_geral(perfil, onboarding_dispensada)
     if caminho == "/utentes":
