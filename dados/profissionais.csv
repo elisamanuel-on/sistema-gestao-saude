@@ -1,0 +1,15 @@
+id_profissional,nome,categoria,especialidade,contacto,numero_cedula,data_admissao,estado
+P0001,Dr. Ricardo Rocha,Médico,Clínica Geral,andrepinto@example.com,CP-93421,2022-06-23,Ativo
+P0002,Dra. Inês Fonseca,Médico,Cardiologia,luana72@example.net,CP-46017,2022-09-21,Ativo
+P0003,Dr. Hugo Teixeira,Médico,Ortopedia,ipereira@example.com,CP-43407,2017-07-12,Ativo
+P0004,Dr. Nuno Barreto,Médico,Pneumologia,lucianacardoso@example.com,CP-97456,2018-11-28,Ativo
+P0005,Dra. Carla Nogueira,Médico,Psiquiatria,leticiafernandes@example.net,CP-34091,2024-09-02,Ativo
+P0006,Dr. Tiago Matos,Médico,Endocrinologia,igorvicente@example.net,CP-89206,2018-04-12,Ativo
+P0007,Dra. Sofia Ramalho,Médico,Neurologia,melaniemacedo@example.com,CP-11489,2016-04-29,Ativo
+P0008,Dra. Patrícia Gomes,Médico,Ginecologia,marquescarlos@example.org,CP-18564,2024-08-20,Ativo
+P0009,Enf. Marta Sousa,Enfermeiro,,amorimerica@example.com,CP-12481,2017-12-14,Ativo
+P0010,Enf. Paulo Cardoso,Enfermeiro,,sarateixeira@example.com,CP-88850,2015-12-25,Ativo
+P0011,Fisio. Beatriz Lima,Fisioterapeuta,,angela97@example.com,CP-38425,2020-01-04,Ativo
+P0012,Nutric. Renata Alves,Nutricionista,,rafaelaaraujo@example.org,CP-47341,2020-07-03,Ativo
+P0013,Psic. Vera Matos,Psicólogo,,constancapacheco@example.net,CP-63303,2023-05-07,Ativo
+P0014,Ass. Social Miguel Nunes,Assistente Social,,freitasleonardo@example.org,CP-84268,2017-07-30,Ativo
