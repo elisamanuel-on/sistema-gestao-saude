@@ -58,6 +58,7 @@ import io
 import json
 import pathlib
 import unicodedata
+import urllib.parse
 
 import dash
 import joblib
@@ -164,6 +165,8 @@ def _carregar_todos_os_dados():
     dados["vitais"] = pd.read_csv(PASTA_DADOS / "vitais.csv", parse_dates=["data_hora"])
     dados["diagnosticos"] = pd.read_csv(PASTA_DADOS / "diagnosticos.csv")
     dados["prescricoes"] = pd.read_csv(PASTA_DADOS / "prescricoes.csv")
+    dados["prescricoes"]["duracao"] = ""
+    dados["prescricoes"]["id_prescricao"] = [f"RX{i + 1:05d}" for i in range(len(dados["prescricoes"]))]
     dados["visitas"] = pd.read_csv(PASTA_DADOS / "visitas.csv")
     dados["alergias"] = pd.read_csv(PASTA_DADOS / "alergias.csv")
     dados["documentos"] = pd.read_csv(PASTA_DADOS / "documentos.csv")
@@ -256,6 +259,13 @@ def _registar_historico(id_utente, profissional, acao):
     DADOS["historico"] = pd.concat([DADOS["historico"], nova_linha], ignore_index=True)
 
 
+def _proximo_id_prescricao():
+    if DADOS["prescricoes"].empty:
+        return "RX00001"
+    maior = DADOS["prescricoes"]["id_prescricao"].str.lstrip("RX").astype(int).max()
+    return f"RX{maior + 1:05d}"
+
+
 # --- Componentes reutilizáveis ----------------------------------------------
 
 
@@ -284,11 +294,12 @@ SECCOES_NAVEGACAO = [
     ("Geral", [("/utentes", "Utentes")]),
     ("Cuidados continuados", [("/ocupacao", "Mapa de Ocupação")]),
     ("Clínica & Hospital", [("/consultas", "Consultas")]),
+    ("Relatórios", [("/relatorios", "Relatórios")]),
     ("Gestão", [("/faturacao", "Faturação"), ("/profissionais", "Profissionais")]),
 ]
 
 
-def _barra_lateral(caminho_atual, perfil):
+def _barra_lateral(caminho_atual, perfil, profissional=None):
     seccoes_visiveis = SECCOES_POR_PERFIL.get(perfil, [titulo for titulo, _itens in SECCOES_NAVEGACAO])
     seccoes = []
     for titulo_seccao, itens in SECCOES_NAVEGACAO:
@@ -307,11 +318,20 @@ def _barra_lateral(caminho_atual, perfil):
         )
     return html.Div(
         [
-            html.Div([html.Span("Gestão de Saúde", className="logotipo-lateral-texto")], className="logotipo-lateral"),
+            html.Div(
+                [
+                    html.Img(src="/assets/icones/logo.svg", className="icone-logotipo-lateral"),
+                    html.Span("Gestão de Saúde", className="logotipo-lateral-texto"),
+                ],
+                className="logotipo-lateral",
+            ),
             html.Div(seccoes, className="grupo-nav-lateral"),
             html.Div(
                 [
-                    html.Div(f"Perfil: {perfil}", className="perfil-atual-lateral"),
+                    html.Div(
+                        f"Perfil: {perfil}" + (f" — {profissional}" if profissional else ""),
+                        className="perfil-atual-lateral",
+                    ),
                     dcc.Link("Sobre este projeto", href="/sobre", className="ligacao-lateral ligacao-lateral--sobre"),
                     html.Button("Sair", id="botao-sair-sessao", className="botao-sair-lateral", n_clicks=0),
                 ],
@@ -332,13 +352,50 @@ def _etiqueta_tom(texto, tom, sufixo_classe="resultado-inline"):
 
 # --- Página: Login (demonstração, sem autenticação real) --------------------
 
-ICONES_PERFIL = {"Enfermeiro": "🩺", "Médico": "⚕️", "Administrativo": "🗂️"}
+ICONES_PERFIL = {
+    "Enfermeiro": "/assets/icones/enfermeiro.svg",
+    "Médico": "/assets/icones/medico.svg",
+    "Administrativo": "/assets/icones/administrativo.svg",
+}
+
+# Enfermeiro e Médico exigem um segundo passo no login — escolher QUAL
+# profissional (nome vindo de profissionais.csv) — porque a agenda própria,
+# a receita assinada e o relatório de atividade só fazem sentido associados
+# a uma pessoa concreta, não a um perfil genérico. O Administrativo não
+# precisa: não gera receitas nem relatórios de atividade pessoal.
+PERFIS_COM_PROFISSIONAL = {"Médico", "Enfermeiro"}
+
+
+def _dados_sessao(sessao):
+    """Normaliza o valor guardado em perfil-sessao: {'perfil':..., 'profissional':...}.
+    Aceita também o formato antigo (string simples, de sessões guardadas antes
+    desta funcionalidade) para não partir sessões já abertas no browser."""
+    if not sessao:
+        return None, None
+    if isinstance(sessao, str):
+        return sessao, None
+    return sessao.get("perfil"), sessao.get("profissional")
 
 
 def _pagina_login():
+    return html.Div(
+        html.Div(
+            [
+                html.Img(src="/assets/icones/logo.svg", className="logotipo-login"),
+                html.H1("Gestão de Saúde"),
+                dcc.Store(id="perfil-provisorio-login", storage_type="memory"),
+                html.Div(id="corpo-login"),
+            ],
+            className="cartao-login",
+        ),
+        className="ecra-login",
+    )
+
+
+def _corpo_login_escolha_perfil():
     botoes = [
         html.Button(
-            [html.Span(ICONES_PERFIL.get(perfil, ""), className="icone-perfil-login"), html.Span(perfil)],
+            [html.Img(src=ICONES_PERFIL.get(perfil, ""), className="icone-perfil-login"), html.Span(perfil)],
             id={"type": "botao-login-perfil", "perfil": perfil},
             n_clicks=0,
             className="botao-perfil-login",
@@ -346,25 +403,46 @@ def _pagina_login():
         for perfil in PERFIS_ACESSO
     ]
     return html.Div(
-        html.Div(
+        [
+            html.P(
+                "Escolhe um perfil para entrar. Cada perfil vê um conjunto diferente de módulos, "
+                "tal como aconteceria com contas reais.",
+                className="texto-explicativo",
+            ),
+            html.Div(botoes, className="grupo-botoes-perfil-login"),
+            html.P(
+                "Isto é uma simulação de acesso por perfil para fins de portfólio — não há "
+                "palavra-passe, autenticação real, nem dados sensíveis protegidos.",
+                className="nota-rodape-login",
+            ),
+        ]
+    )
+
+
+def _corpo_login_escolha_profissional(perfil):
+    disponiveis = DADOS["profissionais"]
+    disponiveis = disponiveis[(disponiveis["categoria"] == perfil) & (disponiveis["estado"] == "Ativo")].sort_values("nome")
+    if disponiveis.empty:
+        corpo_lista = html.P(f"Não há profissionais ativos na categoria {perfil}.", className="texto-explicativo")
+    else:
+        corpo_lista = html.Div(
             [
-                html.Div("✚", className="logotipo-login"),
-                html.H1("Gestão de Saúde"),
-                html.P(
-                    "Escolhe um perfil para entrar. Cada perfil vê um conjunto diferente de módulos, "
-                    "tal como aconteceria com contas reais.",
-                    className="texto-explicativo",
-                ),
-                html.Div(botoes, className="grupo-botoes-perfil-login"),
-                html.P(
-                    "Isto é uma simulação de acesso por perfil para fins de portfólio — não há "
-                    "palavra-passe, autenticação real, nem dados sensíveis protegidos.",
-                    className="nota-rodape-login",
-                ),
+                html.Button(
+                    html.Span(p["nome"]),
+                    id={"type": "botao-login-profissional", "nome": p["nome"]},
+                    n_clicks=0,
+                    className="botao-perfil-login",
+                )
+                for _idx, p in disponiveis.iterrows()
             ],
-            className="cartao-login",
-        ),
-        className="ecra-login",
+            className="grupo-botoes-perfil-login",
+        )
+    return html.Div(
+        [
+            html.P(f"Perfil {perfil} — agora escolhe qual profissional és:", className="texto-explicativo"),
+            corpo_lista,
+            html.Button("‹ Voltar", id="botao-voltar-login", className="botao-secundario", n_clicks=0),
+        ]
     )
 
 
@@ -667,14 +745,49 @@ def _aba_alergias_diagnosticos(id_utente):
     )
 
 
-def _aba_prescricoes(id_utente):
+def _aba_prescricoes(id_utente, perfil=None, profissional=None):
+    # O formulário "+ Nova Prescrição" (e a sua mensagem de confirmação) fica
+    # fora do contentor dinâmico de baixo: se estivesse lá dentro, o próprio
+    # re-render disparado pela criação apagava a mensagem antes de dar para
+    # ler (o contentor é reconstruído do zero a cada atualização).
+    mostrar_criar = perfil == "Médico" and profissional
+    return html.Div(
+        [
+            dcc.Store(id="prescricoes-atualizacao", data=0),
+            html.Div(id="corpo-prescricoes"),
+            *([_formulario_nova_prescricao()] if mostrar_criar else []),
+        ]
+    )
+
+
+def _formulario_nova_prescricao():
+    return html.Details(
+        [
+            html.Summary("+ Nova Prescrição", className="resumo-details"),
+            html.Div(
+                [
+                    dcc.Input(id="form-prescricao-medicamento", placeholder="Medicamento", type="text", className="campo-pesquisa"),
+                    dcc.Input(id="form-prescricao-posologia", placeholder="Posologia (ex: 50mg, 1x/dia)", type="text", className="campo-pesquisa"),
+                    dcc.Input(id="form-prescricao-duracao", placeholder="Duração (ex: 7 dias)", type="text", className="campo-pesquisa"),
+                ],
+                className="grelha-formulario",
+            ),
+            html.Button("Registar prescrição", id="botao-criar-prescricao", className="botao-primario", n_clicks=0),
+            html.Div(id="mensagem-criar-prescricao", className="resultado-mini"),
+        ],
+        className="painel-details",
+    )
+
+
+def _corpo_prescricoes(id_utente, perfil=None, profissional=None):
     prescricoes = DADOS["prescricoes"][DADOS["prescricoes"]["id_utente"] == id_utente].sort_values("data", ascending=False)
-    return dash_table.DataTable(
+    tabela = dash_table.DataTable(
         columns=[
             {"name": "Data", "id": "data"},
             {"name": "Profissional", "id": "profissional"},
             {"name": "Medicamento", "id": "medicamento"},
             {"name": "Posologia", "id": "posologia"},
+            {"name": "Duração", "id": "duracao"},
         ],
         data=prescricoes.to_dict("records"),
         style_table={"overflowX": "auto"},
@@ -682,6 +795,35 @@ def _aba_prescricoes(id_utente):
         style_header={"fontWeight": "600", "backgroundColor": CORES["primaria_suave"]},
         page_size=10,
     )
+
+    # Emitir a receita em PDF é um ato clínico — só o Médico (autenticado
+    # com a sua identidade própria) o pode fazer; ver também
+    # _formulario_nova_prescricao, gerido separadamente em _aba_prescricoes.
+    if perfil != "Médico" or not profissional:
+        return html.Div([tabela])
+
+    proprias = prescricoes[prescricoes["profissional"] == profissional]
+    opcoes_receita = [
+        {"label": f"{r['data']} · {r['medicamento']} ({r['posologia']})", "value": r["id_prescricao"]}
+        for _idx, r in proprias.iterrows()
+    ]
+
+    painel_receita = html.Div(
+        [
+            html.H3("Gerar receita em PDF"),
+            html.P("Só é possível emitir receita das prescrições registadas por ti.", className="texto-explicativo"),
+            dcc.Dropdown(id="select-prescricao-receita", options=opcoes_receita, placeholder="Escolhe uma prescrição...", className="filtro-dropdown"),
+            html.Div(
+                [html.Button("Descarregar receita PDF", id="botao-gerar-receita", className="botao-secundario", n_clicks=0)],
+                className="botoes-exportar",
+            ),
+            dcc.Download(id="descarregar-receita-pdf"),
+            html.Div(id="mensagem-gerar-receita", className="resultado-mini"),
+        ],
+        className="cartao-secao",
+    )
+
+    return html.Div([tabela, painel_receita])
 
 
 def _aba_visitas(id_utente):
@@ -700,7 +842,14 @@ def _aba_documentos(id_utente):
     documentos = DADOS["documentos"][DADOS["documentos"]["id_utente"] == id_utente]
     return html.Div(
         [
-            html.Div([html.Span("📄", className="icone-documento"), html.Span(d["nome_documento"]), html.Span(d["data_upload"], className="data-documento")], className="linha-documento")
+            html.Div(
+                [
+                    html.Img(src="/assets/icones/documento.svg", className="icone-documento"),
+                    html.Span(d["nome_documento"]),
+                    html.Span(d["data_upload"], className="data-documento"),
+                ],
+                className="linha-documento",
+            )
             for _idx, d in documentos.iterrows()
         ]
     )
@@ -893,11 +1042,28 @@ def _aba_avaliacao_risco(id_utente):
     )
 
 
-def _pagina_ficha_utente(id_utente):
+def _pagina_ficha_utente(id_utente, perfil=None, profissional=None):
     linha = DADOS["utentes"].loc[DADOS["utentes"]["id_utente"] == id_utente]
     if linha.empty:
         return html.Div([html.H2("Utente não encontrado"), dcc.Link("Voltar à lista", href="/utentes")])
     utente = linha.iloc[0]
+
+    abas = [
+        dcc.Tab(label="Resumo", value="resumo", children=[_aba_resumo(id_utente, utente)]),
+        dcc.Tab(label="Sinais vitais", value="vitais", children=[_aba_vitais(id_utente)]),
+        dcc.Tab(label="Alergias & Diagnósticos", value="alergias", children=[_aba_alergias_diagnosticos(id_utente)]),
+        dcc.Tab(label="Exames", value="exames", children=[_aba_exames(id_utente)]),
+        dcc.Tab(label="Prescrições", value="prescricoes", children=[_aba_prescricoes(id_utente, perfil, profissional)]),
+        dcc.Tab(label="Plano de Cuidados", value="plano_cuidados", children=[_aba_plano_cuidados(id_utente)]),
+        dcc.Tab(label="Visitas", value="visitas", children=[_aba_visitas(id_utente)]),
+        dcc.Tab(label="Documentos", value="documentos", children=[_aba_documentos(id_utente)]),
+        dcc.Tab(label="Histórico", value="historico", children=[_aba_historico(id_utente)]),
+    ]
+    # Avaliação de risco é um ato clínico (calcular/registar um risco), não
+    # uma simples consulta de dados — por isso fica de fora para o
+    # Administrativo, que só tem acesso de leitura à ficha do utente.
+    if perfil != "Administrativo":
+        abas.append(dcc.Tab(label="Avaliação de risco", value="risco", children=[_aba_avaliacao_risco(id_utente)]))
 
     return html.Div(
         [
@@ -919,22 +1085,7 @@ def _pagina_ficha_utente(id_utente):
                     ),
                 ]
             ),
-            dcc.Tabs(
-                id="abas-ficha-utente",
-                value="resumo",
-                children=[
-                    dcc.Tab(label="Resumo", value="resumo", children=[_aba_resumo(id_utente, utente)]),
-                    dcc.Tab(label="Sinais vitais", value="vitais", children=[_aba_vitais(id_utente)]),
-                    dcc.Tab(label="Alergias & Diagnósticos", value="alergias", children=[_aba_alergias_diagnosticos(id_utente)]),
-                    dcc.Tab(label="Exames", value="exames", children=[_aba_exames(id_utente)]),
-                    dcc.Tab(label="Prescrições", value="prescricoes", children=[_aba_prescricoes(id_utente)]),
-                    dcc.Tab(label="Plano de Cuidados", value="plano_cuidados", children=[_aba_plano_cuidados(id_utente)]),
-                    dcc.Tab(label="Visitas", value="visitas", children=[_aba_visitas(id_utente)]),
-                    dcc.Tab(label="Documentos", value="documentos", children=[_aba_documentos(id_utente)]),
-                    dcc.Tab(label="Histórico", value="historico", children=[_aba_historico(id_utente)]),
-                    dcc.Tab(label="Avaliação de risco", value="risco", children=[_aba_avaliacao_risco(id_utente)]),
-                ],
-            ),
+            dcc.Tabs(id="abas-ficha-utente", value="resumo", children=abas),
             dcc.Store(id="utente-atual-id", data=id_utente),
             dcc.Store(id="utente-atual-nome", data=utente["nome"]),
         ]
@@ -1190,7 +1341,10 @@ def _vista_calendario_consultas(df, inicio):
     )
 
 
-def _pagina_consultas():
+def _pagina_consultas(perfil=None, profissional=None):
+    # Enfermeiro só consulta a agenda (sem marcar/cancelar/reagendar — isso
+    # é ação do Médico ou do Administrativo, que gere a agenda toda).
+    mostrar_gestao_consulta = perfil != "Enfermeiro"
     consultas = DADOS["consultas"]
     hoje = pd.Timestamp.now().normalize()
     daqui_7_dias = hoje + pd.Timedelta(days=7)
@@ -1228,7 +1382,7 @@ def _pagina_consultas():
             html.P("Agendamento do módulo Clínica/Hospital — ambulatório, organizado por especialidade e profissional.", className="texto-explicativo"),
             kpis,
             html.Div([html.H3("Consultas por especialidade"), dcc.Graph(figure=fig_especialidade, config={"displayModeBar": False})], className="cartao-secao"),
-            _formulario_nova_consulta(),
+            *([_formulario_nova_consulta()] if mostrar_gestao_consulta else []),
             html.Div(
                 [
                     dcc.Input(id="pesquisa-consulta", type="text", placeholder="Pesquisar por nome do utente...", className="campo-pesquisa"),
@@ -1257,7 +1411,7 @@ def _pagina_consultas():
             dcc.Store(id="semana-consultas-inicio"),
             dcc.Store(id="consultas-atualizacao", data=0),
             html.Div(id="corpo-tabela-consultas"),
-            _painel_gerir_consulta(),
+            *([_painel_gerir_consulta()] if mostrar_gestao_consulta else []),
         ]
     )
 
@@ -1411,6 +1565,85 @@ def _profissional_tem_historico(nome):
     return any((DADOS[tabela][coluna] == nome).any() for tabela, coluna in COLUNAS_COM_PROFISSIONAL)
 
 
+# --- Relatórios ----------------------------------------------------------------
+
+
+def _estatisticas_atividade_profissional(nome, data_inicio=None, data_fim=None):
+    """Agrega as consultas de um profissional (opcionalmente num período) —
+    base tanto do relatório em PDF/Excel como do resumo mostrado na página."""
+    df = DADOS["consultas"][DADOS["consultas"]["profissional"] == nome]
+    if data_inicio:
+        df = df[df["data_hora"] >= pd.Timestamp(data_inicio)]
+    if data_fim:
+        df = df[df["data_hora"] < pd.Timestamp(data_fim) + pd.Timedelta(days=1)]
+
+    por_estado = df["estado"].value_counts().to_dict()
+    realizadas = por_estado.get("Realizada", 0)
+    faltas = por_estado.get("Falta", 0)
+    taxa_comparencia = (realizadas / (realizadas + faltas) * 100) if (realizadas + faltas) else None
+
+    return {
+        "nome": nome,
+        "total": len(df),
+        "por_estado": por_estado,
+        "taxa_comparencia": taxa_comparencia,
+        "por_especialidade": df["especialidade"].value_counts().to_dict(),
+        "data_inicio": data_inicio,
+        "data_fim": data_fim,
+    }
+
+
+def _opcoes_relatorio_consulta(perfil, profissional):
+    """Lista de consultas para o relatório de consulta — um Médico só pode
+    gerar relatório das suas próprias consultas (agenda própria), tal como
+    já acontece na página de Consultas."""
+    df = DADOS["consultas"]
+    if perfil == "Médico" and profissional:
+        df = df[df["profissional"] == profissional]
+    df = df.merge(DADOS["utentes"][["id_utente", "nome"]], on="id_utente").sort_values("data_hora", ascending=False)
+    return [
+        {
+            "label": f"{r['data_hora'].strftime('%d/%m/%Y %H:%M')} · {r['nome']} · {r['especialidade']} · {r['estado']}",
+            "value": r["id_consulta"],
+        }
+        for _idx, r in df.iterrows()
+    ]
+
+
+def _corpo_relatorio_atividade(nome, data_inicio=None, data_fim=None):
+    if not nome:
+        return html.P("Escolhe um profissional para ver o relatório de atividade.", className="texto-explicativo")
+
+    stats = _estatisticas_atividade_profissional(nome, data_inicio, data_fim)
+    faltas = stats["por_estado"].get("Falta", 0)
+    kpis = html.Div(
+        [
+            _cartao_kpi("Total de consultas", stats["total"]),
+            _cartao_kpi("Realizadas", stats["por_estado"].get("Realizada", 0), tom="risco_baixo"),
+            _cartao_kpi("Faltas", faltas, tom="risco_elevado" if faltas else "risco_baixo"),
+            _cartao_kpi(
+                "Taxa de comparência",
+                f"{stats['taxa_comparencia']:.0f}%" if stats["taxa_comparencia"] is not None else "—",
+            ),
+        ],
+        className="kpis-linha",
+    )
+
+    especialidades_ordenadas = sorted(stats["por_especialidade"].items(), key=lambda item: -item[1])
+    if especialidades_ordenadas:
+        tabela_especialidade = html.Table(
+            [
+                html.Thead(html.Tr([html.Th("Especialidade"), html.Th("Consultas")])),
+                html.Tbody([html.Tr([html.Td(especialidade), html.Td(str(qtd))]) for especialidade, qtd in especialidades_ordenadas]),
+            ],
+            className="tabela-utentes",
+        )
+    else:
+        tabela_especialidade = html.P("Sem consultas registadas no período.", className="texto-explicativo")
+
+    return html.Div([kpis, tabela_especialidade])
+
+
 def _tabela_profissionais():
     prof = DADOS["profissionais"].sort_values("nome")
     if prof.empty:
@@ -1430,10 +1663,11 @@ def _tabela_profissionais():
                     html.Td(html.Span(p["estado"], className=f"etiqueta-estado etiqueta-estado--{_slug(p['estado'])}")),
                     html.Td(str(n_consultas)),
                     html.Td(str(n_plano)),
+                    html.Td(dcc.Link("Ver relatório", href=f"/relatorios?profissional={urllib.parse.quote(p['nome'])}", className="ligacao-voltar")),
                 ]
             )
         )
-    cabecalhos = ["Nome", "Categoria", "Especialidade", "Contacto", "Nº cédula", "Admissão", "Estado", "Consultas", "Plano de cuidados"]
+    cabecalhos = ["Nome", "Categoria", "Especialidade", "Contacto", "Nº cédula", "Admissão", "Estado", "Consultas", "Plano de cuidados", ""]
     return html.Table(
         [html.Thead(html.Tr([html.Th(c) for c in cabecalhos])), html.Tbody(linhas)],
         className="tabela-utentes",
@@ -1535,6 +1769,103 @@ def _pagina_profissionais():
     )
 
 
+def _pagina_relatorios(perfil=None, profissional=None, query_search=None):
+    if perfil == "Administrativo":
+        # Administrativo escolhe qualquer profissional — inclui o valor
+        # vindo do atalho "Ver relatório" na página Profissionais (?profissional=...).
+        profissional_pre = None
+        if query_search:
+            parametros = urllib.parse.parse_qs(query_search.lstrip("?"))
+            valores = parametros.get("profissional")
+            if valores:
+                profissional_pre = valores[0]
+        opcoes_profissional = [{"label": n, "value": n} for n in DADOS["profissionais"].sort_values("nome")["nome"]]
+        dropdown_profissional = dcc.Dropdown(
+            id="select-relatorio-profissional",
+            options=opcoes_profissional,
+            value=profissional_pre,
+            placeholder="Escolhe um profissional...",
+            className="filtro-dropdown",
+        )
+    else:
+        # Médico/Enfermeiro só veem a sua própria atividade — agenda
+        # própria, tal como o resto do módulo de Consultas.
+        dropdown_profissional = dcc.Dropdown(
+            id="select-relatorio-profissional",
+            options=[{"label": profissional, "value": profissional}] if profissional else [],
+            value=profissional,
+            disabled=True,
+            className="filtro-dropdown",
+        )
+
+    secao_atividade = html.Div(
+        [
+            html.H2("Relatório de atividade profissional"),
+            html.P(
+                "Número de consultas, taxa de comparência e distribuição por especialidade, num período à escolha.",
+                className="texto-explicativo",
+            ),
+            html.Div(
+                [
+                    dropdown_profissional,
+                    dcc.DatePickerSingle(id="periodo-relatorio-inicio", placeholder="De", display_format="DD/MM/YYYY"),
+                    dcc.DatePickerSingle(id="periodo-relatorio-fim", placeholder="Até", display_format="DD/MM/YYYY"),
+                ],
+                className="grelha-formulario",
+            ),
+            html.Div(id="corpo-relatorio-atividade"),
+            html.Div(
+                [
+                    html.Button("Descarregar PDF", id="botao-pdf-relatorio-atividade", className="botao-secundario", n_clicks=0),
+                    html.Button("Descarregar Excel", id="botao-excel-relatorio-atividade", className="botao-secundario", n_clicks=0),
+                ],
+                className="botoes-exportar",
+            ),
+            dcc.Download(id="descarregar-pdf-relatorio-atividade"),
+            dcc.Download(id="descarregar-excel-relatorio-atividade"),
+            html.Div(id="mensagem-relatorio-atividade", className="resultado-mini"),
+        ],
+        className="cartao-secao",
+    )
+
+    secao_consulta = html.Div(
+        [
+            html.H2("Relatório de consulta"),
+            html.P("Resumo de uma consulta específica, pronto a arquivar ou partilhar.", className="texto-explicativo"),
+            dcc.Dropdown(
+                id="select-relatorio-consulta",
+                options=_opcoes_relatorio_consulta(perfil, profissional),
+                placeholder="Escolhe uma consulta...",
+                className="filtro-dropdown",
+            ),
+            html.Div(
+                [
+                    html.Button("Descarregar PDF", id="botao-pdf-relatorio-consulta", className="botao-secundario", n_clicks=0),
+                    html.Button("Descarregar Excel", id="botao-excel-relatorio-consulta", className="botao-secundario", n_clicks=0),
+                ],
+                className="botoes-exportar",
+            ),
+            dcc.Download(id="descarregar-pdf-relatorio-consulta"),
+            dcc.Download(id="descarregar-excel-relatorio-consulta"),
+            html.Div(id="mensagem-relatorio-consulta", className="resultado-mini"),
+        ],
+        className="cartao-secao",
+    )
+
+    return html.Div(
+        [
+            html.H1("Relatórios"),
+            html.P(
+                "Documentação e exportação — atividade de um profissional (Médico/Enfermeiro veem só a sua) "
+                "ou o resumo de uma consulta específica.",
+                className="texto-explicativo",
+            ),
+            secao_atividade,
+            secao_consulta,
+        ]
+    )
+
+
 # --- App -----------------------------------------------------------------------
 
 app = dash.Dash(__name__, suppress_callback_exceptions=True)
@@ -1561,15 +1892,52 @@ app.layout = _construir_layout
 
 
 @app.callback(
+    Output("perfil-provisorio-login", "data", allow_duplicate=True),
     Output("perfil-sessao", "data", allow_duplicate=True),
     Output("url", "pathname", allow_duplicate=True),
     Input({"type": "botao-login-perfil", "perfil": ALL}, "n_clicks"),
     prevent_initial_call=True,
 )
-def _entrar_com_perfil(cliques):
+def _escolher_perfil_login(cliques):
     if not ctx.triggered_id or not any(cliques):
+        return dash.no_update, dash.no_update, dash.no_update
+    perfil = ctx.triggered_id["perfil"]
+    if perfil not in PERFIS_COM_PROFISSIONAL:
+        # Administrativo não tem identidade de profissional — entra logo.
+        return dash.no_update, {"perfil": perfil, "profissional": None}, "/"
+    # Médico/Enfermeiro: fica à espera da escolha do profissional (2º passo).
+    return perfil, dash.no_update, dash.no_update
+
+
+@app.callback(
+    Output("perfil-provisorio-login", "data", allow_duplicate=True),
+    Input("botao-voltar-login", "n_clicks"),
+    prevent_initial_call=True,
+)
+def _voltar_login(n_clicks):
+    if not n_clicks:
+        return dash.no_update
+    return None
+
+
+@app.callback(
+    Output("perfil-sessao", "data", allow_duplicate=True),
+    Output("url", "pathname", allow_duplicate=True),
+    Input({"type": "botao-login-profissional", "nome": ALL}, "n_clicks"),
+    State("perfil-provisorio-login", "data"),
+    prevent_initial_call=True,
+)
+def _escolher_profissional_login(cliques, perfil_provisorio):
+    if not ctx.triggered_id or not any(cliques) or not perfil_provisorio:
         return dash.no_update, dash.no_update
-    return ctx.triggered_id["perfil"], "/"
+    return {"perfil": perfil_provisorio, "profissional": ctx.triggered_id["nome"]}, "/"
+
+
+@app.callback(Output("corpo-login", "children"), Input("perfil-provisorio-login", "data"))
+def _renderizar_corpo_login(perfil_provisorio):
+    if perfil_provisorio:
+        return _corpo_login_escolha_profissional(perfil_provisorio)
+    return _corpo_login_escolha_perfil()
 
 
 @app.callback(
@@ -1588,14 +1956,21 @@ def _sair_sessao(n_clicks):
 
 
 @app.callback(Output("barra-lateral-app", "children"), Input("url", "pathname"), Input("perfil-sessao", "data"))
-def _atualizar_barra_lateral(caminho, perfil):
+def _atualizar_barra_lateral(caminho, sessao):
+    perfil, profissional = _dados_sessao(sessao)
     if not perfil:
         return None
-    return _barra_lateral(caminho or "/", perfil)
+    return _barra_lateral(caminho or "/", perfil, profissional)
 
 
-@app.callback(Output("conteudo-pagina", "children"), Input("url", "pathname"), Input("perfil-sessao", "data"))
-def _rotear_pagina(caminho, perfil):
+@app.callback(
+    Output("conteudo-pagina", "children"),
+    Input("url", "pathname"),
+    Input("url", "search"),
+    Input("perfil-sessao", "data"),
+)
+def _rotear_pagina(caminho, query_search, sessao):
+    perfil, profissional = _dados_sessao(sessao)
     caminho = caminho or "/"
     if caminho != "/login" and not perfil:
         return _pagina_login()
@@ -1607,11 +1982,13 @@ def _rotear_pagina(caminho, perfil):
         return _pagina_utentes()
     if caminho.startswith("/utentes/"):
         id_utente = caminho.split("/utentes/")[-1]
-        return _pagina_ficha_utente(id_utente)
+        return _pagina_ficha_utente(id_utente, perfil, profissional)
     if caminho == "/ocupacao":
         return _pagina_ocupacao()
     if caminho == "/consultas":
-        return _pagina_consultas()
+        return _pagina_consultas(perfil, profissional)
+    if caminho == "/relatorios":
+        return _pagina_relatorios(perfil, profissional, query_search)
     if caminho == "/faturacao":
         return _pagina_faturacao()
     if caminho == "/profissionais":
@@ -1646,9 +2023,14 @@ def _filtrar_utentes(texto_pesquisa, tipo_cuidado, estado):
     Input("modo-vista-consultas", "value"),
     Input("semana-consultas-inicio", "data"),
     Input("consultas-atualizacao", "data"),
+    Input("perfil-sessao", "data"),
 )
-def _filtrar_consultas(texto_pesquisa, especialidade, estado, modo="lista", semana_inicio_iso=None, _versao=None):
+def _filtrar_consultas(texto_pesquisa, especialidade, estado, modo="lista", semana_inicio_iso=None, _versao=None, sessao=None):
     df = DADOS["consultas"]
+    perfil, profissional = _dados_sessao(sessao)
+    if perfil == "Médico" and profissional:
+        # Agenda própria: um médico só vê (e só gere) as suas consultas.
+        df = df[df["profissional"] == profissional]
     if texto_pesquisa:
         ids_correspondentes = DADOS["utentes"][DADOS["utentes"]["nome"].str.contains(texto_pesquisa, case=False, na=False)]["id_utente"]
         df = df[df["id_utente"].isin(ids_correspondentes)]
@@ -1736,13 +2118,17 @@ def _criar_consulta(n_clicks, id_utente, especialidade, profissional, data, hora
     return html.Div(mensagem, className="resultado-inline resultado-inline--risco_baixo"), (versao or 0) + 1
 
 
-@app.callback(Output("select-consulta-gerir", "options"), Input("consultas-atualizacao", "data"))
-def _opcoes_consultas_para_gerir(_versao):
-    agendadas = (
-        DADOS["consultas"][DADOS["consultas"]["estado"] == "Agendada"]
-        .merge(DADOS["utentes"][["id_utente", "nome"]], on="id_utente")
-        .sort_values("data_hora")
-    )
+@app.callback(
+    Output("select-consulta-gerir", "options"),
+    Input("consultas-atualizacao", "data"),
+    Input("perfil-sessao", "data"),
+)
+def _opcoes_consultas_para_gerir(_versao, sessao=None):
+    perfil, profissional = _dados_sessao(sessao)
+    agendadas = DADOS["consultas"][DADOS["consultas"]["estado"] == "Agendada"]
+    if perfil == "Médico" and profissional:
+        agendadas = agendadas[agendadas["profissional"] == profissional]
+    agendadas = agendadas.merge(DADOS["utentes"][["id_utente", "nome"]], on="id_utente").sort_values("data_hora")
     return [
         {"label": f"{r['data_hora'].strftime('%d/%m %H:%M')} · {r['nome']} · {r['especialidade']}", "value": r["id_consulta"]}
         for _idx, r in agendadas.iterrows()
@@ -1802,6 +2188,165 @@ def _reagendar_consulta(n_clicks, id_consulta, data, hora, sala, versao):
     _registar_historico(linha.iloc[0]["id_utente"], profissional, "Alterou estado da consulta")
     mensagem = f"Consulta reagendada para {nova_data_hora.strftime('%d/%m/%Y %H:%M')}."
     return html.Div(mensagem, className="resultado-inline resultado-inline--risco_baixo"), (versao or 0) + 1
+
+
+# --- Callbacks: prescrições e receita em PDF (só Médico) ---------------------
+
+
+@app.callback(
+    Output("corpo-prescricoes", "children"),
+    Input("prescricoes-atualizacao", "data"),
+    State("utente-atual-id", "data"),
+    State("perfil-sessao", "data"),
+)
+def _renderizar_prescricoes(_versao, id_utente, sessao):
+    if not id_utente:
+        return dash.no_update
+    perfil, profissional = _dados_sessao(sessao)
+    return _corpo_prescricoes(id_utente, perfil, profissional)
+
+
+@app.callback(
+    Output("mensagem-criar-prescricao", "children"),
+    Output("prescricoes-atualizacao", "data", allow_duplicate=True),
+    Input("botao-criar-prescricao", "n_clicks"),
+    State("utente-atual-id", "data"),
+    State("form-prescricao-medicamento", "value"),
+    State("form-prescricao-posologia", "value"),
+    State("form-prescricao-duracao", "value"),
+    State("perfil-sessao", "data"),
+    State("prescricoes-atualizacao", "data"),
+    prevent_initial_call=True,
+)
+def _criar_prescricao(n_clicks, id_utente, medicamento, posologia, duracao, sessao, versao):
+    if not n_clicks:
+        return dash.no_update, dash.no_update
+    perfil, profissional = _dados_sessao(sessao)
+    if perfil != "Médico" or not profissional:
+        return html.Div("Só o Médico autenticado pode registar uma prescrição.", className="resultado-inline resultado-inline--risco_elevado"), dash.no_update
+    if not id_utente or not all([medicamento, posologia]):
+        return html.Div("Preenche pelo menos o medicamento e a posologia.", className="resultado-inline resultado-inline--risco_moderado"), dash.no_update
+
+    nova_linha = pd.DataFrame(
+        [
+            {
+                "id_prescricao": _proximo_id_prescricao(),
+                "id_utente": id_utente,
+                "data": pd.Timestamp.now().date().isoformat(),
+                "profissional": profissional,
+                "medicamento": medicamento,
+                "posologia": posologia,
+                "duracao": duracao or "",
+            }
+        ]
+    )
+    DADOS["prescricoes"] = pd.concat([DADOS["prescricoes"], nova_linha], ignore_index=True)
+    _registar_historico(id_utente, profissional, "Registou prescrição")
+
+    return html.Div(f"Prescrição de {medicamento} registada.", className="resultado-inline resultado-inline--risco_baixo"), (versao or 0) + 1
+
+
+@app.callback(
+    Output("descarregar-receita-pdf", "data"),
+    Output("mensagem-gerar-receita", "children"),
+    Input("botao-gerar-receita", "n_clicks"),
+    State("select-prescricao-receita", "value"),
+    prevent_initial_call=True,
+)
+def _descarregar_receita_pdf(n_clicks, id_prescricao):
+    if not n_clicks:
+        return dash.no_update, dash.no_update
+    if not id_prescricao:
+        return dash.no_update, html.Div("Escolhe primeiro uma prescrição.", className="resultado-inline resultado-inline--risco_moderado")
+    pdf_bytes = _gerar_pdf_receita(id_prescricao)
+    if pdf_bytes is None:
+        return dash.no_update, html.Div("Prescrição não encontrada — a lista pode ter mudado.", className="resultado-inline resultado-inline--risco_elevado")
+    return dcc.send_bytes(lambda b: b.write(pdf_bytes), f"receita_{id_prescricao}.pdf"), ""
+
+
+# --- Callbacks: relatórios ------------------------------------------------------
+
+
+@app.callback(
+    Output("corpo-relatorio-atividade", "children"),
+    Input("select-relatorio-profissional", "value"),
+    Input("periodo-relatorio-inicio", "date"),
+    Input("periodo-relatorio-fim", "date"),
+)
+def _atualizar_corpo_relatorio_atividade(nome, data_inicio, data_fim):
+    return _corpo_relatorio_atividade(nome, data_inicio, data_fim)
+
+
+@app.callback(
+    Output("descarregar-pdf-relatorio-atividade", "data"),
+    Output("mensagem-relatorio-atividade", "children"),
+    Input("botao-pdf-relatorio-atividade", "n_clicks"),
+    State("select-relatorio-profissional", "value"),
+    State("periodo-relatorio-inicio", "date"),
+    State("periodo-relatorio-fim", "date"),
+    prevent_initial_call=True,
+)
+def _descarregar_pdf_relatorio_atividade(n_clicks, nome, data_inicio, data_fim):
+    if not n_clicks:
+        return dash.no_update, dash.no_update
+    if not nome:
+        return dash.no_update, html.Div("Escolhe um profissional primeiro.", className="resultado-inline resultado-inline--risco_moderado")
+    pdf_bytes = _gerar_pdf_relatorio_atividade(nome, data_inicio, data_fim)
+    return dcc.send_bytes(lambda b: b.write(pdf_bytes), f"relatorio_atividade_{_slug(nome)}.pdf"), ""
+
+
+@app.callback(
+    Output("descarregar-excel-relatorio-atividade", "data"),
+    Output("mensagem-relatorio-atividade", "children", allow_duplicate=True),
+    Input("botao-excel-relatorio-atividade", "n_clicks"),
+    State("select-relatorio-profissional", "value"),
+    State("periodo-relatorio-inicio", "date"),
+    State("periodo-relatorio-fim", "date"),
+    prevent_initial_call=True,
+)
+def _descarregar_excel_relatorio_atividade(n_clicks, nome, data_inicio, data_fim):
+    if not n_clicks:
+        return dash.no_update, dash.no_update
+    if not nome:
+        return dash.no_update, html.Div("Escolhe um profissional primeiro.", className="resultado-inline resultado-inline--risco_moderado")
+    conteudo = _gerar_excel_relatorio_atividade(nome, data_inicio, data_fim)
+    return dcc.send_bytes(lambda b: b.write(conteudo), f"relatorio_atividade_{_slug(nome)}.xlsx"), ""
+
+
+@app.callback(
+    Output("descarregar-pdf-relatorio-consulta", "data"),
+    Output("mensagem-relatorio-consulta", "children"),
+    Input("botao-pdf-relatorio-consulta", "n_clicks"),
+    State("select-relatorio-consulta", "value"),
+    prevent_initial_call=True,
+)
+def _descarregar_pdf_relatorio_consulta(n_clicks, id_consulta):
+    if not n_clicks:
+        return dash.no_update, dash.no_update
+    if not id_consulta:
+        return dash.no_update, html.Div("Escolhe uma consulta primeiro.", className="resultado-inline resultado-inline--risco_moderado")
+    pdf_bytes = _gerar_pdf_relatorio_consulta(id_consulta)
+    if pdf_bytes is None:
+        return dash.no_update, html.Div("Consulta não encontrada — a lista pode ter mudado.", className="resultado-inline resultado-inline--risco_elevado")
+    return dcc.send_bytes(lambda b: b.write(pdf_bytes), f"relatorio_{id_consulta}.pdf"), ""
+
+
+@app.callback(
+    Output("descarregar-excel-relatorio-consulta", "data"),
+    Output("mensagem-relatorio-consulta", "children", allow_duplicate=True),
+    Input("botao-excel-relatorio-consulta", "n_clicks"),
+    State("select-relatorio-consulta", "value"),
+    prevent_initial_call=True,
+)
+def _descarregar_excel_relatorio_consulta(n_clicks, id_consulta):
+    if not n_clicks:
+        return dash.no_update, dash.no_update
+    if not id_consulta:
+        return dash.no_update, html.Div("Escolhe uma consulta primeiro.", className="resultado-inline resultado-inline--risco_moderado")
+    conteudo = _gerar_excel_relatorio_consulta(id_consulta)
+    if conteudo is None:
+        return dash.no_update, html.Div("Consulta não encontrada — a lista pode ter mudado.", className="resultado-inline resultado-inline--risco_elevado")
+    return dcc.send_bytes(lambda b: b.write(conteudo), f"relatorio_{id_consulta}.xlsx"), ""
 
 
 # --- Callbacks: profissionais — CRUD ------------------------------------------
@@ -2174,6 +2719,232 @@ def _descarregar_pdf_ficha(n_clicks, id_utente):
         return dash.no_update
     pdf_bytes = _gerar_pdf_ficha(id_utente)
     return dcc.send_bytes(lambda b: b.write(pdf_bytes), f"ficha_{id_utente}.pdf")
+
+
+# --- Receita em PDF (Médico) --------------------------------------------------
+
+
+def _gerar_pdf_receita(id_prescricao):
+    """Gera uma receita médica em PDF a partir de uma prescrição registada.
+    Só é chamada para prescrições que pertencem ao médico autenticado (ver
+    filtro em _corpo_prescricoes / _descarregar_receita_pdf)."""
+    linha = DADOS["prescricoes"].loc[DADOS["prescricoes"]["id_prescricao"] == id_prescricao]
+    if linha.empty:
+        return None
+    p = linha.iloc[0]
+    utente = DADOS["utentes"].loc[DADOS["utentes"]["id_utente"] == p["id_utente"]].iloc[0]
+    prof = DADOS["profissionais"].loc[DADOS["profissionais"]["nome"] == p["profissional"]]
+    especialidade = prof.iloc[0]["especialidade"] if len(prof) and prof.iloc[0]["especialidade"] else "Medicina Geral"
+    numero_cedula = prof.iloc[0]["numero_cedula"] if len(prof) else "—"
+
+    buffer = io.BytesIO()
+    c = pdf_canvas.Canvas(buffer, pagesize=A4)
+    largura, altura = A4
+    margem_esquerda = 20 * mm
+    posicao_y = altura - 20 * mm
+
+    def escrever(texto, tamanho=10, negrito=False, espaco=6 * mm, centrado=False):
+        nonlocal posicao_y
+        c.setFont("Helvetica-Bold" if negrito else "Helvetica", tamanho)
+        if centrado:
+            c.drawCentredString(largura / 2, posicao_y, texto)
+        else:
+            c.drawString(margem_esquerda, posicao_y, texto)
+        posicao_y -= espaco
+
+    escrever("Receita Médica", 18, negrito=True, espaco=12 * mm, centrado=True)
+    escrever(f"{p['profissional']} · {especialidade}", 11, negrito=True)
+    escrever(f"Cédula profissional: {numero_cedula}", 9, espaco=10 * mm)
+
+    escrever(f"Utente: {utente['nome']}", 11, negrito=True)
+    escrever(
+        f"{utente['genero']} · {_idade_utente(utente['data_nascimento'])} anos · Processo {utente['processo']}",
+        9,
+        espaco=12 * mm,
+    )
+
+    escrever("Prescrição", 12, negrito=True)
+    escrever(p["medicamento"], 11, espaco=6 * mm)
+    escrever(f"Posologia: {p['posologia']}", 10)
+    if p.get("duracao"):
+        escrever(f"Duração do tratamento: {p['duracao']}", 10)
+    posicao_y -= 14 * mm
+
+    escrever(f"Data de emissão: {p['data']}", 10, espaco=18 * mm)
+    c.line(margem_esquerda, posicao_y, margem_esquerda + 70 * mm, posicao_y)
+    posicao_y -= 5 * mm
+    escrever("Assinatura e carimbo", 8)
+
+    c.setFont("Helvetica-Oblique", 8)
+    c.drawString(
+        margem_esquerda, 15 * mm,
+        "Documento gerado automaticamente — demonstração técnica de portfólio, dados sintéticos, não usar com pacientes reais.",
+    )
+
+    c.save()
+    buffer.seek(0)
+    return buffer.getvalue()
+
+
+# --- Relatório de atividade profissional e relatório de consulta (PDF/Excel) --
+
+
+def _gerar_pdf_relatorio_atividade(nome, data_inicio=None, data_fim=None):
+    stats = _estatisticas_atividade_profissional(nome, data_inicio, data_fim)
+    prof = DADOS["profissionais"].loc[DADOS["profissionais"]["nome"] == nome]
+    categoria = prof.iloc[0]["categoria"] if len(prof) else ""
+
+    buffer = io.BytesIO()
+    c = pdf_canvas.Canvas(buffer, pagesize=A4)
+    largura, altura = A4
+    margem_esquerda = 20 * mm
+    posicao_y = altura - 20 * mm
+
+    def escrever(texto, tamanho=10, negrito=False, espaco=6 * mm):
+        nonlocal posicao_y
+        if posicao_y < 25 * mm:
+            c.showPage()
+            posicao_y = altura - 20 * mm
+        c.setFont("Helvetica-Bold" if negrito else "Helvetica", tamanho)
+        c.drawString(margem_esquerda, posicao_y, texto)
+        posicao_y -= espaco
+
+    escrever("Relatório de Atividade Profissional", 16, negrito=True, espaco=10 * mm)
+    escrever(f"{nome}" + (f" · {categoria}" if categoria else ""), 12, negrito=True)
+    escrever(f"Período: {data_inicio or 'início dos registos'} a {data_fim or 'hoje'}", 10, espaco=10 * mm)
+
+    escrever("Resumo", 12, negrito=True)
+    escrever(f"Total de consultas: {stats['total']}", 10)
+    for estado_nome, qtd in stats["por_estado"].items():
+        escrever(f"- {estado_nome}: {qtd}", 9, espaco=5 * mm)
+    taxa_texto = f"{stats['taxa_comparencia']:.0f}%" if stats["taxa_comparencia"] is not None else "sem dados suficientes"
+    escrever(f"Taxa de comparência: {taxa_texto}", 10, espaco=10 * mm)
+
+    escrever("Consultas por especialidade", 12, negrito=True)
+    especialidades_ordenadas = sorted(stats["por_especialidade"].items(), key=lambda item: -item[1])
+    if especialidades_ordenadas:
+        for especialidade, qtd in especialidades_ordenadas:
+            escrever(f"- {especialidade}: {qtd}", 9, espaco=5 * mm)
+    else:
+        escrever("Sem consultas registadas no período.", 10)
+
+    c.setFont("Helvetica-Oblique", 8)
+    c.drawString(
+        margem_esquerda, 15 * mm,
+        "Documento gerado automaticamente — demonstração técnica de portfólio, dados sintéticos, não usar com pacientes reais.",
+    )
+    c.save()
+    buffer.seek(0)
+    return buffer.getvalue()
+
+
+def _gerar_excel_relatorio_atividade(nome, data_inicio=None, data_fim=None):
+    stats = _estatisticas_atividade_profissional(nome, data_inicio, data_fim)
+
+    livro = Workbook()
+    folha_resumo = livro.active
+    folha_resumo.title = "Resumo"
+    folha_resumo.append(["Métrica", "Valor"])
+    for celula in folha_resumo[1]:
+        celula.font = Font(bold=True, color="FFFFFF")
+        celula.fill = PatternFill("solid", fgColor="0F7A6C")
+    folha_resumo.append(["Profissional", nome])
+    folha_resumo.append(["Período", f"{data_inicio or 'início dos registos'} a {data_fim or 'hoje'}"])
+    folha_resumo.append(["Total de consultas", stats["total"]])
+    for estado_nome, qtd in stats["por_estado"].items():
+        folha_resumo.append([estado_nome, qtd])
+    taxa_texto = f"{stats['taxa_comparencia']:.0f}%" if stats["taxa_comparencia"] is not None else "—"
+    folha_resumo.append(["Taxa de comparência", taxa_texto])
+    folha_resumo.column_dimensions["A"].width = 24
+    folha_resumo.column_dimensions["B"].width = 30
+
+    folha_especialidade = livro.create_sheet("Por especialidade")
+    folha_especialidade.append(["Especialidade", "Consultas"])
+    for celula in folha_especialidade[1]:
+        celula.font = Font(bold=True, color="FFFFFF")
+        celula.fill = PatternFill("solid", fgColor="0F7A6C")
+    for especialidade, qtd in sorted(stats["por_especialidade"].items(), key=lambda item: -item[1]):
+        folha_especialidade.append([especialidade, qtd])
+    folha_especialidade.column_dimensions["A"].width = 22
+    folha_especialidade.column_dimensions["B"].width = 14
+
+    buffer = io.BytesIO()
+    livro.save(buffer)
+    buffer.seek(0)
+    return buffer.getvalue()
+
+
+def _gerar_pdf_relatorio_consulta(id_consulta):
+    linha = DADOS["consultas"].loc[DADOS["consultas"]["id_consulta"] == id_consulta]
+    if linha.empty:
+        return None
+    consulta = linha.iloc[0]
+    utente = DADOS["utentes"].loc[DADOS["utentes"]["id_utente"] == consulta["id_utente"]].iloc[0]
+
+    buffer = io.BytesIO()
+    c = pdf_canvas.Canvas(buffer, pagesize=A4)
+    _largura, altura = A4
+    margem_esquerda = 20 * mm
+    posicao_y = altura - 20 * mm
+
+    def escrever(texto, tamanho=10, negrito=False, espaco=6 * mm):
+        nonlocal posicao_y
+        c.setFont("Helvetica-Bold" if negrito else "Helvetica", tamanho)
+        c.drawString(margem_esquerda, posicao_y, texto)
+        posicao_y -= espaco
+
+    escrever("Relatório de Consulta", 16, negrito=True, espaco=10 * mm)
+    escrever(f"Utente: {utente['nome']}", 11, negrito=True)
+    escrever(
+        f"{utente['genero']} · {_idade_utente(utente['data_nascimento'])} anos · Processo {utente['processo']}",
+        9,
+        espaco=10 * mm,
+    )
+
+    escrever(f"Data/Hora: {consulta['data_hora'].strftime('%d/%m/%Y %H:%M')}", 10)
+    escrever(f"Especialidade: {consulta['especialidade']}", 10)
+    escrever(f"Profissional: {consulta['profissional']}", 10)
+    escrever(f"Sala: {consulta['sala']}", 10)
+    escrever(f"Estado: {consulta['estado']}", 10, espaco=10 * mm)
+
+    c.setFont("Helvetica-Oblique", 8)
+    c.drawString(
+        margem_esquerda, 15 * mm,
+        "Documento gerado automaticamente — demonstração técnica de portfólio, dados sintéticos, não usar com pacientes reais.",
+    )
+    c.save()
+    buffer.seek(0)
+    return buffer.getvalue()
+
+
+def _gerar_excel_relatorio_consulta(id_consulta):
+    linha = DADOS["consultas"].loc[DADOS["consultas"]["id_consulta"] == id_consulta]
+    if linha.empty:
+        return None
+    consulta = linha.iloc[0]
+    utente = DADOS["utentes"].loc[DADOS["utentes"]["id_utente"] == consulta["id_utente"]].iloc[0]
+
+    livro = Workbook()
+    folha = livro.active
+    folha.title = "Consulta"
+    folha.append(["Campo", "Valor"])
+    for celula in folha[1]:
+        celula.font = Font(bold=True, color="FFFFFF")
+        celula.fill = PatternFill("solid", fgColor="0F7A6C")
+    folha.append(["Utente", utente["nome"]])
+    folha.append(["Processo", utente["processo"]])
+    folha.append(["Data/Hora", consulta["data_hora"].strftime("%d/%m/%Y %H:%M")])
+    folha.append(["Especialidade", consulta["especialidade"]])
+    folha.append(["Profissional", consulta["profissional"]])
+    folha.append(["Sala", consulta["sala"]])
+    folha.append(["Estado", consulta["estado"]])
+    folha.column_dimensions["A"].width = 18
+    folha.column_dimensions["B"].width = 30
+
+    buffer = io.BytesIO()
+    livro.save(buffer)
+    buffer.seek(0)
+    return buffer.getvalue()
 
 
 if __name__ == "__main__":

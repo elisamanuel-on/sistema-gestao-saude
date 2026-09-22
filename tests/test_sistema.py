@@ -329,10 +329,58 @@ def test_so_administrativo_ve_a_seccao_gestao():
     assert "Gestão" not in constantes.SECCOES_POR_PERFIL["Médico"]
 
 
-def test_pagina_login_mostra_os_tres_perfis():
+def test_pagina_login_tem_o_contentor_do_corpo_dinamico():
+    # A partir de agora _pagina_login() só monta a casca do cartão — o
+    # conteúdo (lista de perfis ou lista de profissionais) é preenchido por
+    # um callback a partir de perfil-provisorio-login, para suportar o passo
+    # extra de escolher qual profissional (Médico/Enfermeiro).
     pagina = str(m._pagina_login())
+    assert "corpo-login" in pagina
+    assert "perfil-provisorio-login" in pagina
+
+
+def test_corpo_login_escolha_perfil_mostra_os_tres_perfis():
+    corpo = str(m._corpo_login_escolha_perfil())
     for perfil in constantes.PERFIS_ACESSO:
-        assert perfil in pagina
+        assert perfil in corpo
+
+
+def test_corpo_login_escolha_profissional_lista_medicos_ativos():
+    corpo = str(m._corpo_login_escolha_profissional("Médico"))
+    medicos_ativos = m.DADOS["profissionais"]
+    medicos_ativos = medicos_ativos[(medicos_ativos["categoria"] == "Médico") & (medicos_ativos["estado"] == "Ativo")]
+    assert not medicos_ativos.empty
+    for nome in medicos_ativos["nome"]:
+        assert nome in corpo
+
+
+def test_dados_sessao_aceita_formato_novo_e_antigo():
+    assert m._dados_sessao(None) == (None, None)
+    assert m._dados_sessao("Médico") == ("Médico", None)  # sessões antigas (só string)
+    assert m._dados_sessao({"perfil": "Médico", "profissional": "Dr. Hugo Teixeira"}) == ("Médico", "Dr. Hugo Teixeira")
+    assert m._dados_sessao({"perfil": "Administrativo", "profissional": None}) == ("Administrativo", None)
+
+
+def test_profissoes_com_profissional_sao_medico_e_enfermeiro():
+    assert m.PERFIS_COM_PROFISSIONAL == {"Médico", "Enfermeiro"}
+    assert "Administrativo" not in m.PERFIS_COM_PROFISSIONAL
+
+
+def test_renderizar_corpo_login_sem_provisorio_mostra_perfis():
+    corpo = str(m._renderizar_corpo_login(None))
+    for perfil in constantes.PERFIS_ACESSO:
+        assert perfil in corpo
+
+
+def test_renderizar_corpo_login_com_provisorio_mostra_profissionais():
+    corpo = str(m._renderizar_corpo_login("Médico"))
+    assert "Voltar" in corpo
+    assert "Perfil Médico" in corpo
+
+
+def test_voltar_login_limpa_o_provisorio():
+    assert m._voltar_login(0) is dash.no_update
+    assert m._voltar_login(1) is None
 
 
 def test_barra_lateral_esconde_faturacao_para_enfermeiro():
@@ -347,12 +395,12 @@ def test_barra_lateral_mostra_faturacao_para_administrativo():
 
 
 def test_rotear_pagina_sem_perfil_mostra_login():
-    pagina = str(m._rotear_pagina("/utentes", None))
+    pagina = str(m._rotear_pagina("/utentes", None, None))
     assert "perfil" in pagina.lower() or "Enfermeiro" in pagina
 
 
 def test_rotear_pagina_com_perfil_mostra_conteudo_pedido():
-    pagina = str(m._rotear_pagina("/utentes", "Médico"))
+    pagina = str(m._rotear_pagina("/utentes", None, "Médico"))
     assert "Nenhum utente encontrado" not in pagina  # é a página de utentes, não a de login
     assert "corpo-tabela-utentes" in pagina
 
@@ -532,3 +580,242 @@ def test_editar_profissional_atualiza_contacto():
 
 def test_pagina_profissionais_renderiza():
     assert m._pagina_profissionais() is not None
+
+
+# --- Testes: acesso diferenciado por perfil (RBAC) --------------------------
+
+
+def test_ficha_utente_esconde_avaliacao_risco_para_administrativo():
+    id_utente = _primeiro_utente()["id_utente"]
+    html_admin = str(m._pagina_ficha_utente(id_utente, "Administrativo"))
+    assert "Avaliação de risco" not in html_admin
+
+
+def test_ficha_utente_mostra_avaliacao_risco_para_medico_e_enfermeiro():
+    id_utente = _primeiro_utente()["id_utente"]
+    assert "Avaliação de risco" in str(m._pagina_ficha_utente(id_utente, "Médico"))
+    assert "Avaliação de risco" in str(m._pagina_ficha_utente(id_utente, "Enfermeiro"))
+    # Sem perfil definido (sessões antigas) mantém o comportamento anterior: mostra.
+    assert "Avaliação de risco" in str(m._pagina_ficha_utente(id_utente))
+
+
+def test_pagina_consultas_esconde_paineis_de_gestao_para_enfermeiro():
+    html_enfermeiro = str(m._pagina_consultas("Enfermeiro"))
+    assert "+ Nova Consulta" not in html_enfermeiro
+    assert "Gerir consulta existente" not in html_enfermeiro
+
+
+def test_pagina_consultas_mostra_paineis_de_gestao_para_medico_e_administrativo():
+    html_medico = str(m._pagina_consultas("Médico"))
+    html_admin = str(m._pagina_consultas("Administrativo"))
+    for pagina in (html_medico, html_admin):
+        assert "+ Nova Consulta" in pagina
+        assert "Gerir consulta existente" in pagina
+
+
+def test_filtrar_consultas_medico_ve_apenas_a_sua_agenda():
+    nome_medico = m.DADOS["profissionais"].loc[
+        (m.DADOS["profissionais"]["categoria"] == "Médico") & (m.DADOS["profissionais"]["estado"] == "Ativo"), "nome"
+    ].iloc[0]
+    total_do_medico = int((m.DADOS["consultas"]["profissional"] == nome_medico).sum())
+
+    resultado = m._filtrar_consultas(None, None, None, sessao={"perfil": "Médico", "profissional": nome_medico})
+    resultado_texto = str(resultado)
+
+    outros_medicos = m.DADOS["profissionais"].loc[
+        (m.DADOS["profissionais"]["categoria"] == "Médico") & (m.DADOS["profissionais"]["nome"] != nome_medico), "nome"
+    ]
+    if total_do_medico and len(outros_medicos):
+        assert nome_medico in resultado_texto
+        # Nenhum outro médico deve aparecer na tabela filtrada.
+        assert not any(outro in resultado_texto for outro in outros_medicos)
+
+
+def test_filtrar_consultas_sem_perfil_medico_mostra_todas():
+    resultado_admin = str(m._filtrar_consultas(None, None, None, sessao={"perfil": "Administrativo", "profissional": None}))
+    resultado_sem_sessao = str(m._filtrar_consultas(None, None, None))
+    # Sem filtragem por agenda própria, ambos devolvem a mesma tabela completa.
+    assert resultado_admin == resultado_sem_sessao
+
+
+def test_opcoes_consultas_para_gerir_filtra_por_medico_da_sessao():
+    nome_medico = m.DADOS["profissionais"].loc[
+        (m.DADOS["profissionais"]["categoria"] == "Médico") & (m.DADOS["profissionais"]["estado"] == "Ativo"), "nome"
+    ].iloc[0]
+    opcoes_medico = m._opcoes_consultas_para_gerir(0, sessao={"perfil": "Médico", "profissional": nome_medico})
+    opcoes_todas = m._opcoes_consultas_para_gerir(0, sessao={"perfil": "Administrativo", "profissional": None})
+    assert len(opcoes_medico) <= len(opcoes_todas)
+
+
+# --- Testes: prescrições e receita em PDF (só Médico) ------------------------
+
+
+def test_aba_e_corpo_prescricoes_esconde_formulario_e_receita_para_nao_medico():
+    utente = _primeiro_utente()
+    for perfil, profissional in [("Enfermeiro", "Enf. Marta Sousa"), ("Administrativo", None)]:
+        aba = str(m._aba_prescricoes(utente["id_utente"], perfil, profissional))
+        corpo = str(m._corpo_prescricoes(utente["id_utente"], perfil, profissional))
+        assert "+ Nova Prescrição" not in aba
+        assert "Gerar receita em PDF" not in corpo
+
+
+def test_aba_e_corpo_prescricoes_mostra_formulario_e_receita_para_medico():
+    utente = _primeiro_utente()
+    medico = _medico_ativo_para_teste()
+    aba = str(m._aba_prescricoes(utente["id_utente"], "Médico", medico["nome"]))
+    corpo = str(m._corpo_prescricoes(utente["id_utente"], "Médico", medico["nome"]))
+    assert "+ Nova Prescrição" in aba
+    assert "Gerar receita em PDF" in corpo
+
+
+def test_criar_prescricao_como_medico_e_bem_sucedida():
+    medico = _medico_ativo_para_teste()
+    utente = _primeiro_utente()
+    antes = len(m.DADOS["prescricoes"])
+    mensagem, versao = m._criar_prescricao(
+        1, utente["id_utente"], "Ibuprofeno", "400mg, 2x/dia", "5 dias",
+        {"perfil": "Médico", "profissional": medico["nome"]}, 0,
+    )
+    assert "risco_baixo" in mensagem.className
+    assert len(m.DADOS["prescricoes"]) == antes + 1
+    assert versao == 1
+    nova = m.DADOS["prescricoes"].iloc[-1]
+    assert nova["medicamento"] == "Ibuprofeno"
+    assert nova["profissional"] == medico["nome"]
+
+
+def test_criar_prescricao_fora_do_perfil_medico_e_recusada():
+    utente = _primeiro_utente()
+    antes = len(m.DADOS["prescricoes"])
+    mensagem, versao = m._criar_prescricao(
+        1, utente["id_utente"], "Paracetamol", "500mg, 1x/dia", None,
+        {"perfil": "Administrativo", "profissional": None}, 0,
+    )
+    assert "risco_elevado" in mensagem.className
+    assert versao is dash.no_update
+    assert len(m.DADOS["prescricoes"]) == antes
+
+
+def test_criar_prescricao_com_campos_em_falta_pede_para_preencher():
+    medico = _medico_ativo_para_teste()
+    utente = _primeiro_utente()
+    mensagem, versao = m._criar_prescricao(
+        1, utente["id_utente"], None, None, None,
+        {"perfil": "Médico", "profissional": medico["nome"]}, 0,
+    )
+    assert "risco_moderado" in mensagem.className
+    assert versao is dash.no_update
+
+
+def test_gerar_pdf_receita_produz_pdf_valido():
+    medico = _medico_ativo_para_teste()
+    utente = _primeiro_utente()
+    m._criar_prescricao(
+        1, utente["id_utente"], "Amoxicilina", "500mg, 3x/dia", "7 dias",
+        {"perfil": "Médico", "profissional": medico["nome"]}, 0,
+    )
+    id_prescricao = m.DADOS["prescricoes"].iloc[-1]["id_prescricao"]
+    pdf_bytes = m._gerar_pdf_receita(id_prescricao)
+    assert pdf_bytes is not None
+    assert pdf_bytes[:4] == b"%PDF"
+
+
+def test_gerar_pdf_receita_com_id_inexistente_devolve_none():
+    assert m._gerar_pdf_receita("RX99999") is None
+
+
+# --- Testes: relatórios (atividade profissional + consulta) ------------------
+
+
+def test_estatisticas_atividade_profissional_calcula_totais_e_taxa():
+    medico = _medico_ativo_para_teste()
+    utente = _primeiro_utente()
+    m._criar_consulta(1, utente["id_utente"], medico["especialidade"], medico["nome"], "2027-02-01", "09:00", "Sala 1", 0)
+    id_consulta = m.DADOS["consultas"].iloc[-1]["id_consulta"]
+    m.DADOS["consultas"].loc[m.DADOS["consultas"]["id_consulta"] == id_consulta, "estado"] = "Realizada"
+
+    stats = m._estatisticas_atividade_profissional(medico["nome"])
+    assert stats["total"] >= 1
+    assert stats["por_estado"].get("Realizada", 0) >= 1
+    assert stats["taxa_comparencia"] is not None
+
+
+def test_estatisticas_atividade_profissional_sem_consultas_no_periodo():
+    stats = m._estatisticas_atividade_profissional("Nome Que Não Existe")
+    assert stats["total"] == 0
+    assert stats["taxa_comparencia"] is None
+    assert stats["por_especialidade"] == {}
+
+
+def test_opcoes_relatorio_consulta_filtra_por_medico_da_sessao():
+    nome_medico = m.DADOS["profissionais"].loc[
+        (m.DADOS["profissionais"]["categoria"] == "Médico") & (m.DADOS["profissionais"]["estado"] == "Ativo"), "nome"
+    ].iloc[0]
+    opcoes_medico = m._opcoes_relatorio_consulta("Médico", nome_medico)
+    opcoes_todas = m._opcoes_relatorio_consulta("Administrativo", None)
+    assert len(opcoes_medico) <= len(opcoes_todas)
+
+
+def test_pagina_relatorios_administrativo_permite_escolher_profissional():
+    pagina = str(m._pagina_relatorios("Administrativo", None, None))
+    assert "select-relatorio-profissional" in pagina
+
+
+def test_pagina_relatorios_le_profissional_da_query_string():
+    medico = _medico_ativo_para_teste()
+    pagina = m._pagina_relatorios("Administrativo", None, f"?profissional={medico['nome']}")
+    assert medico["nome"] in str(pagina)
+
+
+def test_pagina_relatorios_medico_fica_preso_a_propria_identidade():
+    medico = _medico_ativo_para_teste()
+    # Mesmo que a query string tente indicar outro profissional, o Médico
+    # só pode ver o relatório da sua própria identidade autenticada.
+    pagina = str(m._pagina_relatorios("Médico", medico["nome"], "?profissional=Outra Pessoa"))
+    assert "Outra Pessoa" not in pagina
+
+
+def test_gerar_pdf_relatorio_atividade_produz_pdf_valido():
+    medico = _medico_ativo_para_teste()
+    pdf_bytes = m._gerar_pdf_relatorio_atividade(medico["nome"])
+    assert pdf_bytes[:4] == b"%PDF"
+
+
+def test_gerar_excel_relatorio_atividade_produz_xlsx_valido():
+    from openpyxl import load_workbook
+
+    medico = _medico_ativo_para_teste()
+    conteudo = m._gerar_excel_relatorio_atividade(medico["nome"])
+    livro = load_workbook(BytesIO(conteudo))
+    assert "Resumo" in livro.sheetnames
+    assert "Por especialidade" in livro.sheetnames
+
+
+def test_gerar_pdf_relatorio_consulta_produz_pdf_valido():
+    medico = _medico_ativo_para_teste()
+    utente = _primeiro_utente()
+    m._criar_consulta(1, utente["id_utente"], medico["especialidade"], medico["nome"], "2027-02-02", "10:00", "Sala 2", 0)
+    id_consulta = m.DADOS["consultas"].iloc[-1]["id_consulta"]
+    pdf_bytes = m._gerar_pdf_relatorio_consulta(id_consulta)
+    assert pdf_bytes is not None
+    assert pdf_bytes[:4] == b"%PDF"
+
+
+def test_gerar_pdf_relatorio_consulta_com_id_inexistente_devolve_none():
+    assert m._gerar_pdf_relatorio_consulta("C99999") is None
+
+
+def test_gerar_excel_relatorio_consulta_produz_xlsx_valido():
+    from openpyxl import load_workbook
+
+    medico = _medico_ativo_para_teste()
+    utente = _primeiro_utente()
+    m._criar_consulta(1, utente["id_utente"], medico["especialidade"], medico["nome"], "2027-02-03", "11:00", "Sala 3", 0)
+    id_consulta = m.DADOS["consultas"].iloc[-1]["id_consulta"]
+    conteudo = m._gerar_excel_relatorio_consulta(id_consulta)
+    livro = load_workbook(BytesIO(conteudo))
+    assert livro.active.title == "Consulta"
+
+
+def test_gerar_excel_relatorio_consulta_com_id_inexistente_devolve_none():
+    assert m._gerar_excel_relatorio_consulta("C99999") is None

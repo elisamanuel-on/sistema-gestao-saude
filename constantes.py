@@ -105,9 +105,9 @@ TIPOS_EXAME_POR_CATEGORIA = {
 PERFIS_ACESSO = ["Enfermeiro", "Médico", "Administrativo"]
 
 SECCOES_POR_PERFIL = {
-    "Enfermeiro": ["Início", "Geral", "Cuidados continuados", "Clínica & Hospital"],
-    "Médico": ["Início", "Geral", "Cuidados continuados", "Clínica & Hospital"],
-    "Administrativo": ["Início", "Geral", "Cuidados continuados", "Clínica & Hospital", "Gestão"],
+    "Enfermeiro": ["Início", "Geral", "Cuidados continuados", "Clínica & Hospital", "Relatórios"],
+    "Médico": ["Início", "Geral", "Cuidados continuados", "Clínica & Hospital", "Relatórios"],
+    "Administrativo": ["Início", "Geral", "Cuidados continuados", "Clínica & Hospital", "Relatórios", "Gestão"],
 }
 
 # "Profissionais" é gerido junto de "Gestão" (Faturação) — cadastro de

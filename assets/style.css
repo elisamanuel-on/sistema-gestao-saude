@@ -32,6 +32,30 @@
   --tipo-sad-suave: #f8e9f1;
   --tipo-clinica-hospital: #155696;
   --tipo-clinica-hospital-suave: #e5eff8;
+
+  /* Cantos — 4 passos, para não voltar a acumular valores ad-hoc (6px,
+     8px, 10px, 14px...) espalhados pelo ficheiro. */
+  --raio-xs: 6px;
+  --raio-sm: 8px;
+  --raio-md: 10px;
+  --raio-lg: 14px;
+
+  /* Elevação — sombra suave nos cartões/tabelas/popups em vez de só
+     contorno, para dar profundidade sem pesar visualmente. A "flutuante"
+     (mais forte) é só para conteúdo que se sobrepõe à página, como o menu
+     de um dropdown aberto. */
+  --sombra-cartao: 0 1px 2px rgba(15, 23, 20, 0.04), 0 1px 3px rgba(15, 23, 20, 0.06);
+  --sombra-flutuante: 0 8px 24px rgba(15, 23, 20, 0.12), 0 2px 6px rgba(15, 23, 20, 0.08);
+
+  /* Escala tipográfica — consolida os vários tamanhos quase-iguais que se
+     foram acumulando (0.76/0.78rem em rótulos, 0.88/0.9/0.92rem em texto
+     de interface) em passos deliberados. */
+  --texto-xs: 0.76rem;
+  --texto-sm: 0.85rem;
+  --texto-base: 0.9rem;
+  --texto-md: 1rem;
+  --texto-lg: 1.25rem;
+  --texto-xl: 1.5rem;
 }
 
 body {
@@ -58,16 +82,23 @@ body {
 }
 
 .logotipo-lateral {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
   font-weight: 700;
-  font-size: 1.05rem;
+  font-size: var(--texto-md);
+  line-height: 1.25;
   color: var(--primaria);
   padding: 0 20px 20px;
   border-bottom: 1px solid var(--borda);
   margin-bottom: 8px;
 }
 
-.logotipo-lateral-texto::before {
-  content: "✚ ";
+.icone-logotipo-lateral {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  margin-top: 2px;
 }
 
 .grupo-nav-lateral {
@@ -102,8 +133,9 @@ body {
   padding: 11px 20px;
   color: var(--texto-suave);
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: var(--texto-base);
   border-left: 3px solid transparent;
+  transition: background-color 0.12s ease, color 0.12s ease;
 }
 
 .ligacao-lateral:hover {
@@ -129,7 +161,7 @@ body {
 }
 
 .pagina h1 {
-  font-size: 1.5rem;
+  font-size: var(--texto-xl);
   margin: 0 0 18px;
 }
 
@@ -137,9 +169,9 @@ body {
   background: var(--risco-moderado-suave);
   border: 1px solid var(--risco-moderado);
   color: var(--texto);
-  border-radius: 8px;
+  border-radius: var(--raio-sm);
   padding: 12px 16px;
-  font-size: 0.85rem;
+  font-size: var(--texto-sm);
   margin-bottom: 18px;
   line-height: 1.5;
 }
@@ -154,7 +186,8 @@ body {
 .kpi-cartao {
   background: var(--cartao);
   border: 1px solid var(--borda);
-  border-radius: 10px;
+  border-radius: var(--raio-md);
+  box-shadow: var(--sombra-cartao);
   padding: 16px 18px;
 }
 
@@ -163,19 +196,20 @@ body {
 .kpi-cartao--risco_moderado { border-left: 3px solid var(--risco-moderado); }
 .kpi-cartao--risco_elevado { border-left: 3px solid var(--risco-elevado); }
 
-.kpi-titulo { font-size: 0.78rem; color: var(--texto-suave); margin-bottom: 6px; }
+.kpi-titulo { font-size: var(--texto-xs); color: var(--texto-suave); margin-bottom: 6px; }
 .kpi-valor { font-size: 1.35rem; font-weight: 600; }
-.kpi-nota { font-size: 0.76rem; color: var(--texto-suave); margin-top: 4px; }
+.kpi-nota { font-size: var(--texto-xs); color: var(--texto-suave); margin-top: 4px; }
 
 .cartao-secao {
   background: var(--cartao);
   border: 1px solid var(--borda);
-  border-radius: 10px;
+  border-radius: var(--raio-md);
+  box-shadow: var(--sombra-cartao);
   padding: 20px 22px;
   margin-bottom: 20px;
 }
 
-.cartao-secao h3 { font-size: 1rem; margin: 0 0 12px; }
+.cartao-secao h3 { font-size: var(--texto-md); margin: 0 0 12px; }
 
 .cabecalho-secao {
   display: flex;
@@ -187,7 +221,7 @@ body {
 
 .botoes-exportar { display: flex; gap: 10px; }
 
-.texto-explicativo { color: var(--texto-suave); font-size: 0.85rem; line-height: 1.5; }
+.texto-explicativo { color: var(--texto-suave); font-size: var(--texto-sm); line-height: 1.5; }
 
 /* Lista de utentes */
 
@@ -202,9 +236,9 @@ body {
 .campo-pesquisa {
   padding: 9px 12px;
   border: 1px solid var(--borda);
-  border-radius: 8px;
+  border-radius: var(--raio-sm);
   font-family: inherit;
-  font-size: 0.88rem;
+  font-size: var(--texto-base);
 }
 
 .tabela-utentes {
@@ -212,13 +246,14 @@ body {
   border-collapse: collapse;
   background: var(--cartao);
   border: 1px solid var(--borda);
-  border-radius: 10px;
+  border-radius: var(--raio-md);
+  box-shadow: var(--sombra-cartao);
   overflow: hidden;
 }
 
 .tabela-utentes th {
   text-align: left;
-  font-size: 0.78rem;
+  font-size: var(--texto-xs);
   color: var(--texto-suave);
   background: var(--primaria-suave);
   padding: 10px 14px;
@@ -227,7 +262,15 @@ body {
 .tabela-utentes td {
   padding: 10px 14px;
   border-top: 1px solid var(--borda);
-  font-size: 0.88rem;
+  font-size: var(--texto-base);
+}
+
+.tabela-utentes tbody tr {
+  transition: background-color 0.12s ease;
+}
+
+.tabela-utentes tbody tr:hover {
+  background: var(--fundo);
 }
 
 .ligacao-tabela {
@@ -241,7 +284,7 @@ body {
 .etiqueta-estado {
   padding: 3px 10px;
   border-radius: 999px;
-  font-size: 0.76rem;
+  font-size: var(--texto-xs);
   font-weight: 600;
 }
 
@@ -257,7 +300,7 @@ body {
 .etiqueta-tipo {
   padding: 3px 10px;
   border-radius: 999px;
-  font-size: 0.76rem;
+  font-size: var(--texto-xs);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -276,13 +319,13 @@ body {
   display: inline-block;
   color: var(--texto-suave);
   text-decoration: none;
-  font-size: 0.85rem;
+  font-size: var(--texto-sm);
   margin-bottom: 12px;
 }
 
 .ligacao-voltar:hover { color: var(--primaria); }
 
-.subtitulo-ficha { color: var(--texto-suave); margin: 0 0 20px; font-size: 0.9rem; }
+.subtitulo-ficha { color: var(--texto-suave); margin: 0 0 20px; font-size: var(--texto-base); }
 
 .titulo-secao-espacado { margin-top: 24px; }
 
@@ -302,10 +345,10 @@ body {
   gap: 10px;
   padding: 10px 0;
   border-bottom: 1px solid var(--borda);
-  font-size: 0.88rem;
+  font-size: var(--texto-base);
 }
 
-.icone-documento { font-size: 1.1rem; }
+.icone-documento { width: 18px; height: 18px; flex: 0 0 18px; }
 .data-documento { margin-left: auto; color: var(--texto-suave); font-size: 0.8rem; }
 
 /* Avaliação de risco */
@@ -313,12 +356,13 @@ body {
 .sub-cartao-risco {
   background: var(--cartao);
   border: 1px solid var(--borda);
-  border-radius: 10px;
+  border-radius: var(--raio-md);
+  box-shadow: var(--sombra-cartao);
   padding: 18px 20px;
   margin-bottom: 16px;
 }
 
-.sub-cartao-risco h4 { margin: 0 0 12px; font-size: 0.95rem; }
+.sub-cartao-risco h4 { margin: 0 0 12px; font-size: var(--texto-md); }
 
 .grelha-formulario {
   display: grid;
@@ -327,15 +371,15 @@ body {
   margin-bottom: 14px;
 }
 
-.campo-formulario label { display: block; font-size: 0.78rem; color: var(--texto-suave); margin-bottom: 4px; }
+.campo-formulario label { display: block; font-size: var(--texto-xs); color: var(--texto-suave); margin-bottom: 4px; }
 
 .campo-formulario input {
   width: 100%;
   padding: 8px 10px;
   border: 1px solid var(--borda);
-  border-radius: 6px;
+  border-radius: var(--raio-xs);
   font-family: inherit;
-  font-size: 0.88rem;
+  font-size: var(--texto-base);
   color: var(--texto);
   background: var(--cartao);
 }
@@ -347,8 +391,8 @@ body {
 .resultado-inline {
   display: inline-block;
   padding: 6px 14px;
-  border-radius: 8px;
-  font-size: 0.88rem;
+  border-radius: var(--raio-sm);
+  font-size: var(--texto-base);
 }
 
 .resultado-inline--risco_baixo { background: var(--risco-baixo-suave); color: var(--risco-baixo); }
@@ -363,11 +407,12 @@ body {
 .item-plano-cuidados {
   background: var(--cartao);
   border: 1px solid var(--borda);
-  border-radius: 10px;
+  border-radius: var(--raio-md);
+  box-shadow: var(--sombra-cartao);
   padding: 16px 18px;
 }
 
-.cabecalho-item-plano { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; font-size: 0.95rem; }
+.cabecalho-item-plano { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; font-size: var(--texto-md); }
 
 .etiqueta-area-plano {
   background: var(--primaria-suave);
@@ -397,8 +442,8 @@ body {
   margin-top: 12px;
   padding: 14px 16px;
   background: var(--primaria-suave);
-  border-radius: 8px;
-  font-size: 0.88rem;
+  border-radius: var(--raio-sm);
+  font-size: var(--texto-base);
   line-height: 1.6;
   color: var(--texto);
   min-height: 20px;
@@ -407,25 +452,29 @@ body {
 .botao-primario {
   padding: 10px 18px;
   border: 1px solid var(--primaria);
-  border-radius: 8px;
+  border-radius: var(--raio-sm);
   background: var(--primaria);
   color: #ffffff;
-  font-size: 0.9rem;
+  font-size: var(--texto-base);
   font-family: inherit;
   cursor: pointer;
+  box-shadow: 0 1px 2px rgba(15, 122, 108, 0.25);
+  transition: box-shadow 0.15s ease, opacity 0.15s ease, transform 0.1s ease;
 }
 
-.botao-primario:hover { opacity: 0.88; }
+.botao-primario:hover { opacity: 0.92; box-shadow: 0 3px 8px rgba(15, 122, 108, 0.28); transform: translateY(-1px); }
+.botao-primario:active { transform: translateY(0); box-shadow: 0 1px 2px rgba(15, 122, 108, 0.25); }
 
 .botao-secundario {
   padding: 8px 14px;
   border: 1px solid var(--primaria);
-  border-radius: 8px;
+  border-radius: var(--raio-sm);
   background: var(--cartao);
   color: var(--primaria);
-  font-size: 0.85rem;
+  font-size: var(--texto-sm);
   font-family: inherit;
   cursor: pointer;
+  transition: background-color 0.15s ease;
 }
 
 .botao-secundario:hover { background: var(--primaria-suave); }
@@ -436,7 +485,8 @@ body {
 .painel-details {
   background: var(--cartao);
   border: 1px solid var(--borda);
-  border-radius: 10px;
+  border-radius: var(--raio-md);
+  box-shadow: var(--sombra-cartao);
   padding: 14px 18px;
   margin-bottom: 16px;
 }
@@ -445,13 +495,14 @@ body {
   margin: 14px 0 0;
   padding: 14px 16px;
   background: var(--fundo);
+  box-shadow: none;
 }
 
 .resumo-details {
   cursor: pointer;
   font-weight: 600;
   color: var(--primaria);
-  font-size: 0.92rem;
+  font-size: var(--texto-base);
   padding: 2px 0;
 }
 
@@ -478,6 +529,8 @@ body {
 .dash-dropdown-content {
   background-color: var(--cartao) !important;
   border: 1px solid var(--borda) !important;
+  border-radius: var(--raio-sm) !important;
+  box-shadow: var(--sombra-flutuante) !important;
   color: var(--texto) !important;
 }
 .dash-dropdown-option,
@@ -507,7 +560,7 @@ body {
 }
 
 .perfil-atual-lateral {
-  font-size: 0.76rem;
+  font-size: var(--texto-xs);
   font-weight: 600;
   color: var(--texto-suave);
   margin-bottom: 8px;
@@ -515,7 +568,7 @@ body {
 
 .ligacao-lateral--sobre {
   padding: 8px 0;
-  font-size: 0.82rem;
+  font-size: var(--texto-sm);
 }
 
 .botao-sair-lateral {
@@ -524,12 +577,13 @@ body {
   margin-top: 8px;
   padding: 7px 0;
   border: 1px solid var(--borda);
-  border-radius: 8px;
+  border-radius: var(--raio-sm);
   background: var(--cartao);
   color: var(--texto-suave);
-  font-size: 0.82rem;
+  font-size: var(--texto-sm);
   font-family: inherit;
   cursor: pointer;
+  transition: color 0.12s ease, border-color 0.12s ease;
 }
 
 .botao-sair-lateral:hover { color: var(--risco-elevado); border-color: var(--risco-elevado); }
@@ -544,19 +598,27 @@ body {
 /* Ecrã de login (mock — sem autenticação real) */
 
 .ecra-login {
-  min-height: 100vh;
-  width: 100%;
+  /* position:fixed + inset:0 ignora deliberadamente as restrições do
+     contentor pai (.pagina tem max-width:1200px sem margin:auto, o que
+     deixa o resto das páginas encostado à esquerda — correto para listas/
+     formulários, mas errado aqui, onde o cartão tem de ficar centrado no
+     ecrã inteiro, não só dentro dessa caixa). */
+  position: fixed;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--fundo);
   padding: 24px;
+  overflow-y: auto;
+  z-index: 10;
 }
 
 .cartao-login {
   background: var(--cartao);
   border: 1px solid var(--borda);
-  border-radius: 14px;
+  border-radius: var(--raio-lg);
+  box-shadow: var(--sombra-flutuante);
   padding: 40px 36px;
   max-width: 420px;
   width: 100%;
@@ -564,8 +626,8 @@ body {
 }
 
 .logotipo-login {
-  font-size: 2rem;
-  color: var(--primaria);
+  width: 32px;
+  height: 32px;
   margin-bottom: 8px;
 }
 
@@ -584,21 +646,27 @@ body {
   gap: 10px;
   padding: 12px 16px;
   border: 1px solid var(--borda);
-  border-radius: 10px;
+  border-radius: var(--raio-md);
   background: var(--cartao);
   color: var(--texto);
-  font-size: 0.92rem;
+  font-size: var(--texto-base);
   font-family: inherit;
   cursor: pointer;
   text-align: left;
+  transition: border-color 0.12s ease, background-color 0.12s ease, box-shadow 0.12s ease;
 }
 
-.botao-perfil-login:hover { border-color: var(--primaria); background: var(--primaria-suave); color: var(--primaria); }
+.botao-perfil-login:hover {
+  border-color: var(--primaria);
+  background: var(--primaria-suave);
+  color: var(--primaria);
+  box-shadow: var(--sombra-cartao);
+}
 
-.icone-perfil-login { font-size: 1.15rem; }
+.icone-perfil-login { width: 20px; height: 20px; flex: 0 0 20px; }
 
 .nota-rodape-login {
-  font-size: 0.76rem;
+  font-size: var(--texto-xs);
   color: var(--texto-suave);
   line-height: 1.5;
   margin-top: 8px;
@@ -615,9 +683,10 @@ body {
   align-items: center;
   gap: 10px;
   padding: 9px 10px;
-  border-radius: 8px;
+  border-radius: var(--raio-sm);
   font-size: 0.86rem;
   color: var(--texto);
+  transition: background-color 0.12s ease;
 }
 
 .ligacao-alerta:hover .linha-alerta { background: var(--fundo); }
@@ -649,7 +718,7 @@ body {
   display: flex;
   align-items: center;
   gap: 14px;
-  font-size: 0.85rem;
+  font-size: var(--texto-sm);
   color: var(--texto-suave);
   white-space: nowrap;
 }
@@ -664,7 +733,7 @@ body {
   margin-bottom: 14px;
 }
 
-.rotulo-semana { font-size: 0.9rem; font-weight: 600; color: var(--texto); }
+.rotulo-semana { font-size: var(--texto-base); font-weight: 600; color: var(--texto); }
 
 @media (max-width: 800px) {
   .app-raiz { flex-direction: column; }
