@@ -1,0 +1,29 @@
+﻿name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Instalar Python 3.11 (mesma versão do render.yaml)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11.15"
+          cache: "pip"
+
+      - name: Instalar dependências
+        run: pip install -r requirements-dev.txt
+
+      - name: "ruff: F (erros lógicos), E9 (sintaxe), B (bugs comuns)"
+        run: ruff check --select=F,E9,B .
+
+      - name: pytest
+        run: pytest -v

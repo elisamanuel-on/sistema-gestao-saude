@@ -1,5 +1,7 @@
 # Sistema de Gestão de Utentes e Cuidados de Saúde
 
+[![CI](https://github.com/elisamanuel-on/sistema-gestao-saude/actions/workflows/ci.yml/badge.svg)](https://github.com/elisamanuel-on/sistema-gestao-saude/actions/workflows/ci.yml)
+
 Projeto de portfólio: um dashboard/aplicação web (Dash + Plotly + scikit-learn)
 para gestão de utentes num contexto de cuidados continuados/residências sénior
 (UCC/ERPI/SAD), com avaliação de risco clínico por machine learning e um
@@ -239,6 +241,11 @@ pytest -v
 ruff check --select=F,E9,B .
 ```
 
+Estes dois comandos correm automaticamente em cada `push`/pull request para
+o `main`, via GitHub Actions (`.github/workflows/ci.yml`), com o mesmo
+Python do `render.yaml` (3.11.15). O badge no topo deste README mostra o
+estado do último run.
+
 121 testes cobrem: limpeza/estruturação de dados, a escala de risco de queda
 (incluindo as fronteiras exatas entre baixo/moderado/elevado), o resumo
 automático, o roteamento e os callbacks principais, a validade das
@@ -289,11 +296,11 @@ bem para o tamanho atual do projeto, mas separar em módulos (`pages/`,
 `callbacks/`, `pdf/`) seria o próximo passo de organização antes de o
 projeto crescer mais.
 
-**Integração contínua**: os testes e o `ruff` correm manualmente antes de
-cada `git push` (ver secção "Testes" acima), não há ainda um workflow de
-CI (GitHub Actions) a correr isto automaticamente a cada commit antes do
-deploy no Render. É o próximo passo mais simples para apanhar cedo o tipo
-de erro que já aconteceu neste projeto (um ficheiro atualizado localmente
-mas esquecido do `git add`, só descoberto quando o deploy falhava).
+**Integração contínua**: pytest e ruff já correm automaticamente a cada
+`push`/pull request via GitHub Actions (ver secção "Testes" acima), mas o
+Render continua a fazer auto-deploy independentemente do resultado do CI,
+não há ainda uma verificação que bloqueie o deploy se os testes falharem.
+Ligar isso (p.ex. um "deploy hook" do Render disparado só depois do CI
+passar, em vez do auto-deploy direto a cada push) seria o próximo passo.
 
 Tudo isto seria o próximo passo natural para uma versão de produção.
