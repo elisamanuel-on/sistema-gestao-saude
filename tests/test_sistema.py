@@ -491,10 +491,23 @@ def test_rotear_pagina_vitrine_e_publica_mesmo_sem_sessao():
 
 
 def test_rotear_pagina_utentes_sem_sessao_continua_a_mostrar_login():
-    # Só a raiz ("/") passou a mostrar a vitrine para visitantes sem sessão —
-    # qualquer outro caminho continua a cair no login, tal como antes.
+    # A raiz ("/") e o "/sobre" mostram a vitrine/sobre a visitantes sem
+    # sessão — qualquer outro caminho continua a cair no login, tal como antes.
     pagina = str(m._rotear_pagina("/utentes", None, None, None))
     assert "perfil" in pagina.lower() or "Enfermeiro" in pagina
+
+
+def test_rotear_pagina_sobre_e_publica_mesmo_sem_sessao():
+    pagina = str(m._rotear_pagina("/sobre", None, None, None))
+    assert "Sobre este projeto" in pagina
+    assert "href='/vitrine'" in pagina
+
+
+def test_pagina_sobre_logada_nao_mostra_ligacao_de_volta_a_vitrine():
+    # Quem já está numa sessão vê a barra lateral normal — a ligação "Voltar
+    # à vitrine" só faz sentido para quem chegou ao /sobre sem sessão.
+    pagina = str(m._pagina_sobre(logado=True))
+    assert "href='/vitrine'" not in pagina
 
 
 def test_pagina_login_simulacao_tem_texto_proprio_e_ligacao_de_volta():

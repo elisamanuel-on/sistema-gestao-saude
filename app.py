@@ -348,7 +348,7 @@ def _barra_lateral(caminho_atual, perfil, profissional=None):
         [
             html.Div(
                 [
-                    html.Img(src="/assets/icones/logo.svg", className="icone-logotipo-lateral"),
+                    html.Img(src="/assets/icones/logo.svg", alt="", className="icone-logotipo-lateral"),
                     html.Span("Gestão de Saúde", className="logotipo-lateral-texto"),
                 ],
                 className="logotipo-lateral",
@@ -422,7 +422,7 @@ def _pagina_login(simulacao=False):
     return html.Div(
         html.Div(
             [
-                html.Img(src="/assets/icones/logo.svg", className="logotipo-login"),
+                html.Img(src="/assets/icones/logo.svg", alt="", className="logotipo-login"),
                 html.H1("Modo simulação" if simulacao else "Gestão de Saúde"),
                 *(
                     [
@@ -449,7 +449,7 @@ def _pagina_login(simulacao=False):
 def _corpo_login_escolha_perfil():
     botoes = [
         html.Button(
-            [html.Img(src=ICONES_PERFIL.get(perfil, ""), className="icone-perfil-login"), html.Span(perfil)],
+            [html.Img(src=ICONES_PERFIL.get(perfil, ""), alt="", className="icone-perfil-login"), html.Span(perfil)],
             id={"type": "botao-login-perfil", "perfil": perfil},
             n_clicks=0,
             className="botao-perfil-login",
@@ -536,7 +536,7 @@ FUNCIONALIDADES_VITRINE = [
 def _cartao_funcionalidade_vitrine(icone, titulo, texto):
     return html.Div(
         [
-            html.Div(html.Img(src=icone, className="icone-funcionalidade-vitrine"), className="icone-caixa-vitrine"),
+            html.Div(html.Img(src=icone, alt="", className="icone-funcionalidade-vitrine"), className="icone-caixa-vitrine"),
             html.H3(titulo),
             html.P(texto, className="texto-explicativo"),
         ],
@@ -590,7 +590,7 @@ def _pagina_vitrine():
             [
                 html.Div(
                     [
-                        html.Img(src="/assets/icones/logo.svg", className="logotipo-vitrine"),
+                        html.Img(src="/assets/icones/logo.svg", alt="", className="logotipo-vitrine"),
                         html.Span("Gestão de Saúde", className="logotipo-vitrine-texto"),
                     ],
                     className="topo-vitrine",
@@ -601,7 +601,7 @@ def _pagina_vitrine():
                             [
                                 html.Div(
                                     [
-                                        html.Img(src="/assets/icones/logo.svg", className="icone-badge-vitrine"),
+                                        html.Img(src="/assets/icones/logo.svg", alt="", className="icone-badge-vitrine"),
                                         "Projeto de portfólio",
                                     ],
                                     className="badge-vitrine",
@@ -813,48 +813,88 @@ def _pagina_visao_geral(perfil=None, dispensada=None):
 # --- Página: Sobre este projeto ----------------------------------------------
 
 
-def _pagina_sobre():
+URL_REPOSITORIO = "https://github.com/elisamanuel-on/sistema-gestao-saude"
+
+
+def _pagina_sobre(logado=True):
+    estatisticas = html.Div(
+        [
+            _cartao_kpi("Perfis de acesso", len(PERFIS_ACESSO), nota="Enfermeiro, Médico, Receção, Admin"),
+            _cartao_kpi("Testes automatizados", 121, nota="pytest, corridos em CI a cada push"),
+            _cartao_kpi("Avaliações de risco clínico", 3, nota="diabetes, cardiovascular e queda"),
+            _cartao_kpi("Tipos de unidade", len(TIPOS_CUIDADO), nota="UCC, ERPI, SAD, Clínica/Hospital"),
+        ],
+        className="kpis-linha",
+    )
+
+    cabecalho = [html.H1("Sobre este projeto")]
+    if not logado:
+        cabecalho.insert(0, dcc.Link("‹ Voltar à vitrine", href="/vitrine", className="ligacao-voltar"))
+
     return html.Div(
         [
-            html.H1("Sobre este projeto"),
+            *cabecalho,
             html.P(
                 "Projeto de portfólio: um sistema de gestão de utentes e cuidados de saúde que combina dois "
                 "contextos, cuidados continuados/residências sénior (UCC/ERPI/SAD) e ambulatório clínico/"
                 "hospitalar (Clínica/Hospital), com avaliação de risco clínico por machine learning.",
                 className="texto-explicativo",
             ),
-            html.H3("O que inclui", className="titulo-secao-espacado"),
-            html.Ul(
+            estatisticas,
+            html.Div(
                 [
-                    html.Li("Registo de utentes para os 4 tipos de unidade, com pesquisa e filtros."),
-                    html.Li(
-                        "Ficha clínica: sinais vitais, alergias/diagnósticos, exames, prescrições, plano de "
-                        "cuidados multidisciplinar, visitas, documentos e histórico/auditoria, com "
-                        "exportação em PDF."
+                    html.H3("O que inclui"),
+                    html.Ul(
+                        [
+                            html.Li("Registo de utentes para os 4 tipos de unidade, com pesquisa e filtros."),
+                            html.Li(
+                                "Ficha clínica: sinais vitais, alergias/diagnósticos, exames, prescrições, plano de "
+                                "cuidados multidisciplinar, visitas, documentos e histórico/auditoria, com "
+                                "exportação em PDF."
+                            ),
+                            html.Li(
+                                "Avaliação de risco: diabetes e risco cardiovascular por machine learning (random "
+                                "forest), risco de queda pela Morse Fall Scale, e resumo automático em português."
+                            ),
+                            html.Li("Mapa de ocupação (cuidados continuados) e agendamento de consultas com vista de lista e de calendário (Clínica/Hospital)."),
+                            html.Li("Faturação com comparticipação da Segurança Social e seguradoras privadas."),
+                            html.Li("Visão Geral com KPIs agregados e alertas, e acesso por perfil (Enfermeiro/Médico/Receção/Admin)."),
+                        ]
                     ),
-                    html.Li(
-                        "Avaliação de risco: diabetes e risco cardiovascular por machine learning (random "
-                        "forest), risco de queda pela Morse Fall Scale, e resumo automático em português."
+                ],
+                className="cartao-secao",
+            ),
+            html.Div(
+                [
+                    html.H3("Sobre os dados"),
+                    html.P(
+                        "Nenhuma pessoa real está representada: todos os utentes, profissionais e dados clínicos são "
+                        "gerados sinteticamente. Os valores usados para pré-preencher a avaliação de risco vêm de dois "
+                        "datasets públicos e anonimizados (Pima Indians Diabetes, UCI Heart Disease), usados só para "
+                        "manter distribuições realistas, nunca de pacientes reais.",
+                        className="texto-explicativo",
                     ),
-                    html.Li("Mapa de ocupação (cuidados continuados) e agendamento de consultas com vista de lista e de calendário (Clínica/Hospital)."),
-                    html.Li("Faturação com comparticipação da Segurança Social e seguradoras privadas."),
-                    html.Li("Visão Geral com KPIs agregados e alertas, e acesso por perfil (Enfermeiro/Médico/Receção/Admin)."),
-                ]
+                    _aviso_medico(),
+                ],
+                className="cartao-secao",
             ),
-            html.H3("Sobre os dados", className="titulo-secao-espacado"),
-            html.P(
-                "Nenhuma pessoa real está representada: todos os utentes, profissionais e dados clínicos são "
-                "gerados sinteticamente. Os valores usados para pré-preencher a avaliação de risco vêm de dois "
-                "datasets públicos e anonimizados (Pima Indians Diabetes, UCI Heart Disease), usados só para "
-                "manter distribuições realistas, nunca de pacientes reais.",
-                className="texto-explicativo",
-            ),
-            _aviso_medico(),
-            html.H3("Stack técnica", className="titulo-secao-espacado"),
-            html.P(
-                "Python, Dash + Plotly (interface e gráficos), scikit-learn (modelos de risco), pandas "
-                "(dados), reportlab (exportação em PDF), pytest (testes automatizados) e deploy no Render.",
-                className="texto-explicativo",
+            html.Div(
+                [
+                    html.H3("Stack técnica"),
+                    html.P(
+                        "Python, Dash + Plotly (interface e gráficos), scikit-learn (modelos de risco), pandas "
+                        "(dados), reportlab (exportação em PDF), pytest (testes automatizados) e deploy no Render.",
+                        className="texto-explicativo",
+                    ),
+                    html.A(
+                        "Ver o código fonte no GitHub →",
+                        href=URL_REPOSITORIO,
+                        target="_blank",
+                        rel="noopener noreferrer",
+                        className="ligacao-voltar",
+                    ),
+                ],
+                className="cartao-secao",
             ),
         ]
     )
@@ -1103,7 +1143,7 @@ def _aba_documentos(id_utente):
         [
             html.Div(
                 [
-                    html.Img(src="/assets/icones/documento.svg", className="icone-documento"),
+                    html.Img(src="/assets/icones/documento.svg", alt="", className="icone-documento"),
                     html.Span(d["nome_documento"]),
                     html.Span(d["data_upload"], className="data-documento"),
                 ],
@@ -2310,9 +2350,14 @@ def _conteudo_rota(caminho, query_search, sessao, perfil, profissional, onboardi
     if caminho == "/login":
         return _pagina_login()
     if not perfil:
-        # A vitrine é a porta de entrada pública; qualquer outro caminho sem
-        # sessão cai no login real, tal como antes.
-        return _pagina_vitrine() if caminho == "/" else _pagina_login()
+        # A vitrine é a porta de entrada pública; o /sobre também fica aberto
+        # sem sessão (é o link que se partilha diretamente, ex.: num CV) —
+        # qualquer outro caminho sem sessão cai no login real, tal como antes.
+        if caminho == "/":
+            return _pagina_vitrine()
+        if caminho == "/sobre":
+            return _pagina_sobre(logado=False)
+        return _pagina_login()
     if caminho == "/":
         return _pagina_visao_geral(perfil, onboarding_dispensada)
     if caminho == "/utentes":
