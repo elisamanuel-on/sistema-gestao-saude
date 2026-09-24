@@ -1,5 +1,11 @@
 ﻿name: CI
 
+# Corre pytest e ruff em cada push e em cada pull request para o main. Não
+# bloqueia o deploy no Render por si só (o Render continua a fazer
+# auto-deploy a cada push), mas mostra um X vermelho no commit/PR assim que
+# algo fica dessincronizado ou quebrado, em vez de só se descobrir quando o
+# deploy falha em produção. É o mesmo tipo de erro que já aconteceu neste
+# projeto (um ficheiro atualizado localmente mas esquecido do "git add").
 on:
   push:
     branches: [main]
@@ -22,8 +28,8 @@ jobs:
       - name: Instalar dependências
         run: pip install -r requirements-dev.txt
 
-      - name: "ruff: F (erros lógicos), E9 (sintaxe), B (bugs comuns)"
-        run: ruff check --select=F,E9,B .
+      - name: "ruff (regras em pyproject.toml: F, E9, B)"
+        run: ruff check .
 
       - name: pytest
         run: pytest -v
