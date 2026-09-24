@@ -754,6 +754,93 @@ def test_pagina_profissionais_renderiza():
     assert m._pagina_profissionais() is not None
 
 
+# --- Testes: utentes — registo e gestão (Receção/Admin) ---------------------
+
+
+def test_proximo_id_utente_incrementa_a_partir_do_maior_existente():
+    maior_atual = m.DADOS["utentes"]["id_utente"].str.lstrip("U").astype(int).max()
+    assert m._proximo_id_utente() == f"U{maior_atual + 1:04d}"
+
+
+def test_gerar_numero_processo_tem_6_digitos_e_e_unico():
+    existentes = set(m.DADOS["utentes"]["processo"].astype(str))
+    processo = m._gerar_numero_processo()
+    assert len(processo) == 6 and processo.isdigit()
+    assert processo not in existentes
+
+
+def test_criar_utente_sem_campos_obrigatorios_e_recusado():
+    mensagem, versao = m._criar_utente(1, "Utente Teste Incompleto", None, "1950-01-01", "UCC", None, 0)
+    assert "risco_moderado" in mensagem.className
+    assert versao is dash.no_update
+
+
+def test_criar_utente_com_sucesso_fica_em_espera_com_quarto_por_atribuir():
+    total_antes = len(m.DADOS["utentes"])
+    mensagem, versao = m._criar_utente(1, "Utente Teste Novo", "Feminino", "1950-01-01", "ERPI", "2026-01-01", 0)
+    assert "risco_baixo" in mensagem.className
+    assert versao == 1
+    assert len(m.DADOS["utentes"]) == total_antes + 1
+    linha = m.DADOS["utentes"][m.DADOS["utentes"]["nome"] == "Utente Teste Novo"].iloc[0]
+    assert linha["estado"] == "Em espera"
+    assert linha["quarto"] == "N/D"
+    assert linha["id_utente"].startswith("U")
+    assert len(str(linha["processo"])) == 6
+
+
+def test_editar_utente_sem_utente_escolhido_e_recusado():
+    mensagem, versao = m._editar_utente(1, None, "101-A", None, 0)
+    assert "risco_moderado" in mensagem.className
+    assert versao is dash.no_update
+
+
+def test_editar_utente_atualiza_quarto():
+    m._criar_utente(1, "Utente Teste Quarto", "Masculino", "1960-01-01", "UCC", "2026-01-01", 0)
+    id_utente = m.DADOS["utentes"].loc[m.DADOS["utentes"]["nome"] == "Utente Teste Quarto", "id_utente"].iloc[0]
+    mensagem, versao = m._editar_utente(1, id_utente, "205-B", None, 0)
+    assert "risco_baixo" in mensagem.className
+    assert versao == 1
+    quarto = m.DADOS["utentes"].loc[m.DADOS["utentes"]["id_utente"] == id_utente, "quarto"].iloc[0]
+    assert quarto == "205-B"
+
+
+def test_editar_utente_estado_fora_do_habitual_avisa_mas_atualiza():
+    m._criar_utente(1, "Utente Teste Estado", "Feminino", "1970-01-01", "Clínica/Hospital", "2026-01-01", 0)
+    id_utente = m.DADOS["utentes"].loc[m.DADOS["utentes"]["nome"] == "Utente Teste Estado", "id_utente"].iloc[0]
+    # "Internado" não é um estado habitual para Clínica/Hospital (é ambulatório).
+    mensagem, versao = m._editar_utente(1, id_utente, None, "Internado", 0)
+    assert "risco_moderado" in mensagem.className
+    assert versao == 1
+    estado = m.DADOS["utentes"].loc[m.DADOS["utentes"]["id_utente"] == id_utente, "estado"].iloc[0]
+    assert estado == "Internado"
+
+
+def test_dar_alta_utente():
+    m._criar_utente(1, "Utente Teste Alta", "Masculino", "1980-01-01", "SAD", "2026-01-01", 0)
+    id_utente = m.DADOS["utentes"].loc[m.DADOS["utentes"]["nome"] == "Utente Teste Alta", "id_utente"].iloc[0]
+    mensagem, versao = m._dar_alta_utente(1, id_utente, 0)
+    assert "risco_baixo" in mensagem.className
+    assert versao == 1
+    estado = m.DADOS["utentes"].loc[m.DADOS["utentes"]["id_utente"] == id_utente, "estado"].iloc[0]
+    assert estado == "Alta"
+
+
+def test_dar_alta_utente_sem_utente_escolhido_e_recusado():
+    mensagem, versao = m._dar_alta_utente(1, None, 0)
+    assert "risco_moderado" in mensagem.className
+    assert versao is dash.no_update
+
+
+def test_pagina_utentes_mostra_formulario_de_gestao_so_para_recepcao_e_admin():
+    pagina_recepcao = str(m._pagina_utentes("Receção"))
+    pagina_admin = str(m._pagina_utentes("Admin"))
+    pagina_enfermeiro = str(m._pagina_utentes("Enfermeiro"))
+    assert "Novo Utente" in pagina_recepcao
+    assert "Novo Utente" in pagina_admin
+    assert "Novo Utente" not in pagina_enfermeiro
+    assert "Gerir utente" not in pagina_enfermeiro
+
+
 # --- Testes: acesso diferenciado por perfil (RBAC) --------------------------
 
 

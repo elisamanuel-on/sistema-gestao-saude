@@ -57,6 +57,7 @@ import datetime
 import io
 import json
 import pathlib
+import random
 import unicodedata
 import urllib.parse
 
@@ -78,6 +79,7 @@ from constantes import (
     HORARIOS_CONSULTA,
     PERFIS_ACESSO,
     PERFIS_GESTAO_AGENDA,
+    PERFIS_GESTAO_UTENTES,
     PERFIS_RELATORIO_QUALQUER_PROFISSIONAL,
     PERFIS_SEM_ATOS_CLINICOS,
     SALAS_CONSULTA,
@@ -103,6 +105,16 @@ PASTA_DADOS = pathlib.Path("dados")
 PASTA_MODELO = pathlib.Path("modelo")
 
 ESTADOS_UTENTE = ["Internado", "Em acompanhamento", "Alta", "Em espera"]
+
+# Que "estado" faz sentido para cada tipo de cuidado — usado só para avisar
+# se o valor escolhido ao editar um utente não bate certo com o seu tipo
+# (ex.: "Internado" não existe em Clínica/Hospital, que é ambulatório).
+ESTADOS_VALIDOS_POR_TIPO = {
+    "UCC": {"Internado", "Alta", "Em espera"},
+    "ERPI": {"Internado", "Alta", "Em espera"},
+    "SAD": {"Em acompanhamento", "Alta", "Em espera"},
+    "Clínica/Hospital": {"Em acompanhamento", "Alta", "Em espera"},
+}
 
 TOM_PLANO = {"Em curso": "primaria", "Concluído": "risco_baixo", "Suspenso": "risco_moderado"}
 
@@ -291,6 +303,21 @@ def _proximo_id_prescricao():
         return "RX00001"
     maior = DADOS["prescricoes"]["id_prescricao"].str.lstrip("RX").astype(int).max()
     return f"RX{maior + 1:05d}"
+
+
+def _proximo_id_utente():
+    if DADOS["utentes"].empty:
+        return "U0001"
+    maior = DADOS["utentes"]["id_utente"].str.lstrip("U").astype(int).max()
+    return f"U{maior + 1:04d}"
+
+
+def _gerar_numero_processo():
+    existentes = set(DADOS["utentes"]["processo"].astype(str))
+    candidato = str(random.randint(100000, 999999))
+    while candidato in existentes:
+        candidato = str(random.randint(100000, 999999))
+    return candidato
 
 
 # --- Componentes reutilizáveis ----------------------------------------------
@@ -929,12 +956,89 @@ def _tabela_utentes(df):
     )
 
 
-def _pagina_utentes():
+def _formulario_novo_utente():
+    return html.Details(
+        [
+            html.Summary("+ Novo Utente", className="resumo-details"),
+            html.Div(
+                [
+                    dcc.Input(id="form-utente-nome", type="text", placeholder="Nome completo", className="campo-pesquisa"),
+                    dcc.Dropdown(
+                        id="form-utente-genero",
+                        options=[{"label": g, "value": g} for g in ["Feminino", "Masculino"]],
+                        placeholder="Género",
+                        className="filtro-dropdown",
+                    ),
+                    dcc.DatePickerSingle(
+                        id="form-utente-nascimento",
+                        placeholder="Data de nascimento",
+                        display_format="DD/MM/YYYY",
+                        month_format="MM/YYYY",
+                        first_day_of_week=1,
+                        max_date_allowed=datetime.date.today(),
+                    ),
+                    dcc.Dropdown(
+                        id="form-utente-tipo-cuidado",
+                        options=[{"label": t, "value": t} for t in TIPOS_CUIDADO],
+                        placeholder="Tipo de cuidado",
+                        className="filtro-dropdown",
+                    ),
+                    dcc.DatePickerSingle(
+                        id="form-utente-admissao",
+                        placeholder="Data de admissão",
+                        display_format="DD/MM/YYYY",
+                        month_format="MM/YYYY",
+                        first_day_of_week=1,
+                        max_date_allowed=datetime.date.today(),
+                    ),
+                ],
+                className="grelha-formulario",
+            ),
+            html.Button("Adicionar utente", id="botao-criar-utente", className="botao-primario", n_clicks=0),
+            html.Div(id="mensagem-criar-utente", className="resultado-mini"),
+        ],
+        className="painel-details",
+    )
+
+
+def _painel_gerir_utente():
+    return html.Div(
+        [
+            html.H3("Gerir utente"),
+            html.P("Alterar o quarto ou o estado de um utente já registado, ou dar-lhe alta.", className="texto-explicativo"),
+            dcc.Dropdown(id="select-utente-gerir", placeholder="Escolhe um utente...", className="filtro-dropdown"),
+            html.Div(
+                [
+                    dcc.Input(id="form-utente-editar-quarto", type="text", placeholder="Novo quarto (deixa em branco para não alterar)", className="campo-pesquisa"),
+                    dcc.Dropdown(
+                        id="form-utente-editar-estado",
+                        options=[{"label": e, "value": e} for e in ESTADOS_UTENTE],
+                        placeholder="Novo estado (deixa em branco para não alterar)",
+                        className="filtro-dropdown",
+                    ),
+                ],
+                className="grelha-formulario",
+            ),
+            html.Div(
+                [
+                    html.Button("Guardar alterações", id="botao-editar-utente", className="botao-secundario", n_clicks=0),
+                    html.Button("Dar Alta", id="botao-dar-alta-utente", className="botao-secundario", n_clicks=0),
+                ],
+                className="botoes-exportar",
+            ),
+            html.Div(id="mensagem-gerir-utente", className="resultado-mini"),
+        ],
+        className="cartao-secao",
+    )
+
+
+def _pagina_utentes(perfil=None):
     df = DADOS["utentes"]
     total = len(df)
     ativos = int(df["estado"].isin(["Internado", "Em acompanhamento"]).sum())
     em_espera = int((df["estado"] == "Em espera").sum())
     altas_mes = len(DADOS["altas"])
+    pode_gerir = perfil in PERFIS_GESTAO_UTENTES
 
     return html.Div(
         [
@@ -953,6 +1057,8 @@ def _pagina_utentes():
                 ],
                 className="kpis-linha",
             ),
+            *([_formulario_novo_utente()] if pode_gerir else []),
+            dcc.Store(id="utentes-atualizacao", data=0),
             html.Div(
                 [
                     dcc.Input(id="pesquisa-utente", type="text", placeholder="Pesquisar por nome...", className="campo-pesquisa"),
@@ -972,6 +1078,7 @@ def _pagina_utentes():
                 className="filtros-utentes",
             ),
             html.Div(id="corpo-tabela-utentes"),
+            *([_painel_gerir_utente()] if pode_gerir else []),
         ]
     )
 
@@ -2361,7 +2468,7 @@ def _conteudo_rota(caminho, query_search, sessao, perfil, profissional, onboardi
     if caminho == "/":
         return _pagina_visao_geral(perfil, onboarding_dispensada)
     if caminho == "/utentes":
-        return _pagina_utentes()
+        return _pagina_utentes(perfil)
     if caminho.startswith("/utentes/"):
         id_utente = caminho.split("/utentes/")[-1]
         return _pagina_ficha_utente(id_utente, perfil, profissional)
@@ -2394,8 +2501,9 @@ def _conteudo_rota(caminho, query_search, sessao, perfil, profissional, onboardi
     Input("pesquisa-utente", "value"),
     Input("filtro-tipo-cuidado", "value"),
     Input("filtro-estado", "value"),
+    Input("utentes-atualizacao", "data"),
 )
-def _filtrar_utentes(texto_pesquisa, tipo_cuidado, estado):
+def _filtrar_utentes(texto_pesquisa, tipo_cuidado, estado, _versao=None):
     df = DADOS["utentes"]
     if texto_pesquisa:
         df = df[df["nome"].str.contains(texto_pesquisa, case=False, na=False)]
@@ -2882,6 +2990,116 @@ def _remover_profissional(n_clicks, nome, versao):
         return html.Div("Profissional não encontrado, a lista pode ter mudado.", className="resultado-inline resultado-inline--risco_elevado"), dash.no_update
     DADOS["profissionais"] = DADOS["profissionais"][DADOS["profissionais"]["nome"] != nome].reset_index(drop=True)
     return html.Div(f"{nome} removido.", className="resultado-inline resultado-inline--risco_baixo"), (versao or 0) + 1
+
+
+# --- Callbacks: utentes — registo e gestão -------------------------------------
+
+
+@app.callback(
+    Output("select-utente-gerir", "options"),
+    Input("utentes-atualizacao", "data"),
+)
+def _atualizar_opcoes_utente_gerir(_versao):
+    df = DADOS["utentes"].sort_values("nome")
+    return [{"label": f"{u['nome']} ({u['id_utente']})", "value": u["id_utente"]} for _idx, u in df.iterrows()]
+
+
+@app.callback(
+    Output("mensagem-criar-utente", "children"),
+    Output("utentes-atualizacao", "data", allow_duplicate=True),
+    Input("botao-criar-utente", "n_clicks"),
+    State("form-utente-nome", "value"),
+    State("form-utente-genero", "value"),
+    State("form-utente-nascimento", "date"),
+    State("form-utente-tipo-cuidado", "value"),
+    State("form-utente-admissao", "date"),
+    State("utentes-atualizacao", "data"),
+    prevent_initial_call=True,
+)
+def _criar_utente(n_clicks, nome, genero, nascimento, tipo_cuidado, admissao, versao):
+    if not n_clicks:
+        return dash.no_update, dash.no_update
+    nome = (nome or "").strip()
+    if not nome or not genero or not nascimento or not tipo_cuidado:
+        return html.Div("Preenche pelo menos o nome, o género, a data de nascimento e o tipo de cuidado.", className="resultado-inline resultado-inline--risco_moderado"), dash.no_update
+
+    nova_linha = pd.DataFrame(
+        [
+            {
+                "id_utente": _proximo_id_utente(),
+                "nome": nome,
+                "genero": genero,
+                "data_nascimento": nascimento,
+                "processo": _gerar_numero_processo(),
+                "tipo_cuidado": tipo_cuidado,
+                "data_admissao": admissao or datetime.date.today().isoformat(),
+                "quarto": "N/D",
+                "estado": "Em espera",
+            }
+        ]
+    )
+    DADOS["utentes"] = pd.concat([DADOS["utentes"], nova_linha], ignore_index=True)
+    return html.Div(f"Utente {nome} registado, com o estado \"Em espera\".", className="resultado-inline resultado-inline--risco_baixo"), (versao or 0) + 1
+
+
+@app.callback(
+    Output("mensagem-gerir-utente", "children"),
+    Output("utentes-atualizacao", "data", allow_duplicate=True),
+    Input("botao-editar-utente", "n_clicks"),
+    State("select-utente-gerir", "value"),
+    State("form-utente-editar-quarto", "value"),
+    State("form-utente-editar-estado", "value"),
+    State("utentes-atualizacao", "data"),
+    prevent_initial_call=True,
+)
+def _editar_utente(n_clicks, id_utente, quarto, estado, versao):
+    if not n_clicks:
+        return dash.no_update, dash.no_update
+    if not id_utente:
+        return html.Div("Escolhe primeiro um utente.", className="resultado-inline resultado-inline--risco_moderado"), dash.no_update
+    mascara = DADOS["utentes"]["id_utente"] == id_utente
+    if not mascara.any():
+        return html.Div("Utente não encontrado, a lista pode ter mudado.", className="resultado-inline resultado-inline--risco_elevado"), dash.no_update
+    if not any([quarto, estado]):
+        return html.Div("Preenche pelo menos um campo para atualizar.", className="resultado-inline resultado-inline--risco_moderado"), dash.no_update
+
+    nome = DADOS["utentes"].loc[mascara, "nome"].iloc[0]
+    if quarto:
+        DADOS["utentes"].loc[mascara, "quarto"] = quarto
+    if estado:
+        tipo_cuidado = DADOS["utentes"].loc[mascara, "tipo_cuidado"].iloc[0]
+        estados_validos = ESTADOS_VALIDOS_POR_TIPO.get(tipo_cuidado, set(ESTADOS_UTENTE))
+        DADOS["utentes"].loc[mascara, "estado"] = estado
+        if estado not in estados_validos:
+            return (
+                html.Div(
+                    f"{nome} passou a \"{estado}\", mas repara que este estado não é o habitual para {tipo_cuidado}: confirma se é mesmo isso.",
+                    className="resultado-inline resultado-inline--risco_moderado",
+                ),
+                (versao or 0) + 1,
+            )
+    return html.Div(f"Dados de {nome} atualizados.", className="resultado-inline resultado-inline--risco_baixo"), (versao or 0) + 1
+
+
+@app.callback(
+    Output("mensagem-gerir-utente", "children", allow_duplicate=True),
+    Output("utentes-atualizacao", "data", allow_duplicate=True),
+    Input("botao-dar-alta-utente", "n_clicks"),
+    State("select-utente-gerir", "value"),
+    State("utentes-atualizacao", "data"),
+    prevent_initial_call=True,
+)
+def _dar_alta_utente(n_clicks, id_utente, versao):
+    if not n_clicks:
+        return dash.no_update, dash.no_update
+    if not id_utente:
+        return html.Div("Escolhe primeiro um utente.", className="resultado-inline resultado-inline--risco_moderado"), dash.no_update
+    mascara = DADOS["utentes"]["id_utente"] == id_utente
+    if not mascara.any():
+        return html.Div("Utente não encontrado, a lista pode ter mudado.", className="resultado-inline resultado-inline--risco_elevado"), dash.no_update
+    nome = DADOS["utentes"].loc[mascara, "nome"].iloc[0]
+    DADOS["utentes"].loc[mascara, "estado"] = "Alta"
+    return html.Div(f"{nome} passou a Alta.", className="resultado-inline resultado-inline--risco_baixo"), (versao or 0) + 1
 
 
 # --- Callbacks: ficha do utente — sinais vitais -------------------------------

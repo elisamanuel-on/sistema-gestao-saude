@@ -123,6 +123,7 @@ SECCOES_POR_PERFIL = {
 # (filtrada à própria identidade), mas só a gere através da Receção, tal
 # como aconteceria com contas reais.
 PERFIS_GESTAO_AGENDA = {"Receção", "Admin"}  # podem marcar/cancelar/reagendar consultas
+PERFIS_GESTAO_UTENTES = {"Receção", "Admin"}  # podem registar/editar/dar alta a um utente
 PERFIS_RELATORIO_QUALQUER_PROFISSIONAL = {"Admin"}  # escolhem livremente o profissional no relatório de atividade
 PERFIS_SEM_ATOS_CLINICOS = {"Receção"}  # não têm avaliação de risco, prescrições nem receita
 
