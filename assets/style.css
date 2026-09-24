@@ -790,42 +790,78 @@ body {
   margin-top: 8px;
 }
 
-/* Vitrine (landing page pública) — mesmo princípio do ecrã de login
-   (.ecra-login/.cartao-login acima), mas mais larga, para caber a grelha de
-   funcionalidades. */
+/* Vitrine (landing page pública) — "hero com painel visual": texto + CTAs à
+   esquerda, pré-visualização estilizada do dashboard à direita, grelha de
+   funcionalidades em baixo. Mesmo princípio do ecrã de login (position:fixed
+   para ignorar o max-width de .pagina), mas mais larga e sem o cartão
+   centrado — a página flui a toda a largura, como uma landing page a sério. */
 
 .ecra-vitrine {
   position: fixed;
   inset: 0;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  background: var(--fundo);
-  padding: 48px 24px;
+  background: var(--cartao);
   overflow-y: auto;
   z-index: 10;
 }
 
-.cartao-vitrine {
-  background: var(--cartao);
-  border: 1px solid var(--borda);
-  border-radius: var(--raio-lg);
-  box-shadow: var(--sombra-flutuante);
-  padding: 44px 40px;
-  max-width: 760px;
-  width: 100%;
-  text-align: center;
+.conteudo-vitrine {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 24px 60px;
 }
 
-.cartao-vitrine h1 { font-size: 1.6rem; margin: 10px 0 12px; }
-.cartao-vitrine > .texto-explicativo { max-width: 520px; margin: 0 auto 28px; }
+.cor-primaria { color: var(--primaria); }
+.cor-clinica { color: var(--tipo-clinica-hospital); }
+.cor-sad { color: var(--tipo-sad); }
+
+.topo-vitrine {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 26px 0;
+}
+
+.logotipo-vitrine { width: 26px; height: 26px; }
+.logotipo-vitrine-texto { font-weight: 700; font-size: var(--texto-base); }
+
+.hero-vitrine {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 50px;
+  align-items: center;
+  padding: 10px 0 56px;
+}
+
+.badge-vitrine {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--primaria-suave);
+  color: var(--primaria);
+  font-size: var(--texto-xs);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 6px 12px;
+  border-radius: 999px;
+  margin-bottom: 18px;
+}
+
+.icone-badge-vitrine { width: 14px; height: 14px; }
+
+.texto-hero-vitrine h1 {
+  font-size: 2.2rem;
+  line-height: 1.2;
+  margin: 0 0 16px;
+  letter-spacing: -0.01em;
+}
+
+.texto-lead-vitrine { font-size: 1rem; max-width: 480px; margin: 0 0 28px; }
 
 .grupo-botoes-vitrine {
   display: flex;
-  justify-content: center;
   flex-wrap: wrap;
   gap: 14px;
-  margin: 0 0 36px;
+  margin: 0 0 28px;
 }
 
 .botao-vitrine-primario,
@@ -857,23 +893,97 @@ body {
 
 .botao-vitrine-secundario:hover { background: var(--primaria-suave); }
 
+.estatisticas-vitrine {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
+.estatisticas-vitrine strong { display: block; font-size: 1.3rem; color: var(--texto); }
+.estatisticas-vitrine span { font-size: var(--texto-xs); color: var(--texto-suave); }
+
+/* Painel visual: um "preview" estilizado do dashboard — nunca dados reais de
+   um utente, só formas/números ilustrativos para sugerir a interface. */
+.painel-visual-vitrine {
+  position: relative;
+  background: linear-gradient(160deg, var(--primaria-suave), var(--cartao) 65%);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-xl, 20px);
+  padding: 24px;
+  box-shadow: var(--sombra-flutuante);
+}
+
+.etiqueta-flutuante-vitrine {
+  position: absolute;
+  top: -14px;
+  right: 18px;
+  background: var(--primaria);
+  color: #fff;
+  border-radius: var(--raio-sm);
+  padding: 8px 12px;
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  box-shadow: var(--sombra-flutuante);
+}
+
+.cartao-mock-vitrine {
+  background: var(--cartao);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-md);
+  padding: 16px;
+  box-shadow: var(--sombra-cartao);
+  margin-bottom: 12px;
+}
+
+.cartao-mock-vitrine:last-child { margin-bottom: 0; }
+
+.linha-mock { height: 8px; border-radius: 4px; background: var(--borda); margin-bottom: 10px; width: 100%; }
+.linha-mock--curta { width: 40%; }
+
+.kpis-mini-vitrine { display: flex; gap: 10px; }
+.kpis-mini-vitrine > div { flex: 1; background: var(--fundo); border-radius: var(--raio-sm); padding: 10px; text-align: center; }
+.kpis-mini-vitrine strong { display: block; font-size: 1.1rem; }
+.kpis-mini-vitrine span { font-size: 0.68rem; color: var(--texto-suave); }
+
+.barras-mock-vitrine { display: flex; align-items: flex-end; gap: 8px; height: 70px; }
+.barra-mock { flex: 1; border-radius: 4px 4px 0 0; }
+
 .grelha-funcionalidades-vitrine {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 16px;
-  text-align: left;
-  margin-bottom: 28px;
+  margin-bottom: 8px;
 }
 
 .cartao-funcionalidade-vitrine {
   background: var(--fundo);
   border: 1px solid var(--borda);
   border-radius: var(--raio-md);
-  padding: 16px 18px;
+  padding: 18px;
 }
 
-.cartao-funcionalidade-vitrine h3 { font-size: var(--texto-base); margin: 0 0 6px; }
+.icone-caixa-vitrine {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--raio-sm);
+  background: var(--primaria-suave);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.icone-funcionalidade-vitrine { width: 18px; height: 18px; }
+
+.cartao-funcionalidade-vitrine h3 { font-size: var(--texto-base); margin: 0 0 4px; }
 .cartao-funcionalidade-vitrine p { margin: 0; }
+
+.nota-rodape-vitrine { text-align: center; margin: 28px 0 0; }
+
+@media (max-width: 900px) {
+  .hero-vitrine { grid-template-columns: 1fr; }
+  .painel-visual-vitrine { order: -1; }
+}
 
 /* Aviso "Modo simulação", mostrado no topo de todas as páginas de uma
    sessão de simulação — tom de atenção (âmbar), tal como .aviso-medico,
@@ -970,6 +1080,7 @@ body {
   .nav-lateral { flex-direction: row; overflow-x: auto; }
   .filtros-utentes { grid-template-columns: 1fr; }
   .cartao-login { padding: 30px 22px; }
-  .cartao-vitrine { padding: 30px 22px; }
+  .conteudo-vitrine { padding: 0 18px 40px; }
+  .texto-hero-vitrine h1 { font-size: 1.7rem; }
   .banner-simulacao { flex-direction: column; align-items: flex-start; }
 }

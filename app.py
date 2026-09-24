@@ -493,7 +493,7 @@ def _corpo_login_escolha_profissional(perfil):
         )
     return html.Div(
         [
-            html.P(f"Perfil {perfil} — agora escolhe qual profissional és:", className="texto-explicativo"),
+            html.P(f"Perfil {perfil}: agora escolhe qual profissional és.", className="texto-explicativo"),
             corpo_lista,
             html.Button("‹ Voltar", id="botao-voltar-login", className="botao-secundario", n_clicks=0),
         ]
@@ -502,63 +502,151 @@ def _corpo_login_escolha_profissional(perfil):
 
 # --- Página: Vitrine (landing page pública, sem sessão) -----------------------
 
+# (ícone, título, texto) dos 4 módulos em destaque na vitrine — a mesma ordem
+# usada no cabeçalho "O que inclui" da página /sobre, para as duas páginas
+# públicas contarem a mesma história.
+FUNCIONALIDADES_VITRINE = [
+    (
+        "/assets/icones/ficha-clinica.svg",
+        "Ficha clínica completa",
+        "Sinais vitais, diagnósticos, prescrições, exames, plano de cuidados multidisciplinar e "
+        "histórico, com exportação em PDF.",
+    ),
+    (
+        "/assets/icones/risco-ml.svg",
+        "Risco por machine learning",
+        "Diabetes e risco cardiovascular (random forest) e risco de queda (Morse Fall Scale), com "
+        "resumo automático em português.",
+    ),
+    (
+        "/assets/icones/agenda-faturacao.svg",
+        "Agenda e faturação",
+        "Marcação, cancelamento e reagendamento de consultas, mapa de ocupação e faturação com "
+        "comparticipação da Segurança Social e seguradoras privadas.",
+    ),
+    (
+        "/assets/icones/acesso-perfil.svg",
+        "Acesso por perfil",
+        "Cada perfil (Enfermeiro, Médico, Receção e Admin) só vê os módulos relevantes ao seu papel, "
+        "tal como aconteceria com contas reais.",
+    ),
+]
 
-def _cartao_funcionalidade_vitrine(titulo, texto):
-    return html.Div([html.H3(titulo), html.P(texto, className="texto-explicativo")], className="cartao-funcionalidade-vitrine")
+
+def _cartao_funcionalidade_vitrine(icone, titulo, texto):
+    return html.Div(
+        [
+            html.Div(html.Img(src=icone, className="icone-funcionalidade-vitrine"), className="icone-caixa-vitrine"),
+            html.H3(titulo),
+            html.P(texto, className="texto-explicativo"),
+        ],
+        className="cartao-funcionalidade-vitrine",
+    )
+
+
+def _painel_visual_vitrine():
+    """Pré-visualização estilizada do dashboard — barras/números fictícios, só
+    para sugerir a interface na vitrine, nunca dados reais de um utente."""
+    return html.Div(
+        [
+            html.Div("● Dados sintéticos ao vivo", className="etiqueta-flutuante-vitrine"),
+            html.Div(
+                [
+                    html.Div(className="linha-mock linha-mock--curta"),
+                    html.Div(
+                        [
+                            html.Div([html.Strong("45", className="cor-primaria"), html.Span("Utentes")]),
+                            html.Div([html.Strong("27%", className="cor-clinica"), html.Span("Ocupação")]),
+                            html.Div([html.Strong("3", className="cor-sad"), html.Span("Consultas hoje")]),
+                        ],
+                        className="kpis-mini-vitrine",
+                    ),
+                ],
+                className="cartao-mock-vitrine",
+            ),
+            html.Div(
+                [
+                    html.Div(className="linha-mock linha-mock--curta"),
+                    html.Div(
+                        [
+                            html.Div(className="barra-mock", style={"height": "60%", "background": "var(--tipo-erpi)"}),
+                            html.Div(className="barra-mock", style={"height": "90%", "background": "var(--tipo-clinica-hospital)"}),
+                            html.Div(className="barra-mock", style={"height": "40%", "background": "var(--tipo-sad)"}),
+                            html.Div(className="barra-mock", style={"height": "75%", "background": "var(--primaria)"}),
+                        ],
+                        className="barras-mock-vitrine",
+                    ),
+                ],
+                className="cartao-mock-vitrine",
+            ),
+        ],
+        className="painel-visual-vitrine",
+    )
 
 
 def _pagina_vitrine():
     return html.Div(
         html.Div(
             [
-                html.Img(src="/assets/icones/logo.svg", className="logotipo-login"),
-                html.H1("Gestão de Saúde"),
-                html.P(
-                    "Sistema de gestão de utentes e cuidados de saúde — cuidados continuados "
-                    "(UCC/ERPI/SAD) e ambulatório clínico/hospitalar, com avaliação de risco clínico "
-                    "por machine learning e acesso por perfil.",
-                    className="texto-explicativo",
+                html.Div(
+                    [
+                        html.Img(src="/assets/icones/logo.svg", className="logotipo-vitrine"),
+                        html.Span("Gestão de Saúde", className="logotipo-vitrine-texto"),
+                    ],
+                    className="topo-vitrine",
                 ),
                 html.Div(
                     [
-                        dcc.Link("Simulação", href="/simulacao", className="botao-vitrine-primario"),
-                        dcc.Link("Ver o sistema inteiro", href="/login", className="botao-vitrine-secundario"),
+                        html.Div(
+                            [
+                                html.Div(
+                                    [
+                                        html.Img(src="/assets/icones/logo.svg", className="icone-badge-vitrine"),
+                                        "Projeto de portfólio",
+                                    ],
+                                    className="badge-vitrine",
+                                ),
+                                html.H1(["Gestão de utentes e cuidados de saúde, ", html.Span("num só sistema", className="cor-primaria")]),
+                                html.P(
+                                    "Cuidados continuados (UCC/ERPI/SAD) e ambulatório clínico/hospitalar, com "
+                                    "avaliação de risco por machine learning e acesso por perfil para Enfermeiro, "
+                                    "Médico, Receção e Admin.",
+                                    className="texto-explicativo texto-lead-vitrine",
+                                ),
+                                html.Div(
+                                    [
+                                        dcc.Link("Simulação", href="/simulacao", className="botao-vitrine-primario"),
+                                        dcc.Link("Ver o sistema inteiro", href="/login", className="botao-vitrine-secundario"),
+                                    ],
+                                    className="grupo-botoes-vitrine",
+                                ),
+                                html.Div(
+                                    [
+                                        html.Div([html.Strong("4"), html.Span("tipos de unidade")]),
+                                        html.Div([html.Strong("3"), html.Span("modelos de risco clínico")]),
+                                        html.Div([html.Strong("4"), html.Span("perfis de acesso")]),
+                                    ],
+                                    className="estatisticas-vitrine",
+                                ),
+                            ],
+                            className="texto-hero-vitrine",
+                        ),
+                        _painel_visual_vitrine(),
                     ],
-                    className="grupo-botoes-vitrine",
+                    className="hero-vitrine",
                 ),
                 html.Div(
-                    [
-                        _cartao_funcionalidade_vitrine(
-                            "Ficha clínica completa",
-                            "Sinais vitais, diagnósticos, prescrições, exames, plano de cuidados "
-                            "multidisciplinar e histórico — com exportação em PDF.",
-                        ),
-                        _cartao_funcionalidade_vitrine(
-                            "Avaliação de risco por machine learning",
-                            "Diabetes e risco cardiovascular (random forest) e risco de queda (Morse "
-                            "Fall Scale), com resumo automático em português.",
-                        ),
-                        _cartao_funcionalidade_vitrine(
-                            "Agenda e faturação",
-                            "Marcação, cancelamento e reagendamento de consultas, mapa de ocupação e "
-                            "faturação com comparticipação da Segurança Social e seguradoras privadas.",
-                        ),
-                        _cartao_funcionalidade_vitrine(
-                            "Acesso por perfil",
-                            "Enfermeiro, Médico, Receção e Admin — cada um só vê os módulos relevantes "
-                            "ao seu papel, tal como aconteceria com contas reais.",
-                        ),
-                    ],
+                    [_cartao_funcionalidade_vitrine(icone, titulo, texto) for icone, titulo, texto in FUNCIONALIDADES_VITRINE],
                     className="grelha-funcionalidades-vitrine",
                 ),
                 html.P(
                     "Projeto de portfólio: nenhuma pessoa real está representada, todos os dados são "
                     "sintéticos, e a ferramenta não é um sistema clínico certificado nem substitui "
                     "avaliação por um profissional de saúde.",
-                    className="nota-rodape-login",
+                    className="nota-rodape-login nota-rodape-vitrine",
                 ),
             ],
-            className="cartao-vitrine",
+            className="conteudo-vitrine",
         ),
         className="ecra-vitrine",
     )
