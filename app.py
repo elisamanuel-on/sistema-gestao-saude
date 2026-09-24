@@ -201,13 +201,13 @@ def _carregar_todos_os_dados():
     dados["plano_cuidados"] = pd.read_csv(PASTA_DADOS / "plano_cuidados.csv")
     dados["consultas"] = pd.read_csv(PASTA_DADOS / "consultas.csv", parse_dates=["data_hora"])
     dados["faturacao"] = pd.read_csv(PASTA_DADOS / "faturacao.csv")
-    dados["faturacao"]["seguradora"] = dados["faturacao"]["seguradora"].fillna("—")
-    dados["faturacao"]["numero_apolice"] = dados["faturacao"]["numero_apolice"].fillna("—")
+    dados["faturacao"]["seguradora"] = dados["faturacao"]["seguradora"].fillna("N/D")
+    dados["faturacao"]["numero_apolice"] = dados["faturacao"]["numero_apolice"].fillna("N/D")
     dados["historico"] = pd.read_csv(PASTA_DADOS / "historico.csv", parse_dates=["data_hora"])
     dados["profissionais"] = pd.read_csv(PASTA_DADOS / "profissionais.csv")
     dados["profissionais"]["especialidade"] = dados["profissionais"]["especialidade"].fillna("")
-    dados["profissionais"]["contacto"] = dados["profissionais"]["contacto"].fillna("—")
-    dados["profissionais"]["numero_cedula"] = dados["profissionais"]["numero_cedula"].fillna("—")
+    dados["profissionais"]["contacto"] = dados["profissionais"]["contacto"].fillna("N/D")
+    dados["profissionais"]["numero_cedula"] = dados["profissionais"]["numero_cedula"].fillna("N/D")
     dados["altas"] = pd.read_csv(PASTA_DADOS / "altas.csv")
     return dados
 
@@ -357,7 +357,7 @@ def _barra_lateral(caminho_atual, perfil, profissional=None):
             html.Div(
                 [
                     html.Div(
-                        f"Perfil: {perfil}" + (f" — {profissional}" if profissional else ""),
+                        f"Perfil: {perfil}" + (f" ({profissional})" if profissional else ""),
                         className="perfil-atual-lateral",
                     ),
                     dcc.Link("Sobre este projeto", href="/sobre", className="ligacao-lateral ligacao-lateral--sobre"),
@@ -465,7 +465,7 @@ def _corpo_login_escolha_perfil():
             ),
             html.Div(botoes, className="grupo-botoes-perfil-login"),
             html.P(
-                "Isto é uma simulação de acesso por perfil para fins de portfólio — não há "
+                "Isto é uma simulação de acesso por perfil para fins de portfólio: não há "
                 "palavra-passe, autenticação real, nem dados sensíveis protegidos.",
                 className="nota-rodape-login",
             ),
@@ -683,9 +683,9 @@ def _linha_alerta(tom, texto, href):
 # o que pode fazer aqui — mostrado uma vez (guardado em localStorage, por
 # perfil, para reaparecer se entrar com outro perfil da próxima vez).
 ORIENTACAO_POR_PERFIL = {
-    "Enfermeiro": "Vês a ficha clínica dos utentes, registas sinais vitais e cuidados, e consultas a tua agenda — sem acesso a faturação nem à gestão de profissionais.",
-    "Médico": "Além da ficha clínica, podes prescrever medicação e emitir receitas em PDF, e consultas o teu relatório de atividade — sem acesso a faturação nem à gestão de profissionais.",
-    "Receção": "Marca, cancela e reagenda consultas, consultas a ocupação e emites faturação — sem acesso a atos clínicos (prescrições, avaliação de risco) nem à gestão de profissionais.",
+    "Enfermeiro": "Vês a ficha clínica dos utentes, registas sinais vitais e cuidados, e consultas a tua agenda, sem acesso a faturação nem à gestão de profissionais.",
+    "Médico": "Além da ficha clínica, podes prescrever medicação e emitir receitas em PDF, e consultas o teu relatório de atividade, sem acesso a faturação nem à gestão de profissionais.",
+    "Receção": "Marca, cancela e reagenda consultas, consultas a ocupação e emites faturação, sem acesso a atos clínicos (prescrições, avaliação de risco) nem à gestão de profissionais.",
     "Admin": "Acesso total: tudo o que a Receção faz, mais a gestão do cadastro de profissionais e os relatórios de atividade de qualquer um deles.",
 }
 
@@ -757,7 +757,7 @@ def _pagina_visao_geral(perfil=None, dispensada=None):
 
     alertas = []
     for id_utente in ids_risco_elevado[:5]:
-        alertas.append(_linha_alerta("risco_elevado", f"{_nome_utente(id_utente)} — risco clínico elevado por rever", f"/utentes/{id_utente}"))
+        alertas.append(_linha_alerta("risco_elevado", f"{_nome_utente(id_utente)}: risco clínico elevado por rever", f"/utentes/{id_utente}"))
     alterados = (
         exames[exames["estado"] == "Alterado"]
         .merge(utentes[["id_utente", "nome"]], on="id_utente")
@@ -765,11 +765,11 @@ def _pagina_visao_geral(perfil=None, dispensada=None):
         .head(5)
     )
     for _idx, ex in alterados.iterrows():
-        alertas.append(_linha_alerta("risco_moderado", f"{ex['nome']} — exame \"{ex['tipo_exame']}\" alterado, por rever", f"/utentes/{ex['id_utente']}"))
+        alertas.append(_linha_alerta("risco_moderado", f"{ex['nome']}: exame \"{ex['tipo_exame']}\" alterado, por rever", f"/utentes/{ex['id_utente']}"))
     if erros_fatura:
         faturas_erro = fat[fat["erro_fatura"]].merge(utentes[["id_utente", "nome"]], on="id_utente").head(5)
         for _idx, fx in faturas_erro.iterrows():
-            alertas.append(_linha_alerta("risco_moderado", f"{fx['nome']} — fatura com erro por corrigir", "/faturacao"))
+            alertas.append(_linha_alerta("risco_moderado", f"{fx['nome']}: fatura com erro por corrigir", "/faturacao"))
 
     painel_alertas = html.Div(
         [
@@ -796,7 +796,7 @@ def _pagina_visao_geral(perfil=None, dispensada=None):
             *([banner] if banner else []),
             html.H1("Visão Geral"),
             html.P(
-                "Ponto de partida com os indicadores mais importantes de todos os módulos — cuidados "
+                "Ponto de partida com os indicadores mais importantes de todos os módulos: cuidados "
                 "continuados e ambulatório clínico/hospitalar.",
                 className="texto-explicativo",
             ),
@@ -819,8 +819,8 @@ def _pagina_sobre():
             html.H1("Sobre este projeto"),
             html.P(
                 "Projeto de portfólio: um sistema de gestão de utentes e cuidados de saúde que combina dois "
-                "contextos — cuidados continuados/residências sénior (UCC/ERPI/SAD) e ambulatório clínico/"
-                "hospitalar (Clínica/Hospital) — com avaliação de risco clínico por machine learning.",
+                "contextos, cuidados continuados/residências sénior (UCC/ERPI/SAD) e ambulatório clínico/"
+                "hospitalar (Clínica/Hospital), com avaliação de risco clínico por machine learning.",
                 className="texto-explicativo",
             ),
             html.H3("O que inclui", className="titulo-secao-espacado"),
@@ -829,7 +829,7 @@ def _pagina_sobre():
                     html.Li("Registo de utentes para os 4 tipos de unidade, com pesquisa e filtros."),
                     html.Li(
                         "Ficha clínica: sinais vitais, alergias/diagnósticos, exames, prescrições, plano de "
-                        "cuidados multidisciplinar, visitas, documentos e histórico/auditoria — com "
+                        "cuidados multidisciplinar, visitas, documentos e histórico/auditoria, com "
                         "exportação em PDF."
                     ),
                     html.Li(
@@ -846,7 +846,7 @@ def _pagina_sobre():
                 "Nenhuma pessoa real está representada: todos os utentes, profissionais e dados clínicos são "
                 "gerados sinteticamente. Os valores usados para pré-preencher a avaliação de risco vêm de dois "
                 "datasets públicos e anonimizados (Pima Indians Diabetes, UCI Heart Disease), usados só para "
-                "manter distribuições realistas — nunca de pacientes reais.",
+                "manter distribuições realistas, nunca de pacientes reais.",
                 className="texto-explicativo",
             ),
             _aviso_medico(),
@@ -900,7 +900,7 @@ def _pagina_utentes():
         [
             html.H1("Utentes"),
             html.P(
-                "Registo único para todos os tipos de unidade — cuidados continuados (UCC/ERPI/SAD) e "
+                "Registo único para todos os tipos de unidade: cuidados continuados (UCC/ERPI/SAD) e "
                 "ambulatório clínico/hospitalar.",
                 className="texto-explicativo",
             ),
@@ -942,8 +942,8 @@ def _pagina_utentes():
 def _aba_resumo(id_utente, utente):
     idade = _idade_utente(utente["data_nascimento"])
     ultimos_vitais = DADOS["vitais"][DADOS["vitais"]["id_utente"] == id_utente].sort_values("data_hora").tail(1)
-    ultima_glicemia = f"{int(ultimos_vitais['glicemia'].iloc[0])} mg/dL" if len(ultimos_vitais) else "—"
-    ultimo_peso = f"{ultimos_vitais['peso_kg'].iloc[0]:.1f} kg" if len(ultimos_vitais) else "—"
+    ultima_glicemia = f"{int(ultimos_vitais['glicemia'].iloc[0])} mg/dL" if len(ultimos_vitais) else "N/D"
+    ultimo_peso = f"{ultimos_vitais['peso_kg'].iloc[0]:.1f} kg" if len(ultimos_vitais) else "N/D"
     return html.Div(
         [
             html.Div(
@@ -1161,7 +1161,7 @@ def _aba_plano_cuidados(id_utente):
                         className="texto-explicativo",
                     ),
                     html.Div(html.Div(className="barra-progresso-preenchida", style={"width": f"{item['progresso_percent']}%"}), className="barra-progresso"),
-                    _etiqueta_tom(f"{item['estado']} — {item['progresso_percent']}%", tom),
+                    _etiqueta_tom(f"{item['estado']} ({item['progresso_percent']}%)", tom),
                 ],
                 className="item-plano-cuidados",
             )
@@ -1288,7 +1288,7 @@ def _aba_avaliacao_risco(id_utente):
                 [
                     html.H4("Resumo automático"),
                     html.P(
-                        "Calcula pelo menos um dos riscos acima e depois gera o resumo — motor de "
+                        "Calcula pelo menos um dos riscos acima e depois gera o resumo: motor de "
                         "regras local, sem chamadas a APIs externas de IA generativa.",
                         className="texto-explicativo",
                     ),
@@ -1411,7 +1411,7 @@ def _pagina_ocupacao():
                 [
                     "O módulo ",
                     html.Strong("Clínica/Hospital"),
-                    " não usa mapa de camas — é ambulatório, organizado por marcação. Ver ",
+                    " não usa mapa de camas: é ambulatório, organizado por marcação. Ver ",
                     dcc.Link("Consultas", href="/consultas"),
                     ".",
                 ],
@@ -1656,7 +1656,7 @@ def _pagina_consultas(perfil=None, profissional=None):
     return html.Div(
         [
             html.H1("Consultas"),
-            html.P("Agendamento do módulo Clínica/Hospital — ambulatório, organizado por especialidade e profissional.", className="texto-explicativo"),
+            html.P("Agendamento do módulo Clínica/Hospital: ambulatório, organizado por especialidade e profissional.", className="texto-explicativo"),
             kpis,
             html.Div([html.H3("Consultas por especialidade"), dcc.Graph(figure=fig_especialidade, config={"displayModeBar": False})], className="cartao-secao"),
             *([_formulario_nova_consulta()] if mostrar_gestao_consulta else []),
@@ -1761,7 +1761,7 @@ def _pagina_faturacao():
     total_comparticipacao = fat["comparticipacao_ss"].sum()
     total_ars = (fat["ars_diarias_internamento"] + fat["ars_pacote_medicamentos"] + fat["ars_remuneracao_adicional"]).sum()
     total_seguradoras = fat["valor_seguradora"].sum()
-    utentes_com_seguro = int((fat["seguradora"] != "—").sum())
+    utentes_com_seguro = int((fat["seguradora"] != "N/D").sum())
     erros = int(fat["erro_fatura"].sum())
 
     kpis = html.Div(
@@ -1900,7 +1900,7 @@ def _corpo_relatorio_atividade(nome, data_inicio=None, data_fim=None):
             _cartao_kpi("Faltas", faltas, tom="risco_elevado" if faltas else "risco_baixo"),
             _cartao_kpi(
                 "Taxa de comparência",
-                f"{stats['taxa_comparencia']:.0f}%" if stats["taxa_comparencia"] is not None else "—",
+                f"{stats['taxa_comparencia']:.0f}%" if stats["taxa_comparencia"] is not None else "N/D",
             ),
         ],
         className="kpis-linha",
@@ -1933,7 +1933,7 @@ def _tabela_profissionais():
                 [
                     html.Td(p["nome"]),
                     html.Td(p["categoria"]),
-                    html.Td(p["especialidade"] or "—"),
+                    html.Td(p["especialidade"] or "N/D"),
                     html.Td(p["contacto"]),
                     html.Td(p["numero_cedula"]),
                     html.Td(p["data_admissao"]),
@@ -2031,7 +2031,7 @@ def _pagina_profissionais():
         [
             html.H1("Profissionais"),
             html.P(
-                "Cadastro da equipa — médicos (com especialidade, para as consultas) e a equipa de apoio "
+                "Cadastro da equipa: médicos (com especialidade, para as consultas) e a equipa de apoio "
                 "(enfermagem, fisioterapia, nutrição, psicologia, serviço social, para o plano de cuidados).",
                 className="texto-explicativo",
             ),
@@ -2151,7 +2151,7 @@ def _pagina_relatorios(perfil=None, profissional=None, query_search=None):
         [
             html.H1("Relatórios"),
             html.P(
-                "Documentação e exportação — atividade de um profissional (Médico/Enfermeiro veem só a sua, "
+                "Documentação e exportação: atividade de um profissional (Médico/Enfermeiro veem só a sua, "
                 "Admin escolhe qualquer um) ou o resumo de uma consulta específica.",
                 className="texto-explicativo",
             ),
@@ -2496,7 +2496,7 @@ def _cancelar_consulta(n_clicks, id_consulta, versao):
         return html.Div("Escolhe primeiro uma consulta.", className="resultado-inline resultado-inline--risco_moderado"), dash.no_update
     linha = DADOS["consultas"][DADOS["consultas"]["id_consulta"] == id_consulta]
     if linha.empty:
-        return html.Div("Consulta não encontrada — a lista pode ter mudado.", className="resultado-inline resultado-inline--risco_elevado"), dash.no_update
+        return html.Div("Consulta não encontrada, a lista pode ter mudado.", className="resultado-inline resultado-inline--risco_elevado"), dash.no_update
     DADOS["consultas"].loc[DADOS["consultas"]["id_consulta"] == id_consulta, "estado"] = "Cancelada"
     _registar_historico(linha.iloc[0]["id_utente"], linha.iloc[0]["profissional"], "Alterou estado da consulta")
     return html.Div("Consulta cancelada.", className="resultado-inline resultado-inline--risco_moderado"), (versao or 0) + 1
@@ -2520,7 +2520,7 @@ def _reagendar_consulta(n_clicks, id_consulta, data, hora, sala, versao):
         return html.Div("Escolhe a consulta e preenche a nova data, hora e sala.", className="resultado-inline resultado-inline--risco_moderado"), dash.no_update
     linha = DADOS["consultas"][DADOS["consultas"]["id_consulta"] == id_consulta]
     if linha.empty:
-        return html.Div("Consulta não encontrada — a lista pode ter mudado.", className="resultado-inline resultado-inline--risco_elevado"), dash.no_update
+        return html.Div("Consulta não encontrada, a lista pode ter mudado.", className="resultado-inline resultado-inline--risco_elevado"), dash.no_update
 
     profissional = linha.iloc[0]["profissional"]
     nova_data_hora = pd.Timestamp(f"{data} {hora}")
@@ -2606,7 +2606,7 @@ def _descarregar_receita_pdf(n_clicks, id_prescricao):
         return dash.no_update, html.Div("Escolhe primeiro uma prescrição.", className="resultado-inline resultado-inline--risco_moderado")
     pdf_bytes = _gerar_pdf_receita(id_prescricao)
     if pdf_bytes is None:
-        return dash.no_update, html.Div("Prescrição não encontrada — a lista pode ter mudado.", className="resultado-inline resultado-inline--risco_elevado")
+        return dash.no_update, html.Div("Prescrição não encontrada, a lista pode ter mudado.", className="resultado-inline resultado-inline--risco_elevado")
     return dcc.send_bytes(lambda b: b.write(pdf_bytes), f"receita_{id_prescricao}.pdf"), ""
 
 
@@ -2673,7 +2673,7 @@ def _descarregar_pdf_relatorio_consulta(n_clicks, id_consulta):
         return dash.no_update, html.Div("Escolhe uma consulta primeiro.", className="resultado-inline resultado-inline--risco_moderado")
     pdf_bytes = _gerar_pdf_relatorio_consulta(id_consulta)
     if pdf_bytes is None:
-        return dash.no_update, html.Div("Consulta não encontrada — a lista pode ter mudado.", className="resultado-inline resultado-inline--risco_elevado")
+        return dash.no_update, html.Div("Consulta não encontrada, a lista pode ter mudado.", className="resultado-inline resultado-inline--risco_elevado")
     return dcc.send_bytes(lambda b: b.write(pdf_bytes), f"relatorio_{id_consulta}.pdf"), ""
 
 
@@ -2691,7 +2691,7 @@ def _descarregar_excel_relatorio_consulta(n_clicks, id_consulta):
         return dash.no_update, html.Div("Escolhe uma consulta primeiro.", className="resultado-inline resultado-inline--risco_moderado")
     conteudo = _gerar_excel_relatorio_consulta(id_consulta)
     if conteudo is None:
-        return dash.no_update, html.Div("Consulta não encontrada — a lista pode ter mudado.", className="resultado-inline resultado-inline--risco_elevado")
+        return dash.no_update, html.Div("Consulta não encontrada, a lista pode ter mudado.", className="resultado-inline resultado-inline--risco_elevado")
     return dcc.send_bytes(lambda b: b.write(conteudo), f"relatorio_{id_consulta}.xlsx"), ""
 
 
@@ -2730,7 +2730,7 @@ def _criar_profissional(n_clicks, nome, categoria, especialidade, contacto, cedu
         return html.Div("Preenche pelo menos o nome e a categoria.", className="resultado-inline resultado-inline--risco_moderado"), dash.no_update
     if categoria == "Médico" and not especialidade:
         return (
-            html.Div("Escolhe a especialidade — é obrigatória para a categoria Médico.", className="resultado-inline resultado-inline--risco_moderado"),
+            html.Div("Escolhe a especialidade: é obrigatória para a categoria Médico.", className="resultado-inline resultado-inline--risco_moderado"),
             dash.no_update,
         )
     if nome in DADOS["profissionais"]["nome"].values:
@@ -2744,8 +2744,8 @@ def _criar_profissional(n_clicks, nome, categoria, especialidade, contacto, cedu
                 "nome": nome,
                 "categoria": categoria,
                 "especialidade": especialidade if categoria == "Médico" else "",
-                "contacto": contacto or "—",
-                "numero_cedula": cedula or "—",
+                "contacto": contacto or "N/D",
+                "numero_cedula": cedula or "N/D",
                 "data_admissao": admissao or datetime.date.today().isoformat(),
                 "estado": "Ativo",
             }
@@ -2773,7 +2773,7 @@ def _editar_profissional(n_clicks, nome, contacto, cedula, especialidade, versao
         return html.Div("Escolhe primeiro um profissional.", className="resultado-inline resultado-inline--risco_moderado"), dash.no_update
     mascara = DADOS["profissionais"]["nome"] == nome
     if not mascara.any():
-        return html.Div("Profissional não encontrado — a lista pode ter mudado.", className="resultado-inline resultado-inline--risco_elevado"), dash.no_update
+        return html.Div("Profissional não encontrado, a lista pode ter mudado.", className="resultado-inline resultado-inline--risco_elevado"), dash.no_update
     if not any([contacto, cedula, especialidade]):
         return html.Div("Preenche pelo menos um campo para atualizar.", className="resultado-inline resultado-inline--risco_moderado"), dash.no_update
 
@@ -2786,7 +2786,7 @@ def _editar_profissional(n_clicks, nome, contacto, cedula, especialidade, versao
         DADOS["profissionais"].loc[mascara, "especialidade"] = especialidade
     elif especialidade:
         return (
-            html.Div(f"{nome} não é Médico — a especialidade só se aplica a essa categoria; os outros campos foram guardados.", className="resultado-inline resultado-inline--risco_moderado"),
+            html.Div(f"{nome} não é Médico: a especialidade só se aplica a essa categoria; os outros campos foram guardados.", className="resultado-inline resultado-inline--risco_moderado"),
             (versao or 0) + 1,
         )
     return html.Div(f"Dados de {nome} atualizados.", className="resultado-inline resultado-inline--risco_baixo"), (versao or 0) + 1
@@ -2807,7 +2807,7 @@ def _alternar_estado_profissional(n_clicks, nome, versao):
         return html.Div("Escolhe primeiro um profissional.", className="resultado-inline resultado-inline--risco_moderado"), dash.no_update
     mascara = DADOS["profissionais"]["nome"] == nome
     if not mascara.any():
-        return html.Div("Profissional não encontrado — a lista pode ter mudado.", className="resultado-inline resultado-inline--risco_elevado"), dash.no_update
+        return html.Div("Profissional não encontrado, a lista pode ter mudado.", className="resultado-inline resultado-inline--risco_elevado"), dash.no_update
     atual = DADOS["profissionais"].loc[mascara, "estado"].iloc[0]
     novo_estado = "Inativo" if atual == "Ativo" else "Ativo"
     DADOS["profissionais"].loc[mascara, "estado"] = novo_estado
@@ -2829,12 +2829,12 @@ def _remover_profissional(n_clicks, nome, versao):
         return html.Div("Escolhe primeiro um profissional.", className="resultado-inline resultado-inline--risco_moderado"), dash.no_update
     if _profissional_tem_historico(nome):
         mensagem = (
-            f"{nome} tem consultas, plano de cuidados ou outro histórico associado — não pode ser removido "
+            f"{nome} tem consultas, plano de cuidados ou outro histórico associado: não pode ser removido "
             "para não partir esses registos. Marca como Inativo em vez de remover."
         )
         return html.Div(mensagem, className="resultado-inline resultado-inline--risco_moderado"), dash.no_update
     if nome not in DADOS["profissionais"]["nome"].values:
-        return html.Div("Profissional não encontrado — a lista pode ter mudado.", className="resultado-inline resultado-inline--risco_elevado"), dash.no_update
+        return html.Div("Profissional não encontrado, a lista pode ter mudado.", className="resultado-inline resultado-inline--risco_elevado"), dash.no_update
     DADOS["profissionais"] = DADOS["profissionais"][DADOS["profissionais"]["nome"] != nome].reset_index(drop=True)
     return html.Div(f"{nome} removido.", className="resultado-inline resultado-inline--risco_baixo"), (versao or 0) + 1
 
@@ -2872,7 +2872,7 @@ def _calcular_diabetes_tab(n_clicks, *valores):
     linha = pd.DataFrame([dict(zip(RES_DIABETES.keys(), valores, strict=True))])
     probabilidade = float(MODELO_DIABETES.predict_proba(linha)[0, 1])
     classificacao, tom = classificar_risco(probabilidade)
-    resultado = html.Div([html.Strong(classificacao), f" — {probabilidade:.0%}"], className=f"resultado-inline resultado-inline--{tom}")
+    resultado = html.Div([html.Strong(classificacao), f" ({probabilidade:.0%})"], className=f"resultado-inline resultado-inline--{tom}")
     fatores = principais_fatores(METRICAS_DIABETES["importancia_features"], RES_DIABETES)
     return resultado, [probabilidade, classificacao, fatores]
 
@@ -2900,7 +2900,7 @@ def _calcular_cardio_tab(n_clicks, *valores):
     linha = pd.DataFrame([mapeado])[COLUNAS_CARDIO]
     probabilidade = float(MODELO_CARDIO.predict_proba(linha)[0, 1])
     classificacao, tom = classificar_risco(probabilidade)
-    resultado = html.Div([html.Strong(classificacao), f" — {probabilidade:.0%}"], className=f"resultado-inline resultado-inline--{tom}")
+    resultado = html.Div([html.Strong(classificacao), f" ({probabilidade:.0%})"], className=f"resultado-inline resultado-inline--{tom}")
     fatores = principais_fatores(METRICAS_CARDIO["importancia_features"], RES_CARDIO)
     return resultado, [probabilidade, classificacao, fatores]
 
@@ -2921,7 +2921,7 @@ def _calcular_queda_tab(n_clicks, historico, secundario, apoio, soro, marcha, me
     if not n_clicks:
         return "", None
     pontuacao, classificacao, tom = calcular_risco_queda(historico, secundario, apoio, soro, marcha, mental)
-    resultado = html.Div([html.Strong(classificacao), f" — Morse {pontuacao}/125"], className=f"resultado-inline resultado-inline--{tom}")
+    resultado = html.Div([html.Strong(classificacao), f" (Morse {pontuacao}/125)"], className=f"resultado-inline resultado-inline--{tom}")
     return resultado, [pontuacao, classificacao, tom]
 
 
@@ -2998,7 +2998,7 @@ def _gerar_pdf_ficha(id_utente):
         c.drawString(margem_esquerda, posicao_y, texto)
         posicao_y -= espaco
 
-    escrever(f"Ficha clínica — {utente['nome']}", 16, negrito=True, espaco=10 * mm)
+    escrever(f"Ficha clínica: {utente['nome']}", 16, negrito=True, espaco=10 * mm)
     escrever(
         f"{utente['genero']} · {_idade_utente(utente['data_nascimento'])} anos · "
         f"{utente['tipo_cuidado']} · Processo {utente['processo']}",
@@ -3024,7 +3024,7 @@ def _gerar_pdf_ficha(id_utente):
         escrever("Sem plano de cuidados registado.", 10)
     for _idx, p in plano.iterrows():
         escrever(
-            f"- [{p['area_profissional']}] {p['objetivo']} — {p['estado']} ({p['progresso_percent']}%) · "
+            f"- [{p['area_profissional']}] {p['objetivo']}: {p['estado']} ({p['progresso_percent']}%) · "
             f"Resp.: {p['profissional_responsavel']}",
             9,
             espaco=5 * mm,
@@ -3046,7 +3046,7 @@ def _gerar_pdf_ficha(id_utente):
     c.setFont("Helvetica-Oblique", 8)
     c.drawString(
         margem_esquerda, 15 * mm,
-        "Documento gerado automaticamente — demonstração técnica de portfólio, dados sintéticos, não usar com pacientes reais.",
+        "Documento gerado automaticamente: demonstração técnica de portfólio, dados sintéticos, não usar com pacientes reais.",
     )
 
     c.save()
@@ -3081,7 +3081,7 @@ def _gerar_pdf_receita(id_prescricao):
     utente = DADOS["utentes"].loc[DADOS["utentes"]["id_utente"] == p["id_utente"]].iloc[0]
     prof = DADOS["profissionais"].loc[DADOS["profissionais"]["nome"] == p["profissional"]]
     especialidade = prof.iloc[0]["especialidade"] if len(prof) and prof.iloc[0]["especialidade"] else "Medicina Geral"
-    numero_cedula = prof.iloc[0]["numero_cedula"] if len(prof) else "—"
+    numero_cedula = prof.iloc[0]["numero_cedula"] if len(prof) else "N/D"
 
     buffer = io.BytesIO()
     c = pdf_canvas.Canvas(buffer, pagesize=A4)
@@ -3124,7 +3124,7 @@ def _gerar_pdf_receita(id_prescricao):
     c.setFont("Helvetica-Oblique", 8)
     c.drawString(
         margem_esquerda, 15 * mm,
-        "Documento gerado automaticamente — demonstração técnica de portfólio, dados sintéticos, não usar com pacientes reais.",
+        "Documento gerado automaticamente: demonstração técnica de portfólio, dados sintéticos, não usar com pacientes reais.",
     )
 
     c.save()
@@ -3177,7 +3177,7 @@ def _gerar_pdf_relatorio_atividade(nome, data_inicio=None, data_fim=None):
     c.setFont("Helvetica-Oblique", 8)
     c.drawString(
         margem_esquerda, 15 * mm,
-        "Documento gerado automaticamente — demonstração técnica de portfólio, dados sintéticos, não usar com pacientes reais.",
+        "Documento gerado automaticamente: demonstração técnica de portfólio, dados sintéticos, não usar com pacientes reais.",
     )
     c.save()
     buffer.seek(0)
@@ -3199,7 +3199,7 @@ def _gerar_excel_relatorio_atividade(nome, data_inicio=None, data_fim=None):
     folha_resumo.append(["Total de consultas", stats["total"]])
     for estado_nome, qtd in stats["por_estado"].items():
         folha_resumo.append([estado_nome, qtd])
-    taxa_texto = f"{stats['taxa_comparencia']:.0f}%" if stats["taxa_comparencia"] is not None else "—"
+    taxa_texto = f"{stats['taxa_comparencia']:.0f}%" if stats["taxa_comparencia"] is not None else "N/D"
     folha_resumo.append(["Taxa de comparência", taxa_texto])
     folha_resumo.column_dimensions["A"].width = 24
     folha_resumo.column_dimensions["B"].width = 30
@@ -3256,7 +3256,7 @@ def _gerar_pdf_relatorio_consulta(id_consulta):
     c.setFont("Helvetica-Oblique", 8)
     c.drawString(
         margem_esquerda, 15 * mm,
-        "Documento gerado automaticamente — demonstração técnica de portfólio, dados sintéticos, não usar com pacientes reais.",
+        "Documento gerado automaticamente: demonstração técnica de portfólio, dados sintéticos, não usar com pacientes reais.",
     )
     c.save()
     buffer.seek(0)

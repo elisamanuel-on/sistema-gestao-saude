@@ -107,7 +107,7 @@ def _gerar_utentes():
         quarto = (
             f"{ALEATORIO.randint(1, 4)}0{ALEATORIO.randint(1, 9)}-{ALEATORIO.choice('ABC')}"
             if tipo_cuidado in ("UCC", "ERPI") and estado == "Internado"
-            else "—"
+            else "N/D"
         )
         linhas.append(
             {
@@ -342,7 +342,7 @@ def _gerar_exames(utentes):
             estado = ALEATORIO.choices(["Normal", "Alterado", "Pendente"], weights=[0.55, 0.25, 0.20])[0]
             resumo = {
                 "Normal": "Sem alterações relevantes.",
-                "Alterado": "Valores fora do intervalo de referência — a aguardar revisão clínica.",
+                "Alterado": "Valores fora do intervalo de referência: a aguardar revisão clínica.",
                 "Pendente": "Resultado ainda não disponível.",
             }[estado]
             linhas.append(

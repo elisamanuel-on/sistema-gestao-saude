@@ -607,7 +607,7 @@ def test_exportar_csv_faturacao_usa_ponto_virgula_e_virgula_decimal():
     assert "," not in cabecalho  # nenhum título de coluna tem vírgula
     assert ";" in primeira_linha_dados
     assert "," in primeira_linha_dados  # algum valor com casas decimais usa vírgula
-    assert "." not in primeira_linha_dados.replace("—", "")  # não deve sobrar nenhum ponto decimal
+    assert "." not in primeira_linha_dados  # não deve sobrar nenhum ponto decimal
 
 
 # --- Faturação: exportação em Excel -------------------------------------------

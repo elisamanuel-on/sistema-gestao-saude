@@ -7,31 +7,31 @@ EX00008,U0002,2026-04-30,Análises clínicas,Hemoglobina glicada (HbA1c),Normal,
 EX00004,U0002,2026-04-18,Análises clínicas,Função hepática,Normal,Sem alterações relevantes.,Dr. Ricardo Rocha
 EX00007,U0002,2026-03-16,Imagiologia,Ressonância magnética lombar,Pendente,Resultado ainda não disponível.,Nutric. Renata Alves
 EX00006,U0002,2025-10-17,Outro,Audiograma,Normal,Sem alterações relevantes.,Dr. Hugo Teixeira
-EX00010,U0003,2026-07-27,Outro,Audiograma,Alterado,Valores fora do intervalo de referência — a aguardar revisão clínica.,Enf. Marta Sousa
-EX00009,U0003,2025-10-28,Imagiologia,Radiografia do tórax,Alterado,Valores fora do intervalo de referência — a aguardar revisão clínica.,Dr. Hugo Teixeira
+EX00010,U0003,2026-07-27,Outro,Audiograma,Alterado,Valores fora do intervalo de referência: a aguardar revisão clínica.,Enf. Marta Sousa
+EX00009,U0003,2025-10-28,Imagiologia,Radiografia do tórax,Alterado,Valores fora do intervalo de referência: a aguardar revisão clínica.,Dr. Hugo Teixeira
 EX00011,U0003,2025-10-07,Análises clínicas,Hemoglobina glicada (HbA1c),Normal,Sem alterações relevantes.,Dr. Tiago Matos
-EX00016,U0004,2026-09-07,Cardiológico,Ecocardiograma,Alterado,Valores fora do intervalo de referência — a aguardar revisão clínica.,Dra. Carla Nogueira
+EX00016,U0004,2026-09-07,Cardiológico,Ecocardiograma,Alterado,Valores fora do intervalo de referência: a aguardar revisão clínica.,Dra. Carla Nogueira
 EX00015,U0004,2026-03-07,Imagiologia,TAC crânio-encefálico,Pendente,Resultado ainda não disponível.,Dr. Nuno Barreto
 EX00013,U0004,2025-12-08,Imagiologia,TAC crânio-encefálico,Normal,Sem alterações relevantes.,Dra. Inês Fonseca
 EX00014,U0004,2025-11-30,Imagiologia,Radiografia do tórax,Normal,Sem alterações relevantes.,Dra. Carla Nogueira
 EX00012,U0004,2025-10-22,Cardiológico,Eletrocardiograma,Pendente,Resultado ainda não disponível.,Dra. Carla Nogueira
-EX00017,U0005,2026-06-17,Cardiológico,Prova de esforço,Alterado,Valores fora do intervalo de referência — a aguardar revisão clínica.,Enf. Marta Sousa
+EX00017,U0005,2026-06-17,Cardiológico,Prova de esforço,Alterado,Valores fora do intervalo de referência: a aguardar revisão clínica.,Enf. Marta Sousa
 EX00018,U0005,2025-11-15,Cardiológico,Eletrocardiograma,Normal,Sem alterações relevantes.,Dr. Tiago Matos
-EX00019,U0006,2025-11-05,Análises clínicas,Hemograma completo,Alterado,Valores fora do intervalo de referência — a aguardar revisão clínica.,Dr. Tiago Matos
-EX00020,U0007,2026-08-20,Outro,Exame oftalmológico,Alterado,Valores fora do intervalo de referência — a aguardar revisão clínica.,Dra. Sofia Ramalho
+EX00019,U0006,2025-11-05,Análises clínicas,Hemograma completo,Alterado,Valores fora do intervalo de referência: a aguardar revisão clínica.,Dr. Tiago Matos
+EX00020,U0007,2026-08-20,Outro,Exame oftalmológico,Alterado,Valores fora do intervalo de referência: a aguardar revisão clínica.,Dra. Sofia Ramalho
 EX00022,U0007,2026-04-13,Outro,Exame oftalmológico,Normal,Sem alterações relevantes.,Enf. Marta Sousa
 EX00021,U0007,2026-01-28,Imagiologia,Ressonância magnética lombar,Normal,Sem alterações relevantes.,Ass. Social Miguel Nunes
 EX00025,U0008,2026-06-21,Análises clínicas,Função hepática,Normal,Sem alterações relevantes.,Enf. Marta Sousa
-EX00026,U0008,2026-03-23,Imagiologia,Densitometria óssea,Alterado,Valores fora do intervalo de referência — a aguardar revisão clínica.,Fisio. Beatriz Lima
+EX00026,U0008,2026-03-23,Imagiologia,Densitometria óssea,Alterado,Valores fora do intervalo de referência: a aguardar revisão clínica.,Fisio. Beatriz Lima
 EX00024,U0008,2025-11-20,Imagiologia,Ecografia abdominal,Normal,Sem alterações relevantes.,Dr. Hugo Teixeira
-EX00023,U0008,2025-08-18,Imagiologia,TAC crânio-encefálico,Alterado,Valores fora do intervalo de referência — a aguardar revisão clínica.,Dra. Patrícia Gomes
+EX00023,U0008,2025-08-18,Imagiologia,TAC crânio-encefálico,Alterado,Valores fora do intervalo de referência: a aguardar revisão clínica.,Dra. Patrícia Gomes
 EX00027,U0009,2026-07-13,Cardiológico,Eletrocardiograma,Pendente,Resultado ainda não disponível.,Dra. Patrícia Gomes
-EX00030,U0010,2026-08-21,Análises clínicas,Hemograma completo,Alterado,Valores fora do intervalo de referência — a aguardar revisão clínica.,Dr. Hugo Teixeira
+EX00030,U0010,2026-08-21,Análises clínicas,Hemograma completo,Alterado,Valores fora do intervalo de referência: a aguardar revisão clínica.,Dr. Hugo Teixeira
 EX00028,U0010,2026-03-16,Cardiológico,Prova de esforço,Normal,Sem alterações relevantes.,Dra. Inês Fonseca
-EX00029,U0010,2026-01-22,Análises clínicas,Hemoglobina glicada (HbA1c),Alterado,Valores fora do intervalo de referência — a aguardar revisão clínica.,Dr. Nuno Barreto
+EX00029,U0010,2026-01-22,Análises clínicas,Hemoglobina glicada (HbA1c),Alterado,Valores fora do intervalo de referência: a aguardar revisão clínica.,Dr. Nuno Barreto
 EX00034,U0011,2026-04-08,Análises clínicas,Hemoglobina glicada (HbA1c),Normal,Sem alterações relevantes.,Dra. Carla Nogueira
-EX00035,U0011,2026-01-26,Outro,Audiograma,Alterado,Valores fora do intervalo de referência — a aguardar revisão clínica.,Dr. Nuno Barreto
-EX00033,U0011,2025-11-28,Cardiológico,Ecocardiograma,Alterado,Valores fora do intervalo de referência — a aguardar revisão clínica.,Dr. Nuno Barreto
+EX00035,U0011,2026-01-26,Outro,Audiograma,Alterado,Valores fora do intervalo de referência: a aguardar revisão clínica.,Dr. Nuno Barreto
+EX00033,U0011,2025-11-28,Cardiológico,Ecocardiograma,Alterado,Valores fora do intervalo de referência: a aguardar revisão clínica.,Dr. Nuno Barreto
 EX00032,U0011,2025-10-25,Cardiológico,Eletrocardiograma,Normal,Sem alterações relevantes.,Nutric. Renata Alves
 EX00031,U0011,2025-09-29,Cardiológico,Eletrocardiograma,Normal,Sem alterações relevantes.,Ass. Social Miguel Nunes
 EX00036,U0012,2026-01-19,Outro,Audiograma,Pendente,Resultado ainda não disponível.,Enf. Paulo Cardoso
@@ -41,11 +41,11 @@ EX00039,U0013,2026-01-07,Cardiológico,Eletrocardiograma,Normal,Sem alterações
 EX00037,U0013,2025-12-21,Imagiologia,Densitometria óssea,Normal,Sem alterações relevantes.,Dr. Hugo Teixeira
 EX00040,U0013,2025-10-07,Cardiológico,Ecocardiograma,Pendente,Resultado ainda não disponível.,Dra. Patrícia Gomes
 EX00042,U0014,2026-08-13,Análises clínicas,Hemoglobina glicada (HbA1c),Normal,Sem alterações relevantes.,Fisio. Beatriz Lima
-EX00043,U0015,2026-08-03,Outro,Espirometria,Alterado,Valores fora do intervalo de referência — a aguardar revisão clínica.,Enf. Paulo Cardoso
+EX00043,U0015,2026-08-03,Outro,Espirometria,Alterado,Valores fora do intervalo de referência: a aguardar revisão clínica.,Enf. Paulo Cardoso
 EX00044,U0015,2026-04-24,Imagiologia,Ecografia abdominal,Normal,Sem alterações relevantes.,Dra. Carla Nogueira
-EX00045,U0016,2026-09-21,Outro,Espirometria,Alterado,Valores fora do intervalo de referência — a aguardar revisão clínica.,Dr. Hugo Teixeira
+EX00045,U0016,2026-09-21,Outro,Espirometria,Alterado,Valores fora do intervalo de referência: a aguardar revisão clínica.,Dr. Hugo Teixeira
 EX00046,U0016,2026-07-15,Outro,Espirometria,Normal,Sem alterações relevantes.,Dra. Inês Fonseca
-EX00047,U0016,2026-06-05,Análises clínicas,Glicemia em jejum,Alterado,Valores fora do intervalo de referência — a aguardar revisão clínica.,Dr. Tiago Matos
+EX00047,U0016,2026-06-05,Análises clínicas,Glicemia em jejum,Alterado,Valores fora do intervalo de referência: a aguardar revisão clínica.,Dr. Tiago Matos
 EX00048,U0017,2026-05-01,Imagiologia,Densitometria óssea,Pendente,Resultado ainda não disponível.,Dr. Ricardo Rocha
 EX00050,U0017,2025-10-24,Análises clínicas,Glicemia em jejum,Normal,Sem alterações relevantes.,Dr. Tiago Matos
 EX00051,U0017,2025-08-28,Outro,Audiograma,Pendente,Resultado ainda não disponível.,Dr. Nuno Barreto
@@ -54,40 +54,40 @@ EX00052,U0018,2026-04-18,Imagiologia,Ressonância magnética lombar,Normal,Sem a
 EX00054,U0019,2026-02-21,Imagiologia,TAC crânio-encefálico,Normal,Sem alterações relevantes.,Psic. Vera Matos
 EX00053,U0019,2026-01-31,Análises clínicas,Função hepática,Pendente,Resultado ainda não disponível.,Enf. Paulo Cardoso
 EX00055,U0020,2026-01-02,Imagiologia,Ecografia abdominal,Pendente,Resultado ainda não disponível.,Enf. Marta Sousa
-EX00056,U0021,2026-04-13,Imagiologia,Ecografia abdominal,Alterado,Valores fora do intervalo de referência — a aguardar revisão clínica.,Ass. Social Miguel Nunes
+EX00056,U0021,2026-04-13,Imagiologia,Ecografia abdominal,Alterado,Valores fora do intervalo de referência: a aguardar revisão clínica.,Ass. Social Miguel Nunes
 EX00058,U0021,2025-10-01,Cardiológico,Prova de esforço,Normal,Sem alterações relevantes.,Nutric. Renata Alves
-EX00057,U0021,2025-08-30,Imagiologia,Densitometria óssea,Alterado,Valores fora do intervalo de referência — a aguardar revisão clínica.,Dr. Nuno Barreto
+EX00057,U0021,2025-08-30,Imagiologia,Densitometria óssea,Alterado,Valores fora do intervalo de referência: a aguardar revisão clínica.,Dr. Nuno Barreto
 EX00059,U0022,2026-08-05,Outro,Espirometria,Normal,Sem alterações relevantes.,Dr. Nuno Barreto
 EX00060,U0022,2026-01-11,Imagiologia,Ecografia abdominal,Pendente,Resultado ainda não disponível.,Ass. Social Miguel Nunes
 EX00061,U0023,2026-06-24,Cardiológico,Eletrocardiograma,Normal,Sem alterações relevantes.,Dr. Nuno Barreto
-EX00064,U0023,2026-03-26,Cardiológico,Eletrocardiograma,Alterado,Valores fora do intervalo de referência — a aguardar revisão clínica.,Dra. Patrícia Gomes
+EX00064,U0023,2026-03-26,Cardiológico,Eletrocardiograma,Alterado,Valores fora do intervalo de referência: a aguardar revisão clínica.,Dra. Patrícia Gomes
 EX00063,U0023,2026-03-15,Outro,Audiograma,Normal,Sem alterações relevantes.,Dra. Sofia Ramalho
 EX00062,U0023,2026-01-07,Imagiologia,Ecografia abdominal,Normal,Sem alterações relevantes.,Enf. Paulo Cardoso
-EX00065,U0024,2026-04-28,Cardiológico,Prova de esforço,Alterado,Valores fora do intervalo de referência — a aguardar revisão clínica.,Dra. Sofia Ramalho
+EX00065,U0024,2026-04-28,Cardiológico,Prova de esforço,Alterado,Valores fora do intervalo de referência: a aguardar revisão clínica.,Dra. Sofia Ramalho
 EX00066,U0024,2025-12-05,Análises clínicas,Função renal,Normal,Sem alterações relevantes.,Dra. Inês Fonseca
-EX00067,U0024,2025-11-01,Imagiologia,TAC crânio-encefálico,Alterado,Valores fora do intervalo de referência — a aguardar revisão clínica.,Dra. Inês Fonseca
+EX00067,U0024,2025-11-01,Imagiologia,TAC crânio-encefálico,Alterado,Valores fora do intervalo de referência: a aguardar revisão clínica.,Dra. Inês Fonseca
 EX00069,U0025,2026-03-26,Imagiologia,Radiografia do tórax,Pendente,Resultado ainda não disponível.,Nutric. Renata Alves
 EX00068,U0025,2025-08-30,Análises clínicas,Glicemia em jejum,Normal,Sem alterações relevantes.,Dra. Patrícia Gomes
 EX00072,U0026,2026-07-23,Cardiológico,Ecocardiograma,Normal,Sem alterações relevantes.,Dra. Sofia Ramalho
 EX00070,U0026,2026-05-03,Imagiologia,TAC crânio-encefálico,Pendente,Resultado ainda não disponível.,Dra. Carla Nogueira
 EX00071,U0026,2025-12-05,Outro,Espirometria,Normal,Sem alterações relevantes.,Psic. Vera Matos
-EX00073,U0026,2025-11-18,Análises clínicas,Hemograma completo,Alterado,Valores fora do intervalo de referência — a aguardar revisão clínica.,Enf. Marta Sousa
+EX00073,U0026,2025-11-18,Análises clínicas,Hemograma completo,Alterado,Valores fora do intervalo de referência: a aguardar revisão clínica.,Enf. Marta Sousa
 EX00074,U0027,2026-01-16,Imagiologia,Ressonância magnética lombar,Normal,Sem alterações relevantes.,Dr. Tiago Matos
 EX00075,U0028,2026-03-25,Análises clínicas,Glicemia em jejum,Normal,Sem alterações relevantes.,Dra. Carla Nogueira
 EX00077,U0028,2025-11-04,Análises clínicas,Perfil lipídico,Normal,Sem alterações relevantes.,Dra. Inês Fonseca
-EX00076,U0028,2025-08-31,Imagiologia,TAC crânio-encefálico,Alterado,Valores fora do intervalo de referência — a aguardar revisão clínica.,Ass. Social Miguel Nunes
+EX00076,U0028,2025-08-31,Imagiologia,TAC crânio-encefálico,Alterado,Valores fora do intervalo de referência: a aguardar revisão clínica.,Ass. Social Miguel Nunes
 EX00078,U0029,2026-02-24,Análises clínicas,Glicemia em jejum,Normal,Sem alterações relevantes.,Enf. Paulo Cardoso
 EX00079,U0029,2025-12-01,Imagiologia,TAC crânio-encefálico,Pendente,Resultado ainda não disponível.,Dra. Carla Nogueira
 EX00080,U0030,2026-09-04,Análises clínicas,Ionograma,Normal,Sem alterações relevantes.,Dra. Patrícia Gomes
-EX00081,U0030,2026-07-04,Imagiologia,TAC crânio-encefálico,Alterado,Valores fora do intervalo de referência — a aguardar revisão clínica.,Enf. Marta Sousa
-EX00082,U0030,2025-10-05,Outro,Exame oftalmológico,Alterado,Valores fora do intervalo de referência — a aguardar revisão clínica.,Enf. Paulo Cardoso
+EX00081,U0030,2026-07-04,Imagiologia,TAC crânio-encefálico,Alterado,Valores fora do intervalo de referência: a aguardar revisão clínica.,Enf. Marta Sousa
+EX00082,U0030,2025-10-05,Outro,Exame oftalmológico,Alterado,Valores fora do intervalo de referência: a aguardar revisão clínica.,Enf. Paulo Cardoso
 EX00084,U0031,2026-07-13,Imagiologia,TAC crânio-encefálico,Normal,Sem alterações relevantes.,Dra. Patrícia Gomes
 EX00087,U0031,2026-06-06,Outro,Exame oftalmológico,Normal,Sem alterações relevantes.,Dra. Inês Fonseca
 EX00086,U0031,2026-02-20,Cardiológico,Eletrocardiograma,Pendente,Resultado ainda não disponível.,Dr. Ricardo Rocha
-EX00085,U0031,2025-11-05,Imagiologia,Densitometria óssea,Alterado,Valores fora do intervalo de referência — a aguardar revisão clínica.,Psic. Vera Matos
+EX00085,U0031,2025-11-05,Imagiologia,Densitometria óssea,Alterado,Valores fora do intervalo de referência: a aguardar revisão clínica.,Psic. Vera Matos
 EX00083,U0031,2025-09-06,Outro,Espirometria,Pendente,Resultado ainda não disponível.,Dr. Ricardo Rocha
 EX00090,U0032,2026-08-23,Outro,Audiograma,Normal,Sem alterações relevantes.,Fisio. Beatriz Lima
-EX00088,U0032,2025-11-24,Cardiológico,Prova de esforço,Alterado,Valores fora do intervalo de referência — a aguardar revisão clínica.,Psic. Vera Matos
+EX00088,U0032,2025-11-24,Cardiológico,Prova de esforço,Alterado,Valores fora do intervalo de referência: a aguardar revisão clínica.,Psic. Vera Matos
 EX00089,U0032,2025-10-23,Imagiologia,Ressonância magnética lombar,Normal,Sem alterações relevantes.,Dr. Nuno Barreto
 EX00091,U0033,2026-06-13,Análises clínicas,Glicemia em jejum,Normal,Sem alterações relevantes.,Enf. Paulo Cardoso
 EX00094,U0033,2026-06-08,Imagiologia,Ressonância magnética lombar,Pendente,Resultado ainda não disponível.,Fisio. Beatriz Lima
@@ -104,11 +104,11 @@ EX00100,U0036,2026-02-17,Análises clínicas,Glicemia em jejum,Normal,Sem altera
 EX00106,U0037,2026-08-31,Análises clínicas,Hemoglobina glicada (HbA1c),Pendente,Resultado ainda não disponível.,Dra. Patrícia Gomes
 EX00107,U0037,2026-08-02,Outro,Audiograma,Normal,Sem alterações relevantes.,Psic. Vera Matos
 EX00103,U0037,2026-07-31,Outro,Audiograma,Normal,Sem alterações relevantes.,Dr. Tiago Matos
-EX00104,U0037,2026-05-27,Análises clínicas,Função hepática,Alterado,Valores fora do intervalo de referência — a aguardar revisão clínica.,Dr. Hugo Teixeira
+EX00104,U0037,2026-05-27,Análises clínicas,Função hepática,Alterado,Valores fora do intervalo de referência: a aguardar revisão clínica.,Dr. Hugo Teixeira
 EX00105,U0037,2026-04-14,Análises clínicas,Perfil lipídico,Normal,Sem alterações relevantes.,Dra. Patrícia Gomes
 EX00110,U0038,2026-08-15,Outro,Audiograma,Pendente,Resultado ainda não disponível.,Ass. Social Miguel Nunes
 EX00109,U0038,2026-05-31,Imagiologia,TAC crânio-encefálico,Normal,Sem alterações relevantes.,Dra. Inês Fonseca
-EX00108,U0038,2025-12-25,Análises clínicas,Função renal,Alterado,Valores fora do intervalo de referência — a aguardar revisão clínica.,Dra. Inês Fonseca
+EX00108,U0038,2025-12-25,Análises clínicas,Função renal,Alterado,Valores fora do intervalo de referência: a aguardar revisão clínica.,Dra. Inês Fonseca
 EX00115,U0039,2026-08-21,Cardiológico,Ecocardiograma,Normal,Sem alterações relevantes.,Psic. Vera Matos
 EX00112,U0039,2026-04-26,Análises clínicas,Hemograma completo,Normal,Sem alterações relevantes.,Psic. Vera Matos
 EX00114,U0039,2026-02-28,Outro,Espirometria,Normal,Sem alterações relevantes.,Nutric. Renata Alves
@@ -121,12 +121,12 @@ EX00119,U0041,2026-04-24,Cardiológico,Prova de esforço,Normal,Sem alterações
 EX00118,U0041,2026-03-13,Cardiológico,Prova de esforço,Normal,Sem alterações relevantes.,Dra. Inês Fonseca
 EX00117,U0041,2025-10-12,Cardiológico,Ecocardiograma,Normal,Sem alterações relevantes.,Dr. Ricardo Rocha
 EX00122,U0042,2026-09-10,Outro,Exame oftalmológico,Normal,Sem alterações relevantes.,Dra. Sofia Ramalho
-EX00123,U0043,2026-08-04,Outro,Exame oftalmológico,Alterado,Valores fora do intervalo de referência — a aguardar revisão clínica.,Dr. Tiago Matos
+EX00123,U0043,2026-08-04,Outro,Exame oftalmológico,Alterado,Valores fora do intervalo de referência: a aguardar revisão clínica.,Dr. Tiago Matos
 EX00127,U0044,2026-03-14,Análises clínicas,Glicemia em jejum,Normal,Sem alterações relevantes.,Dr. Ricardo Rocha
 EX00125,U0044,2025-12-23,Imagiologia,TAC crânio-encefálico,Normal,Sem alterações relevantes.,Enf. Paulo Cardoso
-EX00126,U0044,2025-11-11,Análises clínicas,Ionograma,Alterado,Valores fora do intervalo de referência — a aguardar revisão clínica.,Enf. Marta Sousa
+EX00126,U0044,2025-11-11,Análises clínicas,Ionograma,Alterado,Valores fora do intervalo de referência: a aguardar revisão clínica.,Enf. Marta Sousa
 EX00124,U0044,2025-09-30,Cardiológico,Prova de esforço,Normal,Sem alterações relevantes.,Psic. Vera Matos
-EX00129,U0045,2026-04-18,Outro,Espirometria,Alterado,Valores fora do intervalo de referência — a aguardar revisão clínica.,Ass. Social Miguel Nunes
+EX00129,U0045,2026-04-18,Outro,Espirometria,Alterado,Valores fora do intervalo de referência: a aguardar revisão clínica.,Ass. Social Miguel Nunes
 EX00131,U0045,2026-01-29,Cardiológico,Eletrocardiograma,Normal,Sem alterações relevantes.,Nutric. Renata Alves
 EX00132,U0045,2025-12-26,Análises clínicas,Glicemia em jejum,Pendente,Resultado ainda não disponível.,Dra. Inês Fonseca
 EX00130,U0045,2025-09-12,Outro,Espirometria,Normal,Sem alterações relevantes.,Dra. Sofia Ramalho
