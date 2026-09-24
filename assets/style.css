@@ -232,6 +232,7 @@ body {
   margin-bottom: 20px;
 }
 
+.cartao-secao h2 { font-size: var(--texto-lg); margin: 0 0 6px; }
 .cartao-secao h3 { font-size: var(--texto-md); margin: 0 0 12px; }
 
 .cabecalho-secao {
@@ -242,7 +243,7 @@ body {
   gap: 10px;
 }
 
-.botoes-exportar { display: flex; gap: 10px; }
+.botoes-exportar { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
 
 .texto-explicativo { color: var(--texto-suave); font-size: var(--texto-sm); line-height: 1.5; }
 
