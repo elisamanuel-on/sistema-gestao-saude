@@ -290,11 +290,18 @@ próxima iteração natural seria trocar os CSV por uma base de dados real
 (p.ex. PostgreSQL/SQLite) para persistência verdadeira e concorrência
 segura entre utilizadores.
 
-**Organização do código**: `app.py` concentra layout, callbacks, lógica de
-negócio e geração de PDF/Excel num único ficheiro (~3200 linhas). Funciona
-bem para o tamanho atual do projeto, mas separar em módulos (`pages/`,
-`callbacks/`, `pdf/`) seria o próximo passo de organização antes de o
-projeto crescer mais.
+**Organização do código**: o que era um único `app.py` (~3600 linhas) está
+agora dividido por responsabilidade: `nucleo.py` (dados + constantes +
+funções auxiliares partilhadas, sem Dash nenhum), `paginas.py` (construção
+das páginas/componentes), `exportacoes.py` (geração dos PDF/Excel),
+`app_instancia.py` (só a instância do Dash, para evitar import circular) e
+`callbacks.py` (todos os `@app.callback`). `app.py` ficou reduzido a um
+ponto de entrada (~90 linhas): junta os módulos, define o layout, configura
+o logging e arranca o servidor, continuando a ser o que o `gunicorn`/`python
+app.py` invocam (nada muda em como correr o projeto). Os mutation callbacks
+(criar/editar/remover consulta, profissional, utente, prescrição, sessão)
+também passaram a registar em `logging`, não só a alterar os dados em
+memória, para haver um rasto do que aconteceu e quando.
 
 **Integração contínua**: pytest e ruff já correm automaticamente a cada
 `push`/pull request via GitHub Actions (ver secção "Testes" acima), mas o
